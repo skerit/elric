@@ -7,6 +7,7 @@ var http = require('http');
 var less = require('less');
 var dust = require('dustjs-linkedin');
 dust.helpers = require('dustjs-helpers');
+var EventEmitter = require('events').EventEmitter;
 var cons = require('consolidate');
 var path = require('path');
 var $ = require('jquery');
@@ -115,6 +116,17 @@ dust.helpers.lilink = function (chunk, context, bodies, params) {
 	var title = params.title;
 	var active = '';
 	
+	var rxParam = /:\w*/g;
+	var results = rxParam.exec(href);
+	
+	if (results !== null && results[0] !== undefined) {
+		var result = results[0];
+		var resultName = result.replace(':', '');
+		if (params[resultName] !== undefined) {
+			href = href.replace(result, params[resultName]);
+		}
+	}
+	
 	if (href == dest) {
 		active = ' active';
 	}
@@ -136,6 +148,7 @@ elric.plugins = {}
 elric.models = {}
 elric.admin = {}
 elric.adminArray = []
+elric.event = new EventEmitter();
 
 elric.classes.Admin = function admin (model, options) {
 	var thisAdmin = this;
@@ -144,10 +157,10 @@ elric.classes.Admin = function admin (model, options) {
 	this.name = options.name;
 	this.title = options.title ? options.title : this.name;
 	
-	var baseOpt = {admin: elric.adminArray, name: this.name, title: this.title}
+	var baseOpt = {admin: elric.adminArray, name: this.name, title: this.title, options: options}
 	
 	// Admin routes
-	elric.app.get('/admin/' + this.name + '/view', function (req, res) {
+	elric.app.get('/admin/' + this.name + '/view/:id', function (req, res) {
 		model.model.find({}, function(err, items) {
 			elric.render(req, res, 'adminView', $.extend({}, baseOpt, {items: items}));
 		});
@@ -155,12 +168,12 @@ elric.classes.Admin = function admin (model, options) {
 	
 	elric.app.get('/admin/' + this.name + '/index', function (req, res) {
 		model.model.find({}, function(err, items) {
-			elric.render(req, res, 'adminIndex', $.extend({}, baseOpt, {items: items, options: options}));
+			elric.render(req, res, 'adminIndex', $.extend({}, baseOpt, {items: items}));
 		});
 	});
 	
 	elric.app.get('/admin/' + this.name + '/add', function (req, res) {
-		elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {options: options}));
+		elric.render(req, res, 'adminAdd', baseOpt);
 	});
 	
 	elric.app.post('/admin/' + this.name + '/add', function(req, res){
@@ -169,14 +182,39 @@ elric.classes.Admin = function admin (model, options) {
 		
 		newrecord.save(function (err) {
 			if (err) {
-				res.send({ error: 'Saving first user failed!', errors: err });
+				res.send({ error: 'Saving new record failed!', errors: err });
 			} else {
 				
 				res.send({ success: 'Saved!', redirect: '/admin/' + thisAdmin.name + '/index'});
 				
 			}
     });
+	});
+	
+	elric.app.get('/admin/' + this.name + '/edit/:id', function (req, res) {
+		
+		model.model.findOne({_id: req.params.id}, function(err, item) {
+			elric.render(req, res, 'adminEdit', $.extend({}, baseOpt, {item: item}));
+		});
 
+	});
+	
+	elric.app.post('/admin/' + this.name + '/edit/:id', function(req, res){
+
+		model.model.findOne({_id: req.params.id}, function(err, item) {
+			
+			for (var field in req.body) {
+				item[field] = req.body[field];
+			}
+			
+			item.save(function (err) {
+				if (err) {
+					res.send({ error: 'Updating record failed!', errors: err });
+				} else {
+					res.send({ success: 'Saved!', redirect: '/admin/' + thisAdmin.name + '/edit/' + req.params.id});
+				}
+			});
+		});
 	});
 	
 }

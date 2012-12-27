@@ -19,7 +19,9 @@
     {#fields item=.}
     <td>{@getitem item=item field=. /}</td>
     {/fields}
-    <td><!-- actions --></td>
+    <td><!-- actions -->
+      <a class="btn btn-small editButton" href="#"  data-model="{name}" data-id="{._id}"><i class="icon-pencil"></i></a>
+    </td>
   </tr>
   {/items}
 </table>

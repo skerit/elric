@@ -9,9 +9,9 @@
 				<div class="well sidebar-nav">
 					<ul class="nav nav-list">
 						<li class="nav-header">Sidebar</li>
-						<li class="active"><a href="/admin">Admin Dashboard</a></li>
-						{#admin}
-							<li><a href="/admin/{name}/index">{title}</a></li>
+						{@lilink dest=dest title="Dashboard" href="/admin" /}
+						{#admin dest=dest}
+							{@lilink dest=dest title=title href="/admin/:modelname/index" modelname=name /}
 						{/admin}
 					</ul>
 				</div><!--/.well -->
