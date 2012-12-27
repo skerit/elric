@@ -1,13 +1,13 @@
-module.exports = function FirstRun (app, models) {
+module.exports = function FirstRun (elric) {
 	
 	// Catch any GET request
-	app.get('*', function(req, res) {
+	elric.app.get('*', function(req, res) {
 		res.render('firstrun');
 	});
 	
 	// Catch the create POST
-	app.post('/create', function(req, res){
-		var firstUser = new models.User(req.body);
+	elric.app.post('/create', function(req, res){
+		var firstUser = new elric.models.user.model(req.body);
 		firstUser.save(function (err) {
 			if (err) {
 				res.send({ error: 'Saving first user failed!', errors: err });

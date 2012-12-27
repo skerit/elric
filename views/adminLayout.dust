@@ -1,0 +1,26 @@
+{>layout/}
+{<content}
+	{>topbar/}
+	
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span2">
+				<div class="well sidebar-nav">
+					<ul class="nav nav-list">
+						<li class="nav-header">Sidebar</li>
+						<li class="active"><a href="/admin">Admin Dashboard</a></li>
+						{#admin}
+							<li><a href="/admin/{name}/index">{title}</a></li>
+						{/admin}
+					</ul>
+				</div><!--/.well -->
+			</div><!--/span-->
+			
+			<div class="span10">
+				{+main}
+					This is the main content.
+				{/main}
+			</div>
+		</div>
+	</div>
+{/content}

@@ -19,6 +19,15 @@
     <script src="/bootstrap/js/bootstrap-collapse.js"></script>
     <script src="/bootstrap/js/bootstrap-carousel.js"></script>
     <script src="/bootstrap/js/bootstrap-typeahead.js"></script>
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
   </head>
   <body>
     {+content}
