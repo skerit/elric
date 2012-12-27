@@ -1,5 +1,6 @@
 module.exports = function Motion (elric) {
 	
-	console.log('Started motion plugin');
+	// Load models
+	elric.loadModel('motion', 'motion');
 	
 }

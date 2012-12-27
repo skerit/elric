@@ -144,21 +144,39 @@ elric.classes.Admin = function admin (model, options) {
 	this.name = options.name;
 	this.title = options.title ? options.title : this.name;
 	
+	var baseOpt = {admin: elric.adminArray, name: this.name, title: this.title}
+	
 	// Admin routes
 	elric.app.get('/admin/' + this.name + '/view', function (req, res) {
-		
 		model.model.find({}, function(err, items) {
-			elric.render(req, res, 'adminView', {username: req.session.username, admin: elric.adminArray, items: items});
+			elric.render(req, res, 'adminView', $.extend({}, baseOpt, {items: items}));
 		});
-		
 	});
 	
 	elric.app.get('/admin/' + this.name + '/index', function (req, res) {
-		
 		model.model.find({}, function(err, items) {
-			elric.render(req, res, 'adminIndex', {username: req.session.username, admin: elric.adminArray, items: items, options: options});
+			elric.render(req, res, 'adminIndex', $.extend({}, baseOpt, {items: items, options: options}));
 		});
+	});
+	
+	elric.app.get('/admin/' + this.name + '/add', function (req, res) {
+		elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {options: options}));
+	});
+	
+	elric.app.post('/admin/' + this.name + '/add', function(req, res){
+
+		var newrecord = new model.model(req.body);
 		
+		newrecord.save(function (err) {
+			if (err) {
+				res.send({ error: 'Saving first user failed!', errors: err });
+			} else {
+				
+				res.send({ success: 'Saved!', redirect: '/admin/' + thisAdmin.name + '/index'});
+				
+			}
+    });
+
 	});
 	
 }
@@ -218,7 +236,7 @@ elric.loadModel = function loadModel (modelName, pluginName) {
 
 elric.render = function render (req, res, view, options) {
 	if (options === undefined) options = {}
-	res.render(view, $.extend(true, {dest: req.originalUrl}, options));
+	res.render(view, $.extend(true, {dest: req.originalUrl, username: req.session.username}, options));
 }
 
 // Load plugins, models, ...

@@ -1,5 +1,12 @@
 {>adminLayout/}
 {<main}
+<div class="adminActionHead">
+  <span class="title" id="mainTitle">{title}: Index</span>
+  <div class="buttons">
+    <button class="btn btn-primary" id="addNew" data-model="{name}">Add new</button>
+  </div>
+  <div class="clear"></div>
+</div>
 <table class="table table-striped table-bordered">
   <tr>
     {#options.fields}
@@ -17,4 +24,3 @@
   {/items}
 </table>
 {/main}
-
