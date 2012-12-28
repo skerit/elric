@@ -1,3 +1,3 @@
-[submodule "doek"]
-        path = public/js/doek
-        url = ssh://skerit@ddsde1.kipdola.be/home/gitadmin/doek.git
+[submodule "public/js/doek"]
+	path = public/js/doek
+	url = ssh://skerit@ddsde1.kipdola.be/home/gitadmin/doek.git
