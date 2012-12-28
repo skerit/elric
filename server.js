@@ -13,6 +13,7 @@ var path = require('path');
 var $ = require('jquery');
 var bcrypt = require('bcrypt');
 var store = new express.session.MemoryStore;
+var async = require('async');
 
 /**
  * Our own modules
@@ -133,6 +134,37 @@ dust.helpers.lilink = function (chunk, context, bodies, params) {
 	
 	chunk.write('<li class="' + active + '"><a href="' + href + '">' + title + '</a></li>');
 	return chunk;
+}
+
+dust.helpers.adminField = function (chunk, context, bodies, params) {
+	var model = params.model;
+	var name = params.name;
+	var selects = params.selects;
+	var blueprint = model.blueprint[name];
+	
+	var html = '<div class="control-group">';
+	
+	switch (blueprint.fieldType) {
+		
+		case 'Select':
+			html += '<select name="' + name + '">';
+			var s = selects[blueprint.source];
+			for (var i in s) {
+				html += '<option value="' + s[i]['_id'] + '">' + s[i]['name'] + '</option>';
+			}
+			html += '</select>';
+			break;
+		
+		default:
+			html += '<input type="text" name="' + name + '" placeholder="' + name + '" />';
+			break;
+		
+	}
+	
+	html += '</div>';
+	
+	chunk.write(html);
+	return chunk;
 	
 }
 
@@ -157,7 +189,7 @@ elric.classes.Admin = function admin (model, options) {
 	this.name = options.name;
 	this.title = options.title ? options.title : this.name;
 	
-	var baseOpt = {admin: elric.adminArray, name: this.name, title: this.title, options: options}
+	var baseOpt = {admin: elric.adminArray, modelName: this.name, title: this.title, options: options, model: this.model}
 	
 	// Admin routes
 	elric.app.get('/admin/' + this.name + '/view/:id', function (req, res) {
@@ -173,7 +205,38 @@ elric.classes.Admin = function admin (model, options) {
 	});
 	
 	elric.app.get('/admin/' + this.name + '/add', function (req, res) {
-		elric.render(req, res, 'adminAdd', baseOpt);
+		var serial = []
+		var bp = thisAdmin.model.blueprint;
+		for (var field in bp) {
+			if (bp[field]['fieldType'] == 'Select') {
+				
+				// Get the source name
+				var s = bp[field]['source'];
+				
+				// Get the source model
+				var fm = elric.models[bp[field]['source']];
+				
+				// Prepare the async functions for serial execution
+				serial.push(function(callback) {
+					fm.model.find({}, function(err, items) {
+						var returnObject = {}
+						returnObject[s] = items;
+						callback(returnObject);
+					});
+				});
+				
+			}
+		}
+		
+		// Execute the find functions
+		async.series(
+			serial,
+			function(results) {
+				elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: results}));
+			}
+		);
+		
+		
 	});
 	
 	elric.app.post('/admin/' + this.name + '/add', function(req, res){

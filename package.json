@@ -18,6 +18,7 @@
     "bcrypt": "*",
     "moment": "*",
     "email": "*",
-    "jquery": "1.8.3"
+    "jquery": "1.8.3",
+    "async": "0.1.22"
   }
 }

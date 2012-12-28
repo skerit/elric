@@ -5,6 +5,8 @@ var Config = function Config (elric) {
 	
 	// Load models
 	elric.loadModel('user');
+	elric.loadModel('room');
+	elric.loadModel('roomElement');
 	
 }
 

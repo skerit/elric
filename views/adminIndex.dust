@@ -3,7 +3,7 @@
 <div class="adminActionHead">
   <span class="title" id="mainTitle">{title}: Index</span>
   <div class="buttons">
-    <button class="btn btn-primary" id="addNew" data-model="{name}">Add new</button>
+    <button class="btn btn-primary" id="addNew" data-model="{modelName}">Add new</button>
   </div>
   <div class="clear"></div>
 </div>
@@ -20,7 +20,7 @@
     <td>{@getitem item=item field=. /}</td>
     {/fields}
     <td><!-- actions -->
-      <a class="btn btn-small editButton" href="#"  data-model="{name}" data-id="{._id}"><i class="icon-pencil"></i></a>
+      <a class="btn btn-small editButton" href="#"  data-model="{modelName}" data-id="{._id}"><i class="icon-pencil"></i></a>
     </td>
   </tr>
   {/items}

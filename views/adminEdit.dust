@@ -8,7 +8,7 @@
 <div class="error"></div>
 
 <table class="table table-striped table-bordered">
-  <form id="saveRecord" data-model="{name}">
+  <form id="saveRecord" data-model="{modelName}">
   {#options.fields item=item}
   <tr>
     <td>{.}</td>
@@ -18,6 +18,6 @@
   </form>
 </table>
 
-<button class="btn btn-primary" id="saveEdit" data-model="{name}" data-id="{item._id}">Save record</button>
+<button class="btn btn-primary" id="saveEdit" data-model="{modelName}" data-id="{item._id}">Save record</button>
 
 {/main}
