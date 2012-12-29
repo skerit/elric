@@ -4,18 +4,13 @@
 {@stringify name="elements" object=elements /}
 <div id="doekContainer">
 	<div id="toolbar">
-		<div class="selects elements">
-			{@select displayName="name" valueName="_id" elements=rooms name="rooms" null=1 /}
-			{@select displayName="name" valueName="_id" elements=elements name="elements" null=1 /}
-			<div class="clear"></div>
-		</div>
 		<div class="btn-group" data-toggle-name="doek_mode" data-elric-function="buttonChange" data-toggle="buttons-radio" >
 			<button type="button" value="select" class="btn" data-toggle="button">Select</button>
 			<button type="button" value="changesize" class="btn" data-toggle="button">Change Size</button>
 			<button type="button" value="edit" class="btn" data-toggle="button">Edit</button>
 		</div>
 		<div>
-			<button class="btn btn-success" id="savemap" ><i class="icon-hdd"></i> Save</button>
+			<button class="btn btn-success" id="savemap" ><i class="icon-hdd"></i> Save all</button>
 		</div>
 		<input type="hidden" name="doek_mode" value="0" />
 		<div class="clear"></div>
@@ -24,3 +19,25 @@
 	<div id="map" data-width=1000 data-height=500></div>
 </div>
 {/main}
+{<sidebar}
+<div class="well sidebar-nav doeksidebar">
+	<div class="selects elements">
+		{@select displayName="name" valueName="_id" elements=rooms name="rooms" null=" -- Rooms -- " /}
+		{@select displayName="name" valueName="_id" elements=elements name="elements" null=" -- Room Elements -- " /}
+		<div class="clear"></div>
+	</div>
+	<div class="edit element">
+		<h4>Edit element</h4>
+		<form id="editElement">
+			{@input name="_id" type="hidden" /}
+			{@input name="name" placeholder="Name" /}
+			{@select displayName="name" valueName="_id" elements=rooms name="room_id" null="Room" /}
+			{@input name="x" placeholder="X" prepend="X" /}
+			{@input name="y" placeholder="Y" prepend="Y" /}
+			{@input name="dx" placeholder="Destination X" prepend="DX" /}
+			{@input name="dy" placeholder="Destination Y" prepend="DY" /}
+			<button class="btn btn-success" id="saveElement" ><i class="icon-hdd"></i> Save</button>
+		</form>
+	</div>
+</div>
+{/sidebar}

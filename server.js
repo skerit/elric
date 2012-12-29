@@ -174,8 +174,8 @@ dust.helpers.select = function (chunk, context, bodies, params) {
 	var html = '<div class="control-group">';
 	html += '<select name="' + name + '">';
 	
-	if (params['null'] == 1) {
-		html += '<option value=""> --- </option>';
+	if (params['null']) {
+		html += '<option value="">' + params['null'] + '</option>';
 	}
 	
 	for (var i in elements) {
@@ -183,6 +183,43 @@ dust.helpers.select = function (chunk, context, bodies, params) {
 	}
 	
 	html += '</select>';
+	html += '</div>';
+	
+	chunk.write(html);
+	return chunk;
+}
+
+dust.helpers.input = function (chunk, context, bodies, params) {
+	
+	var name = params.name;
+	var placeholder = params.name;
+	var pendclass = '';
+	var prepend = '';
+	var append = '';
+	var type = 'text';
+	
+	if (params.prepend) {
+		prepend = '<span class="add-on prepend">' + params.prepend + '</span>';
+		pendclass = 'input-prepend ';
+	}
+	
+	if (params.append) {
+		append = '<span class="add-on append">' + params.append + '</span>';
+		pendclass += 'input-append';
+	}
+	
+	if (params.append || params.prepend) {
+		prepend = '<div class="' + pendclass + '">' + prepend;
+		append += '</div>';
+	}
+	
+	if (params.placeholder) placeholder = params.placeholder;
+	if (params.type) type = params.type;
+	
+	var html = '<div class="control-group">';
+	html += prepend;
+	html += '<input type="' + type + '" name="' + name + '" placeholder="' + placeholder + '" />';
+	html += append;
 	html += '</div>';
 	
 	chunk.write(html);

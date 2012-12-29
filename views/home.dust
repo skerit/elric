@@ -5,6 +5,7 @@
 	<div class="container-fluid">
 		<div class="row-fluid">
 			<div class="span2">
+				{+sidebar}
 				<div class="well sidebar-nav">
 					<ul class="nav nav-list">
 						<li class="nav-header">Sidebar</li>
@@ -25,6 +26,7 @@
 						<li><a href="#">Link</a></li>
 					</ul>
 				</div><!--/.well -->
+				{/sidebar}
 			</div><!--/span-->
 			
 			<div class="span10">

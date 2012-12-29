@@ -83,6 +83,10 @@ module.exports = function RoomElement (elric) {
 					element.dx = el.dx;
 					element.dy = el.dy;
 					
+					if (el.name !== undefined) {
+						element.name = el.name;
+					}
+					
 					element.save(function(err, product){
 						callback(null, {_id: id, err: err});
 					});

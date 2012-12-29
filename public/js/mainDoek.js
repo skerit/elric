@@ -9,6 +9,7 @@ Elric.doek.mode = false;
 Elric.doek.html = {}
 Elric.doek.html.rooms = $('select[name="rooms"]');
 Elric.doek.html.elements = $('select[name="elements"]');
+Elric.doek.html.editElement = $('form#editElement');
 
 /**
  * Select a room in the HTML select element

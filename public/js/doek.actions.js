@@ -117,6 +117,17 @@ if (e) {
 	e.d.registerAction(addLine);
 	e.d.registerAction(changeSize);
 	
+	Elric.saveElements = function (elements) {
+		$.post('/roomelement/updates', elements, function(data){
+			// Catch errors in here
+			for (var i in data) {
+				if (data[i].err) {
+					// @todo: Do something with this error
+				}
+			}
+		});
+	}
+	
 	// Save our rooms & elements when clicking the save button
 	$('#savemap').click(function(e) {
 		e.preventDefault();
@@ -134,14 +145,18 @@ if (e) {
 			}
 		}
 		
-		$.post('/roomelement/updates', elUpdate, function(data){
-			// Catch errors in here
-			for (var i in data) {
-				if (data[i].err) {
-					// @todo: Do something with this error
-				}
-			}
-		});
+		Elric.saveElements(elUpdate);
+	});
+	
+	// Save the room element we're currently editing
+	$('#saveElement').click(function(e) {
+		e.preventDefault();
+		
+		var element = Elric.doek.html.editElement.jsonify();
+		var elUpdate = {}
+		elUpdate[element._id] = element;
+		Elric.saveElements(elUpdate);
 		
 	});
+	
 }

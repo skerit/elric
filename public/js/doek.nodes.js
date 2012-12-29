@@ -56,6 +56,8 @@ Doek.Wall = Doek.extend(Doek.Line, function(instructions, parentObject, roomElem
 	});
 	
 	this.event.on('select', function(caller, payload){
+		
+		// Activate the select style
 		this.activateStyle('select');
 		
 		// Select the items in the html select element
@@ -70,13 +72,41 @@ Doek.Wall = Doek.extend(Doek.Line, function(instructions, parentObject, roomElem
 		// Set the new selected node
 		Elric.doek.selectedNode = this;
 		
+		// Show the edit element form
+		var $ef = Elric.doek.html.editElement;
+		$ef.parent('div').show();
+		
+		this.fillEditForm();
+		
+	});
+	
+	this.event.on('propertychange', function(caller, payload){
+		if (Elric.doek.selectedNode == this) this.fillEditForm();
 	});
 	
 	this.event.on('unselect', function(caller, payload){
 		this.deactivateStyle('select');
+		
+		var $ef = Elric.doek.html.editElement;
+		$ef.parent('div').hide();
+		
 	});
 	
 });
+
+Doek.Wall.prototype.fillEditForm = function() {
+	var $ef = Elric.doek.html.editElement;
+	var n = this.roomElement;
+	
+	$('[name="_id"]', $ef).val(n._id);
+	$('[name="name"]', $ef).val(n.name);
+	$('[name="room_id"]', $ef).val(n.room_id);
+	$('[name="x"]', $ef).val(this.instructions.sx);
+	$('[name="y"]', $ef).val(this.instructions.sy);
+	$('[name="dx"]', $ef).val(this.instructions.dx);
+	$('[name="dy"]', $ef).val(this.instructions.dy);
+	
+}
 
 /**
  * Extend the doek object prototype

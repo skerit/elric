@@ -1,22 +1,47 @@
-.clear {clear: both;}
+.clear {clear: both;float:none !important;}
 
 #doekContainer {
-	
-	
+
 	#map {border: 1px solid black;}
 	
 	#toolbar {
+		margin-bottom: 5px;
 		
 		>div {
 			margin-right: 5px;
 			float:left;
 		}
-		
-		.selects {
-			.control-group {
-				float: left;
-				margin-right: 5px;
-			}
+	}
+}
+
+.doeksidebar {
+	
+	padding-left: 9px !important;
+	padding-right: 9px !important;
+	
+	h4 {
+		border-bottom: 1px solid;
+		margin: 5px 0 !important;
+	}
+	
+	.edit.element {
+		display: none;
+	}
+	
+	.selects {
+		.control-group {
+			margin-bottom: 0;
 		}
+	}
+}
+
+.input-prepend, .input-append {
+	
+	.add-on {
+		width: 25px !important;
+	}
+	
+	input {
+		width: 170px !important;
 	}
 }
