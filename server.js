@@ -97,9 +97,6 @@ app.configure(function(){
 	
 });
 
-// Initialize models
-//models = new Schemas(mongoose);
-
 // Prepare the routes variable
 var routes = false;
 
@@ -136,6 +133,62 @@ dust.helpers.lilink = function (chunk, context, bodies, params) {
 	return chunk;
 }
 
+dust.helpers.menu = function (chunk, context, bodies, params) {
+	
+	var name = params.name;
+	var dest = params.dest;
+	var active = '';
+	
+	if (elric.menus[name] !== undefined) {
+		var menu = elric.menus[name];
+		
+		for (var i in menu) {
+			var link = menu[i];
+			active = '';
+			
+			if (link.href == dest) active = ' active';
+			
+			chunk.write('<li class="' + active + '"><a href="' + link.href + '">' + link.title + '</a></li>');
+		}
+	}
+	
+	return chunk;
+}
+
+dust.helpers.stringify = function (chunk, context, bodies, params) {
+	
+	var html = '<script type="text/javascript">';
+	html += 'var ' + params.name + ' = ' + JSON.stringify(params.object) + ';';
+	html += '</script>';
+	
+	chunk.write(html);
+	return chunk;
+}
+
+dust.helpers.select = function (chunk, context, bodies, params) {
+	var elements = params.elements;
+	var valueName = params.valueName;
+	var displayName = params.displayName;
+	var name = params.name;
+	
+	var html = '<div class="control-group">';
+	html += '<select name="' + name + '">';
+	
+	if (params['null'] == 1) {
+		html += '<option value=""> --- </option>';
+	}
+	
+	for (var i in elements) {
+		html += '<option value="' + elements[i][valueName] + '">' + elements[i][displayName] + '</option>';
+	}
+	
+	html += '</select>';
+	html += '</div>';
+	
+	chunk.write(html);
+	return chunk;
+}
+
 dust.helpers.adminField = function (chunk, context, bodies, params) {
 	var model = params.model;
 	var name = params.name;
@@ -165,7 +218,6 @@ dust.helpers.adminField = function (chunk, context, bodies, params) {
 	
 	chunk.write(html);
 	return chunk;
-	
 }
 
 /**
@@ -181,6 +233,7 @@ elric.models = {}
 elric.admin = {}
 elric.adminArray = []
 elric.event = new EventEmitter();
+elric.menus = {}
 
 elric.classes.Admin = function admin (model, options) {
 	var thisAdmin = this;
@@ -221,22 +274,19 @@ elric.classes.Admin = function admin (model, options) {
 					fm.model.find({}, function(err, items) {
 						var returnObject = {}
 						returnObject[s] = items;
-						callback(returnObject);
+						callback(null, returnObject);
 					});
 				});
-				
 			}
 		}
 		
 		// Execute the find functions
 		async.series(
 			serial,
-			function(results) {
+			function(err, results) {
 				elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: results}));
 			}
 		);
-		
-		
 	});
 	
 	elric.app.post('/admin/' + this.name + '/add', function(req, res){
@@ -335,9 +385,42 @@ elric.loadModel = function loadModel (modelName, pluginName) {
 	}
 }
 
+/**
+ * Our wrapper function for a template render,
+ * adds some basic information
+ *
+ * @param   {object}   req
+ * @param   {object}   res
+ * @param   {object}   view
+ * @param   {object}   options
+ */
 elric.render = function render (req, res, view, options) {
 	if (options === undefined) options = {}
-	res.render(view, $.extend(true, {dest: req.originalUrl, username: req.session.username}, options));
+	res.render(view,
+						 $.extend(true,
+											{dest: req.originalUrl,
+											username: req.session.username},
+											options));
+}
+
+/**
+ * Our wrapper function for setting a route
+ *
+ * @param   {string}   path   The url
+ * @param   {array}    menu   To what menus we should add this route
+ * @param   {object}   callback   The callback function
+ * @param   {string}   methid     What method to use, default = get
+ */
+elric.addRoute = function addRoute (path, menu, title, callback, method) {
+	
+	if (method === undefined) method = 'get';
+	
+	elric.app[method](path, callback);
+	
+	for (var i in menu) {
+		if (elric.menus[menu[i]] === undefined) elric.menus[menu[i]] = []
+		elric.menus[menu[i]].push({href: path, title: title});
+	}
 }
 
 // Load plugins, models, ...

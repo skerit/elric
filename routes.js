@@ -1,4 +1,5 @@
 var bcrypt = require('bcrypt');
+var async = require('async');
 
 module.exports = function Routes (elric) {
 	
@@ -48,6 +49,38 @@ module.exports = function Routes (elric) {
 	 */
 	elric.app.get('/', function (req, res) {
 		elric.render(req, res, 'index', {username: req.session.username});
+	});
+	
+	/**
+	 * Elric routes
+	 */
+	elric.addRoute('/doek', ['topbar'], 'Doek', function (req, res) {
+	
+		var room = elric.models.room;
+		var element = elric.models.roomElement;
+		var par = {}
+		
+		// Prepare function to find all rooms
+		par.rooms = function(callback) {
+			room.model.find({}, function(err, rooms) {
+				callback(null, rooms);
+			});
+		}
+		
+		// Prepare function to find all roomElements
+		par.elements = function(callback) {
+			element.model.find({}, function(err, elements) {
+				callback(null, elements);
+			});
+		};
+		
+		// Execute the find functions
+		async.parallel(
+			par,
+			function(err, results) {
+				elric.render(req, res, 'doek', results);
+			}
+		);
 	});
 	
 }

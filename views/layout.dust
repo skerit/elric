@@ -33,6 +33,8 @@
     {+content}
     This is the base content.
     {/content}
+    <script src="/js/elric.js"></script>
+    {>scriptDoek/}
   </body>
 <!--
 {session}

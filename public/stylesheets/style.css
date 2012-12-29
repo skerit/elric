@@ -1,3 +1,14 @@
 .clear {
   clear: both;
 }
+#doekContainer #map {
+  border: 1px solid black;
+}
+#doekContainer #toolbar > div {
+  margin-right: 5px;
+  float: left;
+}
+#doekContainer #toolbar .selects .control-group {
+  float: left;
+  margin-right: 5px;
+}
