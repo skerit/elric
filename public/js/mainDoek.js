@@ -75,7 +75,9 @@ Elric.View = function(canvasId) {
 	// Enable tiled
 	this.d.settings.tiled = true;
 	
-	this.layer = this.d.addLayer('main', 5);
+	this.layer = this.d.addLayer('main', 10);
+	this.floorLayer = this.d.addLayer('floor', 4);
+	
 }
 
 /**
@@ -87,17 +89,44 @@ Elric.View = function(canvasId) {
  * @param   {array}   rooms   An array of rooms
  */
 Elric.View.prototype.addRooms = function (rooms) {
+	
+	var floorStyle = new Doek.Style('floor');
+	floorStyle.properties.strokeStyle = '#F9F9F9';
+	
 	for (var i in rooms) {
 		var room = rooms[i];
 		
 		if (Elric.rooms[room._id] === undefined) {
 			Elric.rooms[room._id] = room;
 			var er = Elric.rooms[room._id];
-			er.roomObject = new Doek.Object(this.layer);
-			er.roomObject.tiled = true;
 			er.roomElements = {}
 			
+			er.roomObject = new Doek.Object(this.layer);
+			er.roomObject.tiled = true;
 			this.layer.addObject(er.roomObject);
+			
+			er.roomObject.floorObject = new Doek.Object(this.floorLayer);
+			var fo = er.roomObject.floorObject;
+			fo.tiled = true;
+			this.floorLayer.addObject(fo);
+			
+			er.roomObject.floorNode = fo.addRectangle(er.roomObject.x, er.roomObject.y, er.roomObject.dx, er.roomObject.dy, floorStyle);
+			er.roomObject.floorNode.hide();
+			
+			er.roomObject.on('dimensionchange', function (caller, payload) {
+
+				var ro = this;
+				var canvas = ro.parentLayer.parentCanvas;
+				
+				var bp = new Doek.Position(canvas, ro.x+5, ro.y+5);
+				var ep = new Doek.Position(canvas, ro.dx-15, ro.dy-15);
+				
+				this.floorNode.show();
+				
+				this.floorNode.setBeginpoint(bp);
+				this.floorNode.setEndpoint(ep);
+			});
+			
 		}
 		
 	}
