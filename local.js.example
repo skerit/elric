@@ -1,0 +1,5 @@
+module.exports = {
+	mongohost: "127.0.0.1",
+	mongodb: "elric",
+	serverport: 3000
+}

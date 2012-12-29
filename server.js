@@ -18,15 +18,15 @@ var async = require('async');
 /**
  * Our own modules
  */
-//var Schemas = require('./schemas');
 var Routes = require('./routes');
+var local = require('./local');
 
 /**
  * Initialize basic app functionality
  */
 
 // Connect to the database
-mongoose.connect('mongodb://192.168.1.2/test');
+mongoose.connect('mongodb://' + local.mongohost + '/' + local.mongodb);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
@@ -572,5 +572,5 @@ app.get('/motion', function(req, res) {
 });
 */
 
-app.listen(3000);
-console.log('Listening on port 3000');
+app.listen(local.serverport);
+console.log('Listening on port ' + local.serverport);

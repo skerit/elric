@@ -1,3 +1,4 @@
 node_modules
 *.komodo*
 public/bootstrap
+local.js
