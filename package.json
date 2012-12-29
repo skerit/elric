@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "express": "3.x",
+    "bootstrap": "git+https://github.com/twitter/bootstrap.git#v2.2.2",
     "socket.io": "0.9.x",
     "mongoose": "3.5.2",
     "mongoose-validator": "*",

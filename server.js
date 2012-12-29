@@ -5,6 +5,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var http = require('http');
 var less = require('less');
+var lessmw = require('less-middleware')
 var dust = require('dustjs-linkedin');
 dust.helpers = require('dustjs-helpers');
 var EventEmitter = require('events').EventEmitter;
@@ -41,6 +42,7 @@ app.engine('dust', cons.dust);
 // Express configurations
 app.configure(function(){
 
+	var bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap');
 	app.set('template_engine', 'dust');
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'dust');
@@ -51,7 +53,13 @@ app.configure(function(){
 	app.use(express.cookieParser('wigglybits'));
 	app.use(express.session({ secret: 'humanTransmutationIsANoNo', store: store }));
 	app.use(express.session());
-	app.use(require('less-middleware')({ src: __dirname + '/public' }));
+	app.use('/img', express.static(path.join(bootstrapPath, 'img')));
+	app.use('/js/bootstrap', express.static(path.join(bootstrapPath, 'js')));
+	app.use(lessmw({src    : path.join(__dirname, 'assets', 'less'),
+					paths  : [path.join(bootstrapPath, 'less')],
+					dest   : path.join(__dirname, 'public', 'stylesheets'),
+					prefix : '/stylesheets'
+					}));
 	app.use(express.static(path.join(__dirname, 'public')));
 	
 	// middleware
@@ -94,8 +102,8 @@ app.configure(function(){
 	});
 	
 	app.use(app.router);
-	
 });
+
 
 // Prepare the routes variable
 var routes = false;
