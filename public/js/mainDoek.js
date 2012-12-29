@@ -30,6 +30,17 @@ Elric.doek.selectRoom = function (id) {
 }
 
 /**
+ * Get the selected room from the HTML select
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    2012.12.29
+ */
+Elric.doek.getSelectedRoom = function () {
+	var $r = Elric.doek.html.rooms;
+	return $('option:selected', $r).val();
+}
+
+/**
  * Select a roomElement in the HTML select element
  * Should be called AFTER a selectRoom
  *
@@ -140,9 +151,9 @@ Elric.buttonChange = function (newMode) {
 	Elric.doek.mode = newMode;
 	
 	if (newMode == 'changesize') {
-		e.d.setAction('changeSize');
+		ev.d.setAction('changeSize');
 	} else {
-		e.d.setAction(false);
+		ev.d.setAction(false);
 	}
 }
 
@@ -151,12 +162,13 @@ Elric.buttonChange = function (newMode) {
  */
 if ($('#map').length) {
 	var e = new Elric.View('map');
+	var ev = e;
 	
 	if (rooms !== undefined) {
-		e.addRooms(rooms);
+		ev.addRooms(rooms);
 	}
 	
 	if (elements !== undefined) {
-		e.addElements(elements);
+		ev.addElements(elements);
 	}
 }

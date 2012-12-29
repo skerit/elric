@@ -101,6 +101,17 @@ module.exports = function RoomElement (elric) {
 				res.send(results);
 			}
 		);
+	});
+	
+	elric.app.post('/roomelement/wall/new', function (req, res) {
+		
+		if (req.body.room_id) {
+			var newrecord = new thisModel.model({name: 'NewWall', room_id: req.body.room_id, x: 10, y: 10, width: 0, height: 0, dx: 50, dy: 50});
+			
+			newrecord.save(function(err, wall) {
+				res.send(wall);
+			});
+		}
 		
 	});
 	

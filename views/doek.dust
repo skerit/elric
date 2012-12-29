@@ -7,9 +7,9 @@
 		<div class="btn-group" data-toggle-name="doek_mode" data-elric-function="buttonChange" data-toggle="buttons-radio" >
 			<button type="button" value="select" class="btn" data-toggle="button">Select</button>
 			<button type="button" value="changesize" class="btn" data-toggle="button">Change Size</button>
-			<button type="button" value="edit" class="btn" data-toggle="button">Edit</button>
 		</div>
-		<div>
+		<div class="btn-nongroup">
+			<button class="btn btn-primary" value="addwall" id="addwall"><i class="icon-plus-sign"></i> Add wall</button>
 			<button class="btn btn-success" id="savemap" ><i class="icon-hdd"></i> Save all</button>
 		</div>
 		<input type="hidden" name="doek_mode" value="0" />

@@ -67,43 +67,6 @@ changeSize.on('mouseup', function (caller, payload) {
 	changeSize.mmstuf = false;
 });
 
-// Create an addLine action
-var addLine = new Doek.Action('addLine');
-
-addLine.on('init', function (caller, payload) {
-	this.storage.layer = e.layer;
-});
-
-addLine.on('mouseupFirst', function(caller, payload) {
-
-	this.storage.object = new Doek.Object(this.storage.layer);
-	this.storage.object.tiled = true;
-	
-	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = '#DD0000';
-	style.properties.lineWidth = 1;
-	
-	var p = payload.startposition;
-	
-	var myline = this.storage.object.addLine(p.absX, p.absY, p.absX, p.absY, style);
-	
-	var hstyle = new Doek.Style('hover');
-	hstyle.properties.strokeStyle = '#009910';
-	this.storage.object.addStyle(hstyle);
-	
-	this.storage.line = myline;
-	this.storage.myobject = this.storage.layer.addObject(this.storage.object);
-});
-
-addLine.on('mousemoveFirstClick', function (caller, payload) {
-	
-	var pos = payload.position;
-	this.storage.line.setEndpoint(pos);
-	
-	//this.storage.myobject
-
-});
-
 /**
  * If e is defined (which is our canvas view from
  * our Elric wrapper class) do some things...
@@ -114,7 +77,6 @@ addLine.on('mousemoveFirstClick', function (caller, payload) {
 if (e) {
 	
 	// Register our newly made actions
-	e.d.registerAction(addLine);
 	e.d.registerAction(changeSize);
 	
 	Elric.saveElements = function (elements) {
@@ -156,7 +118,21 @@ if (e) {
 		var elUpdate = {}
 		elUpdate[element._id] = element;
 		Elric.saveElements(elUpdate);
+	});
+	
+	// Add a new wall
+	$('#addwall').click(function(e) {
 		
+		Elric.doek.html.rooms.parent('div').removeClass('error');
+		var room_id = Elric.doek.getSelectedRoom();
+		
+		if (room_id) {
+			$.post('/roomelement/wall/new', {room_id: room_id}, function(data){
+				ev.addElements([data]);
+			});
+		} else {
+			Elric.doek.html.rooms.parent('div').addClass('error');
+		}
 	});
 	
 }
