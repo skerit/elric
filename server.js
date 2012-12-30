@@ -246,7 +246,7 @@ dust.helpers.adminField = function (chunk, context, bodies, params) {
 		
 		case 'Select':
 			html += '<select name="' + name + '">';
-			var s = selects[blueprint.source];
+			var s = selects[blueprint.source.name];
 			for (var i in s) {
 				html += '<option value="' + s[i]['_id'] + '">' + s[i]['name'] + '</option>';
 			}
@@ -308,30 +308,42 @@ elric.classes.Admin = function admin (model, options) {
 		for (var field in bp) {
 			if (bp[field]['fieldType'] == 'Select') {
 				
-				// Get the source name
+				// Get the data from a model or an object?
 				var s = bp[field]['source'];
 				
-				// Get the source model
-				var fm = elric.models[bp[field]['source']];
+				if (s.type == 'model') {
+					
+					// Get the source model
+					var fm = elric.models[s.name];
+					
+					// Prepare the async functions for serial execution
+					serial.push(function(elementName) {
+						return function(callback) {
+							fm.model.find({}, function(err, items) {
+								var returnObject = {}
+								returnObject[elementName] = items;
+								callback(null, returnObject);
+							});
+						}
+					}(s.name)); // Closure! Because the s.name var changes over time
+				} else if (s.type == 'object') {
+					// Do something else!
+				}
 				
-				// Prepare the async functions for serial execution
-				serial.push(function(callback) {
-					fm.model.find({}, function(err, items) {
-						var returnObject = {}
-						returnObject[s] = items;
-						callback(null, returnObject);
-					});
-				});
 			}
 		}
 		
-		// Execute the find functions
-		async.series(
-			serial,
-			function(err, results) {
-				elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: results}));
-			}
-		);
+		if (serial.length) {
+			// Execute the find functions
+			async.parallel(
+				serial,
+				function(err, results) {
+					elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: results[0]}));
+				}
+			);
+		} else {
+			elric.render(req, res, 'adminAdd', $.extend({}, baseOpt));
+		}
 	});
 	
 	elric.app.post('/admin/' + this.name + '/add', function(req, res){

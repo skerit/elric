@@ -21,7 +21,13 @@ module.exports = function RoomElement (elric) {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
 			fieldType: 'Select',
-			source: 'room'
+			source: {type: 'model', name: 'room'}
+		},
+		element_type: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			fieldType: 'Select',
+			source: {type: 'object', name: 'elementType'}
 		},
 		x: {
 			type: Number,
@@ -57,7 +63,7 @@ module.exports = function RoomElement (elric) {
 	
 	this.admin = {
 		title: 'Room Elements',
-		fields: ['name', 'room_id', 'x', 'y', 'dx', 'dy', 'width', 'height']
+		fields: ['name', 'room_id', 'element_type', 'x', 'y', 'dx', 'dy', 'width', 'height']
 	}
 
 	this.schema = mongoose.Schema(this.blueprint);
