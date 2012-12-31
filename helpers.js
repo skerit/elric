@@ -4,8 +4,24 @@ var async = require('async');
 
 module.exports = function (elric) {
 	
+	/**
+	 * A function to extend functions, lifted from Doek
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.31
+	 */
+	elric.extend = function (parent, constructor) {
+		var intermediateConstructor = constructor;
+		
+		for(var i in parent.prototype) {
+			intermediateConstructor.prototype[i] = parent.prototype[i];                  
+		}
+		
+		return intermediateConstructor;
+	}
+	
 	elric.redirectLogin = function redirectLogin (res, req) {
-		if (!isFirstRun && req.originalUrl != '/login') {
+		if (!elric.isFirstRun && req.originalUrl != '/login') {
 			req.session.destination = req.originalUrl;
 			res.redirect('/login');
 			return true;
@@ -55,6 +71,27 @@ module.exports = function (elric) {
 			elric.admin[modelName] = new elric.classes.Admin(m, $.extend(true, {name: modelName}, m.admin));
 			elric.adminArray.push(elric.admin[modelName]);
 		}
+	}
+	
+	/**
+	 * Load a new element type
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.31
+	 */
+	elric.loadElementType = function loadElementType (typeName, pluginName) {
+		
+		var path = './element_types/' + typeName;
+		
+		if (pluginName !== undefined) {
+			path = './plugins/' + pluginName + '/element_types/' + typeName;
+		}
+		
+		var constructor = require(path);
+		var et = elric.extend(elric.classes.BaseElementType, constructor)(elric);
+		
+		// Store the new type
+		elric.types[typeName] = et;
 	}
 	
 	/**

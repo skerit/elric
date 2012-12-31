@@ -31,8 +31,6 @@ mongoose.connect('mongodb://' + local.mongohost + '/' + local.mongodb);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
-var isFirstRun = true;
-
 // Initialize express
 var app = express();
 
@@ -112,6 +110,7 @@ var routes = false;
  * This variable will be passed allong to plugins
  */
 var elric = {}
+elric.isFirstRun = true; // Initial first run setting
 elric.classes = {}
 elric.routes = routes;
 elric.mongoose = mongoose;
@@ -122,6 +121,7 @@ elric.admin = {}
 elric.adminArray = []
 elric.event = new EventEmitter();
 elric.menus = {}
+elric.types = {}
 
 // Initiate admin
 require('./admin.js')(elric);
@@ -147,7 +147,7 @@ app.initializeRoutes = function() {
 	routes = new Routes(elric);
 	elric.routes = routes;
 	
-	isFirstRun = false;
+	elric.isFirstRun = false;
 }
 
 // Do this once the database connection has been made
