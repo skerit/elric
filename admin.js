@@ -1,0 +1,113 @@
+var $ = require('jquery');
+var async = require('async');
+
+module.exports = function (elric) {
+	
+	elric.classes.Admin = function admin (model, options) {
+		var thisAdmin = this;
+		this.elric = elric;
+		this.model = model;
+		this.name = options.name;
+		this.title = options.title ? options.title : this.name;
+		
+		var baseOpt = {admin: elric.adminArray, modelName: this.name, title: this.title, options: options, model: this.model}
+		
+		// Admin routes
+		elric.app.get('/admin/' + this.name + '/view/:id', function (req, res) {
+			model.model.find({}, function(err, items) {
+				elric.render(req, res, 'adminView', $.extend({}, baseOpt, {items: items}));
+			});
+		});
+		
+		elric.app.get('/admin/' + this.name + '/index', function (req, res) {
+			model.model.find({}, function(err, items) {
+				elric.render(req, res, 'adminIndex', $.extend({}, baseOpt, {items: items}));
+			});
+		});
+		
+		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
+			var serial = []
+			var bp = thisAdmin.model.blueprint;
+			for (var field in bp) {
+				if (bp[field]['fieldType'] == 'Select') {
+					
+					// Get the data from a model or an object?
+					var s = bp[field]['source'];
+					
+					if (s.type == 'model') {
+						
+						// Get the source model
+						var fm = elric.models[s.name];
+						
+						// Prepare the async functions for serial execution
+						serial.push(function(elementName) {
+							return function(callback) {
+								fm.model.find({}, function(err, items) {
+									var returnObject = {}
+									returnObject[elementName] = items;
+									callback(null, returnObject);
+								});
+							}
+						}(s.name)); // Closure! Because the s.name var changes over time
+					} else if (s.type == 'object') {
+						// Do something else!
+					}
+					
+				}
+			}
+			
+			if (serial.length) {
+				// Execute the find functions
+				async.parallel(
+					serial,
+					function(err, results) {
+						elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: results[0]}));
+					}
+				);
+			} else {
+				elric.render(req, res, 'adminAdd', $.extend({}, baseOpt));
+			}
+		});
+		
+		elric.app.post('/admin/' + this.name + '/add', function(req, res){
+	
+			var newrecord = new model.model(req.body);
+			
+			newrecord.save(function (err) {
+				if (err) {
+					res.send({ error: 'Saving new record failed!', errors: err });
+				} else {
+					
+					res.send({ success: 'Saved!', redirect: '/admin/' + thisAdmin.name + '/index'});
+					
+				}
+			});
+		});
+		
+		elric.app.get('/admin/' + this.name + '/edit/:id', function (req, res) {
+			
+			model.model.findOne({_id: req.params.id}, function(err, item) {
+				elric.render(req, res, 'adminEdit', $.extend({}, baseOpt, {item: item}));
+			});
+	
+		});
+		
+		elric.app.post('/admin/' + this.name + '/edit/:id', function(req, res){
+	
+			model.model.findOne({_id: req.params.id}, function(err, item) {
+				
+				for (var field in req.body) {
+					item[field] = req.body[field];
+				}
+				
+				item.save(function (err) {
+					if (err) {
+						res.send({ error: 'Updating record failed!', errors: err });
+					} else {
+						res.send({ success: 'Saved!', redirect: '/admin/' + thisAdmin.name + '/edit/' + req.params.id});
+					}
+				});
+			});
+		});
+	}
+}

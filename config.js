@@ -1,4 +1,4 @@
-var Config = function Config (elric) {
+module.exports = function Config (elric) {
 
 	// Load plugins
 	elric.loadPlugin('motion');
@@ -9,5 +9,3 @@ var Config = function Config (elric) {
 	elric.loadModel('roomElement');
 	
 }
-
-module.exports = Config;
