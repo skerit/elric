@@ -27,7 +27,7 @@ module.exports = function RoomElement (elric) {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
 			fieldType: 'Select',
-			source: {type: 'object', name: 'elementType'}
+			source: {type: 'memobject', name: 'elementTypes'}
 		},
 		type_external_id: {
 			type: mongoose.Schema.Types.ObjectId,

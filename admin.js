@@ -26,8 +26,10 @@ module.exports = function (elric) {
 		});
 		
 		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
-			var serial = []
+			var serial = {}
 			var bp = thisAdmin.model.blueprint;
+			var syncresults = {}
+			
 			for (var field in bp) {
 				if (bp[field]['fieldType'] == 'Select') {
 					
@@ -40,32 +42,33 @@ module.exports = function (elric) {
 						var fm = elric.models[s.name];
 						
 						// Prepare the async functions for serial execution
-						serial.push(function(elementName) {
+						serial[s.name] = function(elementName) {
 							return function(callback) {
 								fm.model.find({}, function(err, items) {
-									var returnObject = {}
-									returnObject[elementName] = items;
-									callback(null, returnObject);
+									callback(null, items);
 								});
 							}
-						}(s.name)); // Closure! Because the s.name var changes over time
-					} else if (s.type == 'object') {
-						// Do something else!
+						}(s.name); // Closure! Because the s.name var changes over time
+						
+					} else if (s.type == 'memobject') {
+						syncresults[s.name] = elric.memobjects[s.name];
 					}
 					
 				}
 			}
 			
-			if (serial.length) {
+			if (!$.isEmptyObject(serial)) {
 				// Execute the find functions
 				async.parallel(
 					serial,
 					function(err, results) {
-						elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: results[0]}));
+						var finalSelects = $.extend({}, results, syncresults);
+						var finalReturn = $.extend({}, baseOpt, {selects: finalSelects});
+						elric.render(req, res, 'adminAdd', finalReturn);
 					}
 				);
 			} else {
-				elric.render(req, res, 'adminAdd', $.extend({}, baseOpt));
+				elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: syncresults}));
 			}
 		});
 		
@@ -86,10 +89,60 @@ module.exports = function (elric) {
 		
 		elric.app.get('/admin/' + this.name + '/edit/:id', function (req, res) {
 			
-			model.model.findOne({_id: req.params.id}, function(err, item) {
-				elric.render(req, res, 'adminEdit', $.extend({}, baseOpt, {item: item}));
-			});
-	
+			var serial = {}
+			var bp = thisAdmin.model.blueprint;
+			var syncresults = {}
+			
+			for (var field in bp) {
+				if (bp[field]['fieldType'] == 'Select') {
+					
+					// Get the data from a model or an object?
+					var s = bp[field]['source'];
+					
+					if (s.type == 'model') {
+						
+						// Get the source model
+						var fm = elric.models[s.name];
+						
+						// Prepare the async functions for serial execution
+						serial[s.name] = function(elementName) {
+							return function(callback) {
+								fm.model.find({}, function(err, items) {
+									callback(null, items);
+								});
+							}
+						}(s.name); // Closure! Because the s.name var changes over time
+						
+					} else if (s.type == 'memobject') {
+						syncresults[s.name] = elric.memobjects[s.name];
+					}
+					
+				}
+			}
+			
+			serial['_itemToEdit'] = function (callback) {
+				model.model.findOne({_id: req.params.id}, function(err, item) {
+					callback(null, item);
+				});
+			}
+			
+			// Execute the find functions
+			async.parallel(
+				serial,
+				function(err, results) {
+					
+					// Get the element we need to edit
+					var itemToEdit = results['_itemToEdit'];
+					
+					// Delete it from the results object, because that's for filling selects
+					delete results['_itemToEdit'];
+					
+					var finalSelects = $.extend({}, results, syncresults);
+					var finalReturn = $.extend({}, baseOpt, {selects: finalSelects, item: itemToEdit});
+					elric.render(req, res, 'adminEdit', finalReturn);
+				}
+			);
+
 		});
 		
 		elric.app.post('/admin/' + this.name + '/edit/:id', function(req, res){

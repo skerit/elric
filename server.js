@@ -121,7 +121,7 @@ elric.admin = {}
 elric.adminArray = []
 elric.event = new EventEmitter();
 elric.menus = {}
-elric.types = {}
+elric.memobjects = {}
 
 // Initiate admin
 require('./admin.js')(elric);

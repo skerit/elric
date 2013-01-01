@@ -88,10 +88,13 @@ module.exports = function (elric) {
 		}
 		
 		var constructor = require(path);
-		var et = elric.extend(elric.classes.BaseElementType, constructor)(elric);
+		
+		var et = elric.extend(elric.classes.BaseElementType, constructor);
+		
+		et = new et(elric);
 		
 		// Store the new type
-		elric.types[typeName] = et;
+		elric.memobjects.elementTypes[typeName] = et;
 	}
 	
 	/**

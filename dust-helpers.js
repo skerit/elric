@@ -131,16 +131,37 @@ module.exports = function (dust, elric) {
 		var name = params.name;
 		var selects = params.selects;
 		var blueprint = model.blueprint[name];
-		
+		var value = '';
 		var html = '<div class="control-group">';
+		
+		if (item && field) {
+			var item = params.item;
+			var field = params.field;
+			value = item[field];
+		}
+		
+		var selected = '';
 		
 		switch (blueprint.fieldType) {
 			
 			case 'Select':
 				html += '<select name="' + name + '">';
 				var s = selects[blueprint.source.name];
-				for (var i in s) {
-					html += '<option value="' + s[i]['_id'] + '">' + s[i]['name'] + '</option>';
+				console.log(selects);
+				if (blueprint.source.type == 'model') {
+					for (var i in s) {
+						selected = '';
+						if (s[i]['_id'] == value) selected = 'selected';
+						
+						html += '<option value="' + s[i]['_id'] + '" ' + selected + '>' + s[i]['name'] + '</option>';
+					}
+				} else if (blueprint.source.type == 'memobject') {
+					for (var i in s) {
+						selected = '';
+						if (s[i]['_id'] == value) selected = 'selected';
+						
+						html += '<option value="' + s[i]['name'] + '"' + selected + '>' + s[i]['title'] + '</option>';
+					}
 				}
 				html += '</select>';
 				break;
