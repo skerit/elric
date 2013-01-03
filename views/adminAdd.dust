@@ -12,8 +12,7 @@
   {#options.fields model=model}
   <tr>
     <td>{.}</td>
-    <td>{@adminField name=. model=model selects=selects /}
-      <!--<div class="control-group"><input type="text" name="{.}" placeholder="{.}" /></div>--></td>
+    <td>{@adminField name=. model=model selects=selects /}</td>
   </tr>
   {/options.fields}
   </form>

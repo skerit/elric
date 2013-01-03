@@ -12,7 +12,6 @@
   {#options.fields item=item model=model}
   <tr>
     <td>{.}</td>
-    <!--<td><div class="control-group"><input type="text" name="{.}" placeholder="{.}" value="{@getitem item=item field=. /}" /></div></td>-->
     <td>{@adminField name=. model=model selects=selects item=item field=. /}</td>
   </tr>
   {/options.fields}

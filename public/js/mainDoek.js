@@ -10,6 +10,7 @@ Elric.doek.html = {}
 Elric.doek.html.rooms = $('select[name="rooms"]');
 Elric.doek.html.elements = $('select[name="elements"]');
 Elric.doek.html.editElement = $('form#editElement');
+Elric.doek.etf = {} // Element Type Functions
 
 /**
  * Select a room in the HTML select element
@@ -133,14 +134,14 @@ Elric.View.prototype.addRooms = function (rooms) {
 }
 
 /**
- * Add room elements to the Doek Canvas and the Elric room object
+ * Add an element type function for adding a wall
  *
  * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    2012.12.28
+ * @since    2013.01.03
  *
- * @param   {array}   elements   An array of roomElements
+ * @param   
  */
-Elric.View.prototype.addElements = function (elements) {
+Elric.doek.etf.wallInit = function (wall) {
 	
 	var style = new Doek.Style('ori');
 	style.properties.strokeStyle = '#990000';
@@ -151,18 +152,34 @@ Elric.View.prototype.addElements = function (elements) {
 	var selectStyle = new Doek.Style('select');
 	selectStyle.properties.strokeStyle = '#000099';
 	
+	if (Elric.rooms[wall.room_id] !== undefined) {
+		var er = Elric.rooms[wall.room_id];
+		er.roomElements[wall._id] = wall;
+		var el = er.roomElements[wall._id];
+		
+		var newWall = er.roomObject.addWall(el);
+		
+		newWall.addStyle(hoverStyle);
+		newWall.addStyle(selectStyle);
+	}
+}
+
+/**
+ * Add room elements to the Doek Canvas and the Elric room object
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    2012.12.28
+ *
+ * @param   {array}   elements   An array of roomElements
+ */
+Elric.View.prototype.addElements = function (elements) {
+
 	for (var i in elements) {
 		var element = elements[i];
+		var et = element.element_type;
 		
-		if (Elric.rooms[element.room_id] !== undefined) {
-			var er = Elric.rooms[element.room_id];
-			er.roomElements[element._id] = element;
-			var el = er.roomElements[element._id];
-			
-			var newWall = er.roomObject.addWall(el);
-			
-			newWall.addStyle(hoverStyle);
-			newWall.addStyle(selectStyle);
+		if (Elric.doek.etf[et + 'Init'] !== undefined) {
+			Elric.doek.etf[et + 'Init'](element);
 		}
 	}
 }
