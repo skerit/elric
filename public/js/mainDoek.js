@@ -204,6 +204,26 @@ Elric.buttonChange = function (newMode) {
 }
 
 /**
+ * Add a new element to the doek
+ */
+$('[data-target="addElementType"]').click(function(e){
+	e.preventDefault();
+	var type = $(this).attr('data-elementType');
+	
+	Elric.doek.html.rooms.parent('div').removeClass('error');
+	var room_id = Elric.doek.getSelectedRoom();
+	
+	if (room_id) {
+		$.post('/roomelement/new', {room_id: room_id, element_type: type}, function(data){
+			ev.addElements([data]);
+		});
+	} else {
+		Elric.doek.html.rooms.parent('div').addClass('error');
+	}
+	
+});
+
+/**
  * Only create a new Doek if the wrapper div exists
  */
 if ($('#map').length) {

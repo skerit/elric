@@ -9,7 +9,16 @@
 			<button type="button" value="changesize" class="btn" data-toggle="button">Change Size</button>
 		</div>
 		<div class="btn-nongroup">
-			<button class="btn btn-primary" value="addwall" id="addwall"><i class="icon-plus-sign"></i> Add wall</button>
+			<div class="btn-group">
+				<button class="btn btn-primary" data-target="addElementType" data-elementType="wall"><i class="icon-plus-sign"></i> Add wall</button>
+				<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					{@doekETMenu /}
+				</ul>
+			</div>
+			
 			<button class="btn btn-success" id="savemap" ><i class="icon-hdd"></i> Save all</button>
 		</div>
 		<input type="hidden" name="doek_mode" value="0" />

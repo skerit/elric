@@ -13,5 +13,6 @@ module.exports = function Config (elric) {
 	
 	// Load element types
 	elric.loadElementType('wall');
+	elric.loadElementType('camera', 'motion');
 	
 }

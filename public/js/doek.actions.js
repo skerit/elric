@@ -119,20 +119,4 @@ if (e) {
 		elUpdate[element._id] = element;
 		Elric.saveElements(elUpdate);
 	});
-	
-	// Add a new wall
-	$('#addwall').click(function(e) {
-		
-		Elric.doek.html.rooms.parent('div').removeClass('error');
-		var room_id = Elric.doek.getSelectedRoom();
-		
-		if (room_id) {
-			$.post('/roomelement/wall/new', {room_id: room_id}, function(data){
-				ev.addElements([data]);
-			});
-		} else {
-			Elric.doek.html.rooms.parent('div').addClass('error');
-		}
-	});
-	
 }

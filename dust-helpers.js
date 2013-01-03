@@ -126,6 +126,21 @@ module.exports = function (dust, elric) {
 		return chunk;
 	}
 	
+	dust.helpers.doekETMenu = function (chunk, context, bodies, params) {
+		
+		var html = '';
+		
+		for (var typename in elric.memobjects.elementTypes) {
+			var type = elric.memobjects.elementTypes[typename];
+			
+			html += '<li><a href="#" data-target="addElementType" data-elementType="' + typename + '">Add ' + type.title + '</a></li>';
+			
+		}
+		
+		chunk.write(html);
+		return chunk;
+	}
+	
 	dust.helpers.adminField = function (chunk, context, bodies, params) {
 		var model = params.model;
 		var name = params.name;

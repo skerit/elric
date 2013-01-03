@@ -115,14 +115,16 @@ module.exports = function RoomElement (elric) {
 		);
 	});
 	
-	elric.app.post('/roomelement/wall/new', function (req, res) {
+	elric.app.post('/roomelement/new', function (req, res) {
 		
-		if (req.body.room_id) {
-			var newrecord = new thisModel.model({name: 'NewWall', room_id: req.body.room_id, x: 10, y: 10, width: 0, height: 0, dx: 50, dy: 50});
+		if (req.body.room_id && req.body.element_type) {
+			var newrecord = new thisModel.model({name: 'UnnamedElement', room_id: req.body.room_id, element_type: req.body.element_type, x: 10, y: 10, width: 0, height: 0, dx: 50, dy: 50});
 			
-			newrecord.save(function(err, wall) {
-				res.send(wall);
+			newrecord.save(function(err, element) {
+				res.send(element);
 			});
+		} else {
+			res.send({'error': 'Error: not all fields were found'});
 		}
 		
 	});
