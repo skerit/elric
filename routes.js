@@ -78,6 +78,7 @@ module.exports = function Routes (elric) {
 		async.parallel(
 			par,
 			function(err, results) {
+				results.elementTypes = elric.memobjects.elementTypes;
 				elric.render(req, res, 'doek', results);
 			}
 		);

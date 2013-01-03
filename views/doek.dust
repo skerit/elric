@@ -2,6 +2,7 @@
 {<main}
 {@stringify name="rooms" object=rooms /}
 {@stringify name="elements" object=elements /}
+{@stringify name="elementTypes" object=elementTypes /}
 <div id="doekContainer">
 	<div id="toolbar">
 		<div class="btn-group" data-toggle-name="doek_mode" data-elric-function="buttonChange" data-toggle="buttons-radio" >

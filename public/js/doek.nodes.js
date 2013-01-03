@@ -125,6 +125,7 @@ Doek.Object.prototype.addWall = function(roomElement) {
 	var el = roomElement;
 	var wallStyle = new Doek.Style('wall');
 	
+	// @todo: These selects need to go (these are defined in the elementType)
 	// Colores del mundo: nepal touch
 	wallStyle.properties.strokeStyle = '#BBCFCC';
 	
@@ -132,18 +133,18 @@ Doek.Object.prototype.addWall = function(roomElement) {
 	selectStyle.properties.strokeStyle = '#BBCCEE';
 	selectStyle.weight = 10;
 	
-	var newWall = new Doek.Wall({type: 'line',
+	var newCamera = new Doek.Wall({type: 'line',
 						sx: el.x, sy: el.y,
 						dx: el.dx, dy: el.dy,
 						style: wallStyle}, this, el);
 	
-	newWall.addStyle(selectStyle);
+	newCamera.addStyle(selectStyle);
 	
-	var index = this.nodes.push(newWall);
+	var index = this.nodes.push(newCamera);
 	
-	el.node = newWall;
+	el.node = newCamera;
 	
 	this.calculate();
 	
-	return newWall;
+	return newCamera;
 }

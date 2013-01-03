@@ -144,13 +144,13 @@ Elric.View.prototype.addRooms = function (rooms) {
 Elric.doek.etf.wallInit = function (wall) {
 	
 	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = '#990000';
+	style.properties.strokeStyle = elementTypes.wall.colourOri;
 	
 	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = '#009900';
+	hoverStyle.properties.strokeStyle = elementTypes.wall.colourHover;
 	
 	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = '#000099';
+	selectStyle.properties.strokeStyle = elementTypes.wall.colourSelect;
 	
 	if (Elric.rooms[wall.room_id] !== undefined) {
 		var er = Elric.rooms[wall.room_id];
@@ -158,6 +158,37 @@ Elric.doek.etf.wallInit = function (wall) {
 		var el = er.roomElements[wall._id];
 		
 		var newWall = er.roomObject.addWall(el);
+		
+		newWall.addStyle(hoverStyle);
+		newWall.addStyle(selectStyle);
+	}
+}
+
+/**
+ * Add an element type function for adding a camera
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    2013.01.04
+ *
+ * @param   
+ */
+Elric.doek.etf.cameraInit = function (camera) {
+	
+	var style = new Doek.Style('ori');
+	style.properties.strokeStyle = elementTypes.camera.colourOri;
+	
+	var hoverStyle = new Doek.Style('hover');
+	hoverStyle.properties.strokeStyle = elementTypes.camera.colourHover;
+	
+	var selectStyle = new Doek.Style('select');
+	selectStyle.properties.strokeStyle = elementTypes.camera.colourSelect;
+	
+	if (Elric.rooms[camera.room_id] !== undefined) {
+		var er = Elric.rooms[camera.room_id];
+		er.roomElements[camera._id] = camera;
+		var el = er.roomElements[camera._id];
+		
+		var newWall = er.roomObject.addRectangle(el.x, el.y, el.x+1, el.y+1, style);
 		
 		newWall.addStyle(hoverStyle);
 		newWall.addStyle(selectStyle);
