@@ -134,7 +134,7 @@ module.exports = function (dust, elric) {
 		var value = '';
 		var html = '<div class="control-group">';
 		
-		if (item && field) {
+		if (params.item && params.field) {
 			var item = params.item;
 			var field = params.field;
 			value = item[field];
@@ -167,9 +167,8 @@ module.exports = function (dust, elric) {
 				break;
 			
 			default:
-				html += '<input type="text" name="' + name + '" placeholder="' + name + '" />';
+				html += '<input type="text" name="' + name + '" placeholder="' + name + '" value="' + value + '" />';
 				break;
-			
 		}
 		
 		html += '</div>';

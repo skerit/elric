@@ -18,6 +18,7 @@
 			</div><!--/span-->
 			
 			<div class="span10">
+				<div id="error"></div>
 				{+main}
 					This is the main content.
 				{/main}
