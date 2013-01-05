@@ -47,7 +47,7 @@ changeSize.on('mousemoveDown', function (caller, payload) {
 		
 		var left = changeSize.mmstuf.left;
 		var right = changeSize.mmstuf.right;
-		
+
 		// We clicked the left side
 		if (left < 10) {
 			node.setBeginpoint(cp);

@@ -106,10 +106,17 @@ Elric.View.prototype.addRooms = function (rooms) {
 			er.roomObject.tiled = true;
 			this.layer.addObject(er.roomObject);
 			
+			// Add the original element to this room
+			er.roomObject.roomElement = room;
+			
 			er.roomObject.floorObject = new Doek.Object(this.floorLayer);
 			var fo = er.roomObject.floorObject;
 			fo.tiled = true;
 			this.floorLayer.addObject(fo);
+			
+			// Indicate it's a floor
+			fo.floor = true;
+			fo.roomElement = room;
 			
 			er.roomObject.floorNode = fo.addRectangle(er.roomObject.x, er.roomObject.y, er.roomObject.dx, er.roomObject.dy, floorStyle);
 			er.roomObject.floorNode.hide();
@@ -139,28 +146,15 @@ Elric.View.prototype.addRooms = function (rooms) {
  * @author   Jelle De Loecker <jelle@kipdola.be>
  * @since    2013.01.03
  *
- * @param   
+ * @param    {object}   wall   Wall element type
  */
 Elric.doek.etf.wallInit = function (wall) {
-	
-	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = elementTypes.wall.colourOri;
-	
-	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = elementTypes.wall.colourHover;
-	
-	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = elementTypes.wall.colourSelect;
-	
 	if (Elric.rooms[wall.room_id] !== undefined) {
 		var er = Elric.rooms[wall.room_id];
 		er.roomElements[wall._id] = wall;
 		var el = er.roomElements[wall._id];
 		
 		var newWall = er.roomObject.addWall(el);
-		
-		newWall.addStyle(hoverStyle);
-		newWall.addStyle(selectStyle);
 	}
 }
 
@@ -170,28 +164,16 @@ Elric.doek.etf.wallInit = function (wall) {
  * @author   Jelle De Loecker <jelle@kipdola.be>
  * @since    2013.01.04
  *
- * @param   
+ * @param    {object}   camera   Camera element type
  */
 Elric.doek.etf.cameraInit = function (camera) {
-	
-	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = elementTypes.camera.colourOri;
-	
-	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = elementTypes.camera.colourHover;
-	
-	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = elementTypes.camera.colourSelect;
 	
 	if (Elric.rooms[camera.room_id] !== undefined) {
 		var er = Elric.rooms[camera.room_id];
 		er.roomElements[camera._id] = camera;
 		var el = er.roomElements[camera._id];
 		
-		var newWall = er.roomObject.addCamera(el);
-		
-		newWall.addStyle(hoverStyle);
-		newWall.addStyle(selectStyle);
+		var newCamera = er.roomObject.addCamera(el);
 	}
 }
 
