@@ -47,7 +47,7 @@ module.exports = function Room (elric) {
 		fields: ['name', 'z', 'x', 'y', 'width', 'height']
 	}
 
-	this.schema = mongoose.Schema(this.blueprint);
+	this.schema = elric.Schema(this.blueprint);
 	
 	this.model = mongoose.model('Room', this.schema);
 	

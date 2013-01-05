@@ -10,6 +10,7 @@ module.exports = function Config (elric) {
 	elric.loadModel('user');
 	elric.loadModel('room');
 	elric.loadModel('roomElement');
+	elric.loadModel('notification');
 	
 	// Load element types
 	elric.loadElementType('wall');

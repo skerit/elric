@@ -3,3 +3,4 @@ node_modules
 public/bootstrap
 public/stylesheets
 local.js
+npm-debug.log

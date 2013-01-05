@@ -38,7 +38,7 @@ module.exports = function User (elric) {
 	/**
 	 * The user schema
 	 */
-	this.schema = mongoose.Schema(this.blueprint);
+	this.schema = elric.Schema(this.blueprint);
 	
 	this.schema.pre('save', function(next){
 		if (this.password) this.password = bcrypt.hashSync(this.password, 10);

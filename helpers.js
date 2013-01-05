@@ -20,6 +20,54 @@ module.exports = function (elric) {
 		return intermediateConstructor;
 	}
 	
+	/**
+	 * Create a notification
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.05
+	 *
+	 */
+	elric.notify = function notify (message, level, origin, payload, destination) {
+		
+		var n = elric.models.notification.model;
+		
+		var notification = {message: message}
+		
+		if (level !== undefined) notification.level = level;
+		if (origin !== undefined) notification.origin = origin;
+		if (payload !== undefined) notification.payload = payload;
+		if (destination !== undefined) notification.destination = destination;
+		
+		var newrecord = new n(notification);
+		
+		newrecord.save();
+	}
+	
+	/**
+	 * Create a new Mongoose schema, with certain fields auto created
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.05
+	 *
+	 * @param    {object}   blueprint   The schema blueprint
+	 * 
+	 * @returns  {object}   A mongoose schema
+	 */
+	elric.Schema = function Schema (blueprint) {
+		
+		blueprint.created = {type: Date, default: Date.now, fieldType: 'Date'}
+		blueprint.updated = {type: Date, default: Date.now, fieldType: 'Date'}
+		
+		var schema = elric.mongoose.Schema(blueprint);
+		
+		schema.pre('save', function(next){
+			this.updated = Date.now();
+			next();
+		});
+		
+		return schema;
+	}
+	
 	elric.redirectLogin = function redirectLogin (res, req) {
 		if (!elric.isFirstRun && req.originalUrl != '/login') {
 			req.session.destination = req.originalUrl;

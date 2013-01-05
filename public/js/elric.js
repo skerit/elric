@@ -28,3 +28,9 @@ $('div.btn-group[data-toggle-name]').each(function(){
 		}
 	});
 });
+
+$('#ma-notifybutton').click(function(e){
+	e.preventDefault();
+	var content = $('#notifications').html();
+	$('#ma-notifybutton').popover({placement: 'bottom', content: content});
+});

@@ -17,6 +17,8 @@
     <script src="/js/bootstrap/bootstrap-collapse.js"></script>
     <script src="/js/bootstrap/bootstrap-carousel.js"></script>
     <script src="/js/bootstrap/bootstrap-typeahead.js"></script>
+    <script src="/js/pnotify/jquery.pnotify.min.js"></script>
+    <link href="/js/pnotify/jquery.pnotify.default.css" media="all" rel="stylesheet" type="text/css" />
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -33,6 +35,9 @@
     {/content}
     <script src="/js/elric.js"></script>
     {>scriptDoek/}
+    <div id="notifications" style="display:none;">
+      
+    </div>
   </body>
 <!--
 {session}

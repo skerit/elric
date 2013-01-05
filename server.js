@@ -257,7 +257,7 @@ elric.server.listen(local.serverport, function(){
 														 local.serverport,
 														 app.settings.env)
 								 );
-})
+});
 
 // Listen for IO connections
 elric.io.sockets.on('connection', function(socket) { 
@@ -268,11 +268,18 @@ elric.io.sockets.on('connection', function(socket) {
 														 address.port)
 								 );
 	
+	elric.notify('IO connection received');
+	
 	// Disconnect listener
 	socket.on('disconnect', function() {
 		elric.log.info(util.format('IO Connection closed from ip %s on port %d',
 														 address.address,
 														 address.port)
 								 );
+	});
+	
+	// Listen for messages
+	socket.on('data', function (data) {
+		console.log(data);
 	});
 });

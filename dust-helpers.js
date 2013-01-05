@@ -13,6 +13,13 @@ module.exports = function (dust, elric) {
 		var dest = params.dest;
 		var title = params.title;
 		var active = '';
+		var id = title.toLowerCase();
+		
+		if (params.id) {
+			id = params.id;
+		}
+		
+		var liid = 'mli-parent-' + id;
 		
 		var rxParam = /:\w*/g;
 		var results = rxParam.exec(href);
@@ -29,7 +36,7 @@ module.exports = function (dust, elric) {
 			active = ' active';
 		}
 		
-		chunk.write('<li class="' + active + '"><a href="' + href + '">' + title + '</a></li>');
+		chunk.write('<li id="' + liid + '" class="' + active + '"><a id="ma-'+id+'" href="' + href + '">' + title + '</a></li>');
 		return chunk;
 	}
 	

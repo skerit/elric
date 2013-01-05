@@ -14,6 +14,7 @@
 				<ul class="nav">
 				  {@lilink dest=dest title="Home" href="/" /}
 					{@lilink dest=dest title="Admin" href="/admin" /}
+					{@lilink dest=dest title="Notifications" id="notifybutton" href="#" /}
 					{@menu name="topbar" dest=dest /}
 				</ul>
 			</div><!--/.nav-collapse -->

@@ -14,7 +14,7 @@ module.exports = function FirstRun (elric) {
 			} else {
 				
 				// Now start using the correct routes!
-				app.initializeRoutes();
+				elric.app.initializeRoutes();
 				
 				// @todo: LOGIN before redirect!
 				res.send({ success: 'Saved!', redirect: '/'});
