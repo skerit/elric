@@ -17,6 +17,7 @@ var bcrypt = require('bcrypt');
 var async = require('async');
 var io = require('socket.io');
 var util = require('util');
+var randomstring = require('randomstring');
 
 /**
  * Our own modules
@@ -52,6 +53,8 @@ elric.adminArray = []
 elric.event = new EventEmitter();
 elric.menus = {}
 elric.memobjects = {}
+elric.randomstring = randomstring.generate;
+elric.activeUsers = {}
 
 // Create the HTTP server
 elric.server = http.createServer(app);
@@ -124,6 +127,22 @@ app.configure(function(){
 			} else {
 				if (!elric.redirectLogin(res, req)) next();
 			}
+		}
+	});
+	
+	// Get notifications
+	app.use(function(req, res, next) {
+		
+		res.locals.notifications = []
+		
+		if (req.session.user) {
+			var notification = elric.models.notification.model;
+			notification.find({}).sort('-created').limit(6).execFind(function(err,notifications){
+				res.locals.notifications = notifications;
+				next();
+			});
+		} else {
+			next();
 		}
 	});
 	
@@ -260,15 +279,18 @@ elric.server.listen(local.serverport, function(){
 });
 
 // Listen for IO connections
-elric.io.sockets.on('connection', function(socket) { 
+elric.io.sockets.on('connection', function(socket) {
 
 	var address = socket.handshake.address;
+
+	var browserclient = {}
+	browserclient.username = false;
+	browserclient.address = address;
+	
   elric.log.info(util.format('IO connection from ip %s on port %d',
 														 address.address,
 														 address.port)
 								 );
-	
-	elric.notify('IO connection received');
 	
 	// Disconnect listener
 	socket.on('disconnect', function() {
@@ -276,6 +298,55 @@ elric.io.sockets.on('connection', function(socket) {
 														 address.address,
 														 address.port)
 								 );
+		
+		if (browserclient.username) {
+			elric.activeUsers[browserclient.username].socket = false;
+			elric.event.emit('browserdisconnected', browserclient);
+		}
+		
+	});
+	
+	// Listen for browser logins
+	socket.on('browserlogin', function (data) {
+		
+		var login = data.login;
+		var key = data.key;
+		
+		if (elric.activeUsers[login] !== undefined) {
+			if (elric.activeUsers[login].key == key) {
+				
+				elric.log.info(util.format('Ip %s on port %d identified as %s (browser)',
+														 address.address,
+														 address.port,
+														 login));
+				
+				// Store the socket
+				elric.activeUsers[login].socket = socket;
+				
+				// Store the username
+				browserclient.username = login;
+				
+				// Send a global event
+				elric.event.emit('browserconnected', browserclient);
+			} else {
+				elric.log.error(util.format('Ip %s on port %d did not identify as %s (browser)',
+														 address.address,
+														 address.port,
+														 login));
+			}
+		}
+	});
+	
+	// Listen for client logins
+	socket.on('clientlogin', function (data) {
+		
+		var nmessage = util.format('Ip %s on port %d identified as a client',
+														 address.address,
+														 address.port);
+		
+		elric.log.info(nmessage);
+		
+		elric.notify('Elric client has connected from ' + address.address);
 	});
 	
 	// Listen for messages

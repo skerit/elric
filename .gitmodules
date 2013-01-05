@@ -4,3 +4,6 @@
 [submodule "public/js/pnotify"]
 	path = public/js/pnotify
 	url = git://github.com/sciactive/pnotify.git
+[submodule "public/js/cookie"]
+	path = public/js/cookie
+	url = git://github.com/carhartl/jquery-cookie.git

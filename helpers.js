@@ -21,6 +21,25 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Submit something to all connected browsers (websockets)
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.05
+	 */
+	elric.submitAllBrowsers = function submitAllBrowsers (message, type) {
+		
+		if (type === undefined) type = 'message';
+		
+		for (var login in elric.activeUsers) {
+			
+			var socket = elric.activeUsers[login].socket;
+			
+			// If the socket is still connected
+			if (socket) socket.emit(type, message);
+		}
+	}
+	
+	/**
 	 * Create a notification
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -31,7 +50,12 @@ module.exports = function (elric) {
 		
 		var n = elric.models.notification.model;
 		
-		var notification = {message: message}
+		var notification = {
+			message: message,
+			level: 'info',
+			origin: 'main',
+			payload: false,
+			destination: 'wide'}
 		
 		if (level !== undefined) notification.level = level;
 		if (origin !== undefined) notification.origin = origin;
@@ -39,6 +63,8 @@ module.exports = function (elric) {
 		if (destination !== undefined) notification.destination = destination;
 		
 		var newrecord = new n(notification);
+		
+		elric.submitAllBrowsers(notification, 'notify');
 		
 		newrecord.save();
 	}
@@ -86,8 +112,15 @@ module.exports = function (elric) {
 			req.session.user = user;
 			req.session.username = user.username;
 			
-			res.cookie('pass', password, { maxAge: 900000, httpOnly: true });
-			res.cookie('user', user.username, { maxAge: 900000, httpOnly: true });
+			res.cookie('pass', password, { maxAge: 3600, httpOnly: true });
+			res.cookie('user', user.username, { maxAge: 3600, httpOnly: true });
+			
+			// Set the random string for socket.io connection
+			if (elric.activeUsers[user.username] === undefined) {
+				elric.activeUsers[user.username] = {
+					key: elric.randomstring(),
+				  socket: false};
+			}
 			
 			return true;
 		} else {
@@ -166,11 +199,21 @@ module.exports = function (elric) {
 	 * @param   {object}   options
 	 */
 	elric.render = function render (req, res, view, options) {
+		
 		if (options === undefined) options = {}
+		
+		var iokey = false;
+		
+		if (elric.activeUsers[req.session.username] !== undefined) {
+			iokey = elric.activeUsers[req.session.username].key;
+		}
+		
 		res.render(view,
 							 $.extend(true,
 												{dest: req.originalUrl,
-												username: req.session.username},
+												username: req.session.username,
+												notifications: res.locals.notifications,
+												iokey: iokey},
 												options));
 	}
 	
