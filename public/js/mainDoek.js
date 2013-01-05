@@ -188,7 +188,7 @@ Elric.doek.etf.cameraInit = function (camera) {
 		er.roomElements[camera._id] = camera;
 		var el = er.roomElements[camera._id];
 		
-		var newWall = er.roomObject.addRectangle(el.x, el.y, el.x+1, el.y+1, style);
+		var newWall = er.roomObject.addCamera(el);
 		
 		newWall.addStyle(hoverStyle);
 		newWall.addStyle(selectStyle);

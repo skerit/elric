@@ -23,6 +23,7 @@ var changeSize = new Doek.Action('changeSize');
  */
 changeSize.on('mousemoveDown', function (caller, payload) {
 	if (payload.originnode == Elric.doek.selectedNode) {
+
 		var sp = payload.dragstartposition; // Start position
 		var cp = payload.position; // Current position
 		var np = payload.originnode.position; // Node position

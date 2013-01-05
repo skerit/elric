@@ -111,6 +111,94 @@ Doek.Wall.prototype.fillEditForm = function() {
 }
 
 /**
+ * Create a new Doek Node class: Calera
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    2013.01.04
+ *
+ * @param    {object}       instructions   How to draw this thing
+ * @param    {Doek.Object}  parentObject   The parent object
+ * @param    {object}       roomElement    The raw roomElement
+ */
+Doek.Camera = Doek.extend(Doek.Rectangle, function(instructions, parentObject, roomElement) {
+	
+	this.roomElement = roomElement;
+	
+	// Call the init function, the parent's constructor
+	this.init(instructions, parentObject);
+	
+	var thisWall = this;
+	
+	var style = new Doek.Style('ori');
+	style.properties.strokeStyle = '#990000';
+	style.weight = 100;
+	
+	var hoverStyle = new Doek.Style('hover');
+	hoverStyle.properties.strokeStyle = '#009900';
+	hoverStyle.weight = 1000;
+	
+	var selectStyle = new Doek.Style('select');
+	selectStyle.properties.strokeStyle = '#000099';
+	
+	this.addStyle(hoverStyle);
+	this.addStyle(selectStyle);
+	
+	// Add some events
+	this.event.on('mouseMove', function(caller, payload){
+		this.activateStyle('hover');
+	});
+	
+	this.event.on('mouseOut', function(caller, payload){
+		this.deactivateStyle('hover');
+	});
+	
+	this.event.on('mouseclick', function(caller, payload){
+		
+		if (Elric.doek.mode == 'select') {
+			this.fire('select', this, payload);
+		}
+	});
+	
+	this.event.on('select', function(caller, payload){
+		
+		// Activate the select style
+		this.activateStyle('select');
+		
+		// Select the items in the html select element
+		Elric.doek.selectRoom(this.roomElement.room_id);
+		Elric.doek.selectElement(this.roomElement._id);
+		
+		if (Elric.doek.selectedNode) {
+			var oldSelect = Elric.doek.selectedNode;
+			oldSelect.fire('unselect', this, payload);
+		}
+		
+		// Set the new selected node
+		Elric.doek.selectedNode = this;
+		
+		// Show the edit element form
+		var $ef = Elric.doek.html.editElement;
+		$ef.parent('div').show();
+		
+		this.fillEditForm();
+		
+	});
+	
+	this.event.on('propertychange', function(caller, payload){
+		if (Elric.doek.selectedNode == this) this.fillEditForm();
+	});
+	
+	this.event.on('unselect', function(caller, payload){
+		this.deactivateStyle('select');
+		
+		var $ef = Elric.doek.html.editElement;
+		$ef.parent('div').hide();
+		
+	});
+	
+});
+
+/**
  * Extend the doek object prototype
  * Add a wall node to this object
  *
@@ -133,9 +221,48 @@ Doek.Object.prototype.addWall = function(roomElement) {
 	selectStyle.properties.strokeStyle = '#BBCCEE';
 	selectStyle.weight = 10;
 	
-	var newCamera = new Doek.Wall({type: 'line',
+	var newWall = new Doek.Wall({type: 'line',
 						sx: el.x, sy: el.y,
 						dx: el.dx, dy: el.dy,
+						style: wallStyle}, this, el);
+	
+	newWall.addStyle(selectStyle);
+	
+	var index = this.nodes.push(newWall);
+	
+	el.node = newWall;
+	
+	this.calculate();
+	
+	return newWall;
+}
+
+/**
+ * Extend the doek object prototype
+ * Add a camera node to this object
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    2013.01.04
+ *
+ * @param	   {Object}	roomElement
+ * @returns	 {Doek.Node}
+ */
+Doek.Object.prototype.addCamera = function(roomElement) {
+	
+	var el = roomElement;
+	var wallStyle = new Doek.Style('wall');
+	
+	// @todo: These selects need to go (these are defined in the elementType)
+	// Colores del mundo: nepal touch
+	wallStyle.properties.strokeStyle = '#BBCFCC';
+	
+	var selectStyle = new Doek.Style('select');
+	selectStyle.properties.strokeStyle = '#BBCCEE';
+	selectStyle.weight = 10;
+	
+	var newCamera = new Doek.Camera({type: 'rectangle',
+						sx: el.x, sy: el.y,
+						dx: el.x+1, dy: el.y+1,
 						style: wallStyle}, this, el);
 	
 	newCamera.addStyle(selectStyle);
