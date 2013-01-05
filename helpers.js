@@ -48,6 +48,9 @@ module.exports = function (elric) {
 	}
 	
 	elric.loadPlugin = function loadPlugin (pluginName) {
+		
+		elric.log.debug('Initializing Plugin "' + pluginName + '"');
+		
 		var plugin = require('./plugins/' + pluginName + '/' + pluginName);
 		elric.plugins[pluginName] = new plugin(elric);
 	}
@@ -55,10 +58,14 @@ module.exports = function (elric) {
 	elric.loadModel = function loadModel (modelName, pluginName) {
 		
 		var path = './models/' + modelName;
+		var debugm = '';
 		
 		if (pluginName !== undefined) {
 			path = './plugins/' + pluginName + '/models/' + modelName;
+			debugm = ' from Plugin "' + pluginName + '"';
 		}
+		
+		elric.log.debug('Initializing Model "' + modelName + '"' + debugm);
 		
 		var model = require(path);
 		var m = new model(elric);
@@ -82,10 +89,14 @@ module.exports = function (elric) {
 	elric.loadElementType = function loadElementType (typeName, pluginName) {
 		
 		var path = './element_types/' + typeName;
+		var debugm = '';
 		
 		if (pluginName !== undefined) {
 			path = './plugins/' + pluginName + '/element_types/' + typeName;
+			debugm = ' from Plugin "' + pluginName + '"';
 		}
+		
+		elric.log.debug('Initializing elementType "' + typeName + '"' + debugm);
 		
 		var constructor = require(path);
 		

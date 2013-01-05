@@ -15,6 +15,8 @@ var store = new express.session.MemoryStore;
 var $ = require('jquery');
 var bcrypt = require('bcrypt');
 var async = require('async');
+var io = require('socket.io');
+var util = require('util');
 
 /**
  * Our own modules
@@ -22,17 +24,43 @@ var async = require('async');
 var Routes = require('./routes');
 var local = require('./local');
 
-/**
- * Initialize basic app functionality
- */
+// Prepare the routes variable
+var routes = false;
+
+// Initialize express
+var app = express();
 
 // Connect to the database
 mongoose.connect('mongodb://' + local.mongohost + '/' + local.mongodb);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
-// Initialize express
-var app = express();
+/**
+ * This variable will be passed allong to plugins
+ */
+var elric = {}
+elric.isFirstRun = true; // Initial first run setting
+elric.classes = {}
+elric.routes = routes;
+elric.mongoose = mongoose;  // Mongoose DB wrapper
+elric.db = db;              // Direct DB access
+elric.app = app;
+elric.plugins = {}
+elric.models = {}
+elric.admin = {}
+elric.adminArray = []
+elric.event = new EventEmitter();
+elric.menus = {}
+elric.memobjects = {}
+
+// Create the HTTP server
+elric.server = http.createServer(app);
+
+// Create the IO websocket server
+elric.io = io.listen(elric.server);
+
+// Use IO's logger
+elric.log = elric.io.log;
 
 // Set Dust as our template engine
 app.engine('dust', cons.dust);
@@ -101,27 +129,6 @@ app.configure(function(){
 	
 	app.use(app.router);
 });
-
-
-// Prepare the routes variable
-var routes = false;
-
-/**
- * This variable will be passed allong to plugins
- */
-var elric = {}
-elric.isFirstRun = true; // Initial first run setting
-elric.classes = {}
-elric.routes = routes;
-elric.mongoose = mongoose;
-elric.app = app;
-elric.plugins = {}
-elric.models = {}
-elric.admin = {}
-elric.adminArray = []
-elric.event = new EventEmitter();
-elric.menus = {}
-elric.memobjects = {}
 
 // Initiate admin
 require('./admin.js')(elric);
@@ -244,5 +251,28 @@ app.get('/motion', function(req, res) {
 });
 */
 
-app.listen(local.serverport);
-console.log('Listening on port ' + local.serverport);
+// Start the server
+elric.server.listen(local.serverport, function(){
+	elric.log.info(util.format('Elric server listening on port %d in %s mode',
+														 local.serverport,
+														 app.settings.env)
+								 );
+})
+
+// Listen for IO connections
+elric.io.sockets.on('connection', function(socket) { 
+
+	var address = socket.handshake.address;
+  elric.log.info(util.format('IO connection from ip %s on port %d',
+														 address.address,
+														 address.port)
+								 );
+	
+	// Disconnect listener
+	socket.on('disconnect', function() {
+		elric.log.info(util.format('IO Connection closed from ip %s on port %d',
+														 address.address,
+														 address.port)
+								 );
+	});
+});
