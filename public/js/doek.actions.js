@@ -45,14 +45,21 @@ changeSize.on('mousemoveDown', function (caller, payload) {
 			}
 		}
 		
-		var left = changeSize.mmstuf.left;
-		var right = changeSize.mmstuf.right;
-
-		// We clicked the left side
-		if (left < 10) {
+		if (node.roomElement.elementType.dimensions > 0) {
+			
+			var left = changeSize.mmstuf.left;
+			var right = changeSize.mmstuf.right;
+	
+			// We clicked the left side
+			if (left < 10) {
+				node.setBeginpoint(cp);
+			} else if (right < 20) { // Right side
+				node.setEndpoint(cp);
+			}
+		} else {
+			// 0 dimensions, so just change position
 			node.setBeginpoint(cp);
-		} else if (right < 20) { // Right side
-      node.setEndpoint(cp);
+			node.setEndpoint(cp);
 		}
 	}
 });

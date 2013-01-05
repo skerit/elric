@@ -153,7 +153,7 @@ Elric.doek.etf.wallInit = function (wall) {
 		var er = Elric.rooms[wall.room_id];
 		er.roomElements[wall._id] = wall;
 		var el = er.roomElements[wall._id];
-		
+		el.elementType = elementTypes['wall'];
 		var newWall = er.roomObject.addWall(el);
 	}
 }
@@ -172,7 +172,7 @@ Elric.doek.etf.cameraInit = function (camera) {
 		var er = Elric.rooms[camera.room_id];
 		er.roomElements[camera._id] = camera;
 		var el = er.roomElements[camera._id];
-		
+		el.elementType = elementTypes['camera'];
 		var newCamera = er.roomObject.addCamera(el);
 	}
 }

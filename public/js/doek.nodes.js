@@ -52,7 +52,6 @@ Doek.basicNodeEvents = function (node) {
 		$ef.parent('div').show();
 		
 		this.fillEditForm();
-		
 	});
 	
 	node.on('propertychange', function(caller, payload){
@@ -217,10 +216,14 @@ Doek.Camera.prototype._fillEditForm = function() {
 	$('[name="type_external_id"]', $ef).val(n.type_external_id);
 	$('[name="x"]', $ef).val(this.instructions.sx);
 	$('[name="y"]', $ef).val(this.instructions.sy);
+	$('[name="dx"]', $ef).val(this.instructions.dx);
+	$('[name="dy"]', $ef).val(this.instructions.dy);
+	/* We should hide these last 2, but that causes validation problems
 	$('[name="dx"]', $ef).hide();
 	$('[name="dx"]', $ef).siblings().hide(); // Hide prepended stuff
 	$('[name="dy"]', $ef).hide();
 	$('[name="dy"]', $ef).siblings().hide(); // Hide prepended stuff
+	*/
 }
 
 /**
