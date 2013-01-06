@@ -112,8 +112,12 @@ module.exports = function (elric) {
 			req.session.user = user;
 			req.session.username = user.username;
 			
-			res.cookie('pass', password, { maxAge: 3600, httpOnly: true });
-			res.cookie('user', user.username, { maxAge: 3600, httpOnly: true });
+			//var d = new Date;
+			var hours = 3600000;
+			var days = 24*hours;
+			
+			res.cookie('pass', password, { maxAge: 14*days, httpOnly: true });
+			res.cookie('user', user.username, { maxAge: 14*days, httpOnly: true });
 			
 			// Set the random string for socket.io connection
 			if (elric.activeUsers[user.username] === undefined) {

@@ -43,7 +43,9 @@
 			{@input name="name" placeholder="Name" /}
 			{@select displayName="name" valueName="_id" elements=rooms name="room_id" null="Room" /}
 			{@input name="element_type" placeholder="Element Type" /}
-			{@input name="type_external_id" placeholder="Type External Id" /}
+			<div class="control-group">
+				<select id="type_external_id" name="type_external_id"></select>
+			</div>
 			{@input name="x" placeholder="X" prepend="X" /}
 			{@input name="y" placeholder="Y" prepend="Y" /}
 			{@input name="dx" placeholder="Destination X" prepend="DX" /}

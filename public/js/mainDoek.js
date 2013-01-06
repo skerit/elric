@@ -141,20 +141,21 @@ Elric.View.prototype.addRooms = function (rooms) {
 }
 
 /**
- * Add an element type function for adding a wall
+ * Add an element type function for default elements
  *
  * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    2013.01.03
+ * @since    2013.01.06
  *
- * @param    {object}   wall   Wall element type
+ * @param    {object}   element   The element type element
+ * @param    {string}   type      The type to add
  */
-Elric.doek.etf.wallInit = function (wall) {
-	if (Elric.rooms[wall.room_id] !== undefined) {
-		var er = Elric.rooms[wall.room_id];
-		er.roomElements[wall._id] = wall;
-		var el = er.roomElements[wall._id];
-		el.elementType = elementTypes['wall'];
-		var newWall = er.roomObject.addWall(el);
+Elric.doek.etf.defaultInit = function (element, type) {
+	if (Elric.rooms[element.room_id] !== undefined) {
+		var er = Elric.rooms[element.room_id];
+		er.roomElements[element._id] = element;
+		var el = er.roomElements[element._id];
+		el.elementType = elementTypes[type];
+		var newElement = er.roomObject.addDefault(el, type);
 	}
 }
 
@@ -193,6 +194,8 @@ Elric.View.prototype.addElements = function (elements) {
 		
 		if (Elric.doek.etf[et + 'Init'] !== undefined) {
 			Elric.doek.etf[et + 'Init'](element);
+		} else {
+			Elric.doek.etf.defaultInit(element, et);
 		}
 	}
 }

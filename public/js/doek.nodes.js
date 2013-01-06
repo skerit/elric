@@ -105,20 +105,22 @@ Doek.Wall = Doek.extend(Doek.Line, function(instructions, parentObject, roomElem
 	this.roomElement = roomElement;
 	this.elricType = 'wall';
 	
+	if (instructions.override) this.elricType = instructions.override;
+	
 	instructions.type = 'line';
 	
 	var thisWall = this;
 	
 	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = elementTypes.wall.colourOri;
+	style.properties.strokeStyle = elementTypes[this.elricType].colourOri;
 	style.weight = 100;
 	
 	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = elementTypes.wall.colourHover;
+	hoverStyle.properties.strokeStyle = elementTypes[this.elricType].colourHover;
 	hoverStyle.weight = 1000;
 	
 	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = elementTypes.wall.colourSelect;
+	selectStyle.properties.strokeStyle = elementTypes[this.elricType].colourSelect;
 	selectStyle.weight = 10000;
 	
 	this.addStyle(style);
@@ -228,18 +230,20 @@ Doek.Camera.prototype._fillEditForm = function() {
 
 /**
  * Extend the doek object prototype
- * Add a wall node to this object
+ * Add a default node to this object
  *
  * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    2012.12.28
+ * @since    2013.01.06
  *
- * @param	{Object}	roomElement
- * @returns	{Doek.Node}
+ * @param	   {Object}	   roomElement
+ * @param    {string}    type
+ * @returns	 {Doek.Node}
  */
-Doek.Object.prototype.addWall = function(roomElement) {
+Doek.Object.prototype.addDefault = function(roomElement, type) {
 	var el = roomElement;
 
 	var newWall = new Doek.Wall({
+		        override: type,
 						sx: el.x, sy: el.y,
 						dx: el.dx, dy: el.dy}, this, el);
 	
@@ -251,7 +255,6 @@ Doek.Object.prototype.addWall = function(roomElement) {
 	
 	return newWall;
 }
-
 /**
  * Extend the doek object prototype
  * Add a camera node to this object

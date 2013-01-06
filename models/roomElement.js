@@ -118,7 +118,7 @@ module.exports = function RoomElement (elric) {
 	elric.app.post('/roomelement/new', function (req, res) {
 		
 		if (req.body.room_id && req.body.element_type) {
-			var newrecord = new thisModel.model({name: 'UnnamedElement', room_id: req.body.room_id, element_type: req.body.element_type, x: 10, y: 10, width: 0, height: 0, dx: 50, dy: 50});
+			var newrecord = new thisModel.model({name: 'UnnamedElement', room_id: req.body.room_id, element_type: req.body.element_type, x: 10, y: 10, width: 0, height: 0, dx: 30, dy: 30});
 			
 			newrecord.save(function(err, element) {
 				res.send(element);

@@ -11,9 +11,12 @@ module.exports = function Config (elric) {
 	elric.loadModel('room');
 	elric.loadModel('roomElement');
 	elric.loadModel('notification');
+	elric.loadModel('client');
+	elric.loadModel('clientCapability');
 	
 	// Load element types
 	elric.loadElementType('wall');
-	elric.loadElementType('camera', 'motion');
+	elric.loadElementType('client');
+	elric.loadElementType('closet');
 	
 }
