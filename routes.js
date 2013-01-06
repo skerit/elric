@@ -101,6 +101,60 @@ module.exports = function Routes (elric) {
 		);
 	});
 	
+	// Save client capability settings
+	elric.app.post('/clients/save/:id/:capname', function(req, res){
+
+		var P = elric.models.clientCapability.model;
+
+		P.findOne({client_id: req.params.id, capability: req.params.capname}, function(err, item) {
+			
+			if (!item) {
+				item = new P({
+					client_id: req.params.id,
+					capability: req.params.capname,
+					settings: {}
+				});
+			}
+			
+			item.settings = req.body;
+			
+			item.save(function (err) {
+				if (err) {
+					res.send({ error: 'Updating capability record failed!', errors: err });
+				} else {
+					res.send({ success: 'Saved!'});
+				}
+			});
+		});
+	});
+	
+	// Enable or disable a client capability
+	elric.app.post('/clients/enable/:id/:capname', function(req, res){
+	
+		var P = elric.models.clientCapability.model;
+
+		P.findOne({client_id: req.params.id, capability: req.params.capname}, function(err, item) {
+			
+			if (!item) {
+				item = new P({
+					client_id: req.params.id,
+					capability: req.params.capname,
+					settings: {}
+				});
+			}
+			
+			item.enabled = req.body.enabled;
+			
+			item.save(function (err) {
+				if (err) {
+					res.send({ error: 'Toggling capability record failed!', errors: err });
+				} else {
+					res.send({ success: 'Saved!'});
+				}
+			});
+		});
+	});
+	
 	/**
 	 * Home routes
 	 */

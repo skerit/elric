@@ -34,7 +34,9 @@ Elric.cap.toggle = function (capname, enable, ajax) {
 	
 	// Inform the server
 	if (ajax) {
-		
+		$.post('/clients/enable/' + Elric.exposed.workingclient + '/' + capname, {enabled:enable}, function(data) {
+			// Do something with the return data
+		});
 	}
 }
 
@@ -48,6 +50,19 @@ $('button[data-function="toggle"]').click(function (e) {
 	Elric.cap.toggle(capname, toggle, true);
 });
 
+$('button[data-function="save"]').click(function (e) {
+	e.preventDefault();
+	var $this = $(this);
+	var capname = $this.attr('data-capability');
+	
+	var saverecord = $('#capform-' + capname).jsonify();
+	
+	$.post('/clients/save/' + Elric.exposed.workingclient + '/' + capname, saverecord, function(data) {
+		// Do something with the return data
+	});
+	
+});
+
 // Set the initial states
 for (var capname in Elric.exposed.capsettings) {
 	
@@ -59,6 +74,3 @@ for (var capname in Elric.exposed.capsettings) {
 		Elric.cap.toggle(capname, true, false);
 	}
 }
-
-
-

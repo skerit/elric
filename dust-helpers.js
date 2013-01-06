@@ -217,17 +217,50 @@ module.exports = function (dust, elric) {
 	}
 	
 	dust.helpers.adminField = function (chunk, context, bodies, params) {
+		
 		var model = params.model;
 		var name = params.name;
 		var selects = params.selects;
-		var blueprint = model.blueprint[name];
+		
+		// If a blueprint is given, use that one
+		if (params.blueprint) {
+			var blueprint = params.blueprint;
+		} else{ // Otherwise get it from a model
+			var blueprint = model.blueprint[name];
+		}
+		
+		var title = name;
+		
+		if (params.title) {
+			title = params.title;
+		}
+		
 		var value = '';
 		var html = '<div class="control-group">';
+		
+		if (params.label == 1) {
+			html += '<label class="control-label" for="' + name + '">' + title + '</label>';
+		}
+		
+		html += '<div class="controls">';
+		
+		if (params.items && params.ofItem && params.field) {
+			params.item = params.items[params.ofItem];
+		}
+		
+		if (params.ofItem2) {
+			params.item = params.item[params.ofItem2];
+		}
 		
 		if (params.item && params.field) {
 			var item = params.item;
 			var field = params.field;
-			value = item[field];
+			
+			if (item[field] === undefined) {
+				value = '';
+			} else {
+				value = item[field];
+			}
 		}
 		
 		var selected = '';
@@ -237,7 +270,7 @@ module.exports = function (dust, elric) {
 			case 'Select':
 				html += '<select name="' + name + '">';
 				var s = selects[blueprint.source.name];
-				console.log(selects);
+
 				if (blueprint.source.type == 'model') {
 					for (var i in s) {
 						selected = '';
@@ -257,11 +290,11 @@ module.exports = function (dust, elric) {
 				break;
 			
 			default:
-				html += '<input type="text" name="' + name + '" placeholder="' + name + '" value="' + value + '" />';
+				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value="' + value + '" />';
 				break;
 		}
 		
-		html += '</div>';
+		html += '</div></div>';
 		
 		chunk.write(html);
 		return chunk;

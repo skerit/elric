@@ -12,12 +12,7 @@
 	</p>
 </div>
 
-
-{@stringify object=settings name="settings" html=1 /}
-
 {#capabilities settings=settings}
-	{@stringify object=. name="capability" html=1 /}
-
 	<section id="capset{name}" data-capability="{name}">
 		<div class="page-header">
 			<h1>
@@ -27,7 +22,12 @@
 			</h1>
 		</div>
 		<div class="edit-settings">
-			Settings go here!
+			<form class="form-horizontal" id="capform-{name}">
+			{#fields blueprint=settingBlueprint capability=name settings=settings}
+				{@adminField blueprint=blueprint selects=selects items=settings ofItem=capability ofItem2="settings" name=. field=. label=1 /}
+			{/fields}
+			<button class="btn btn-success" data-function="save" data-capability="{name}" ><i class="icon-hdd"></i> Save</button>
+			</form>
 		</div>
 	</section>
 

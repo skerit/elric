@@ -29,4 +29,14 @@ module.exports = function (elric) {
 	 */
 	bp.title = 'Base Capability';
 	
+	/**
+	 * The version of the client file
+	 */
+	bp.version = '2013.01.01';
+	
+	/**
+	 * The plugin we're in
+	 */
+	bp.plugin = false;
+	
 }
