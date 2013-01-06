@@ -21,6 +21,26 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Make a variable available in the browser
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.06
+	 *
+	 * @param    {string}   name    Variable name (inside browser's Elric namespace)
+	 * @param    {object}   object  The object to send to the browser
+	 * @param    {object}   res     Optional: only send it once
+	 */
+	elric.expose = function expose (name, object, res) {
+		
+		if (res === undefined) {
+			elric.exposedObjects[name] = {name: name, object: object};
+		} else {
+			if (res.locals.exposedObjects === undefined) res.locals.exposedObjects = {};
+			res.locals.exposedObjects[name] = {name: name, object: object};
+		}
+	}
+	
+	/**
 	 * Submit something to all connected browsers (websockets)
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -207,17 +227,26 @@ module.exports = function (elric) {
 		if (options === undefined) options = {}
 		
 		var iokey = false;
+		var objects = {};
+		var robj = {};
 		
 		if (elric.activeUsers[req.session.username] !== undefined) {
 			iokey = elric.activeUsers[req.session.username].key;
+			objects = elric.exposedObjects;
+			
+			elric.expose('iokey', iokey, res);
+			elric.expose('username', req.session.username, res);
 		}
+		
+		if (res.locals.exposedObjects !== undefined) robj = res.locals.exposedObjects;
 		
 		res.render(view,
 							 $.extend(true,
 												{dest: req.originalUrl,
 												username: req.session.username,
 												notifications: res.locals.notifications,
-												iokey: iokey},
+												iokey: iokey,
+												exposedObjects: $.extend({}, objects, robj)},
 												options));
 	}
 	

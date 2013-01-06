@@ -55,6 +55,7 @@ elric.menus = {}
 elric.memobjects = {}
 elric.randomstring = randomstring.generate;
 elric.activeUsers = {}
+elric.exposedObjects = {}
 
 // Create the HTTP server
 elric.server = http.createServer(app);

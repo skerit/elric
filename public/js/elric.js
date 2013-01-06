@@ -1,7 +1,3 @@
-/**
- * Create our Elric namespace
- */
-var Elric = {}
 Elric.connected = false;
 Elric.ioqueue = []
 Elric.iokey = $.cookie('iokey');
@@ -83,8 +79,8 @@ Elric.notify = function (message) {
 Elric.login = function () {
 	
 	var auth = {
-		login: username,
-		key: iokey,
+		login: Elric.exposed.username,
+		key: Elric.exposed.iokey,
 		type: 'browser'
 	}
 	
@@ -92,7 +88,7 @@ Elric.login = function () {
 }
 
 // Create a connection
-if (iokey) {
+if (Elric.exposed.iokey) {
 	Elric.socket = io.connect('http://localhost');
 
 	// Send a login upon connect

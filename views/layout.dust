@@ -21,8 +21,11 @@
     <script src="/js/bootstrap/bootstrap-typeahead.js"></script>
     <script src="/js/pnotify/jquery.pnotify.min.js"></script>
     <link href="/js/pnotify/jquery.pnotify.default.css" media="all" rel="stylesheet" type="text/css" />
-    {@stringify name="username" object=username /}
-    {@stringify name="iokey" object=iokey /}
+    <script type="text/javascript">
+      var Elric = {};
+      Elric.exposed = {};
+    </script>
+    {@expose objects=exposedObjects namespace="Elric" /}
     <style type="text/css">
       body {
         padding-top: 60px;

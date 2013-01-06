@@ -40,6 +40,10 @@ module.exports = function (dust, elric) {
 		return chunk;
 	}
 	
+	/**
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.29
+	 */
 	dust.helpers.menu = function (chunk, context, bodies, params) {
 		
 		var name = params.name;
@@ -62,10 +66,59 @@ module.exports = function (dust, elric) {
 		return chunk;
 	}
 	
-	dust.helpers.stringify = function (chunk, context, bodies, params) {
+	/**
+	 * Expose objects to the browser
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.06
+	 */
+	dust.helpers.expose = function (chunk, context, bodies, params) {
+		
+		var objects = params.objects;
+		
+		var propertyOf = false;
+		
+		if (params.namespace) propertyOf = params.namespace;
 		
 		var html = '<script type="text/javascript">';
-		html += 'var ' + params.name + ' = ' + JSON.stringify(params.object) + ';';
+		
+		for (var name in objects) {
+			var json = JSON.stringify(objects[name].object);
+			
+			if (!propertyOf) {
+				html += 'var ' + name + ' = ' + json + ';';
+			} else {
+				html += propertyOf + '.exposed["' + name + '"] = ' + json + ';';
+			}
+		}
+		html += '</script>';
+		
+		chunk.write(html);
+		return chunk;
+	}
+	
+	/**
+	 * Send an object to the browser
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.29
+	 */
+	dust.helpers.stringify = function (chunk, context, bodies, params) {
+		
+		if (params.name === undefined) return chunk;
+		
+		var json = JSON.stringify(params.object);
+		var propertyOf = false;
+		
+		if (params.namespace) propertyOf = params.namespace;
+		
+		var html = '<script type="text/javascript">';
+		
+		if (!propertyOf) {
+			html += 'var ' + params.name + ' = ' + json + ';';
+		} else {
+			html += propertyOf + '.exposed["' + params.name + '"] = ' + json + ';';
+		}
 		html += '</script>';
 		
 		chunk.write(html);
