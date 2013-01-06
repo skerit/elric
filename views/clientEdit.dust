@@ -1,0 +1,36 @@
+{>clientLayout/}
+{<main}
+
+<div class="hero-unit">
+	<h1>{client.name}</h1>
+	<p>
+		<b>Created:</b> {client.created}<br/>
+		<b>Updated:</b> {client.updated}<br/>
+		<b>Hostname:</b> {client.hostname}<br/>
+		<b>IP:</b> {client.ip}<br/>
+		<b>Key:</b> {client.key}
+	</p>
+</div>
+
+
+{@stringify object=settings name="settings" html=1 /}
+
+{#capabilities settings=settings}
+	{@stringify object=. name="capability" html=1 /}
+
+	<section id="capset{name}" data-capability="{name}">
+		<div class="page-header">
+			<h1>
+				{title}
+				<button type="button" data-capability="{name}" data-function="toggle" data-toggle="enable" class="btn btn-success">Enable</button>
+				<button type="button" data-capability="{name}" data-function="toggle" data-toggle="disable" class="btn btn-danger" style="display:none;">Disable</button>
+			</h1>
+		</div>
+		<div class="edit-settings">
+			Settings go here!
+		</div>
+	</section>
+
+{/capabilities}
+
+{/main}

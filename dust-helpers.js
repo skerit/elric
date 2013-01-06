@@ -12,6 +12,7 @@ module.exports = function (dust, elric) {
 		var href = params.href;
 		var dest = params.dest;
 		var title = params.title;
+		var prependid = 'ma-';
 		var active = '';
 		var id = title.toLowerCase();
 		
@@ -19,7 +20,11 @@ module.exports = function (dust, elric) {
 			id = params.id;
 		}
 		
-		var liid = 'mli-parent-' + id;
+		if (params.prependid) {
+			prependid = params.prependid + '-';
+		}
+		
+		var liid = prependid + 'parent-' + id;
 		
 		var rxParam = /:\w*/g;
 		var results = rxParam.exec(href);
@@ -36,7 +41,7 @@ module.exports = function (dust, elric) {
 			active = ' active';
 		}
 		
-		chunk.write('<li id="' + liid + '" class="' + active + '"><a id="ma-'+id+'" href="' + href + '">' + title + '</a></li>');
+		chunk.write('<li id="' + liid + '" class="' + active + '"><a id="'+prependid+id+'" href="' + href + '">' + title + '</a></li>');
 		return chunk;
 	}
 	
@@ -102,6 +107,7 @@ module.exports = function (dust, elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.29
+	 * @version  2013.01.06
 	 */
 	dust.helpers.stringify = function (chunk, context, bodies, params) {
 		
@@ -112,14 +118,23 @@ module.exports = function (dust, elric) {
 		
 		if (params.namespace) propertyOf = params.namespace;
 		
-		var html = '<script type="text/javascript">';
-		
+		if (params.html == 1) {
+			var html = '<p class="codeexample">';
+		} else {
+			var html = '<script type="text/javascript">';
+		}
+
 		if (!propertyOf) {
 			html += 'var ' + params.name + ' = ' + json + ';';
 		} else {
 			html += propertyOf + '.exposed["' + params.name + '"] = ' + json + ';';
 		}
-		html += '</script>';
+		
+		if (params.html == 1) {
+			html += '</p>';
+		} else {
+			html += '</script>';
+		}
 		
 		chunk.write(html);
 		return chunk;

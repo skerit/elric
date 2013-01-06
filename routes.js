@@ -45,6 +45,63 @@ module.exports = function Routes (elric) {
 	});
 	
 	/**
+	 * Client routes
+	 */
+	elric.app.get('/clients', function (req, res) {
+		
+		var C = elric.models.client.model;
+		
+		C.find({}, function (err, clients) {
+			elric.render(req, res, 'clientDashboard', {username: req.session.username, clients: clients});
+		});
+	});
+	
+	elric.app.get('/clients/:id', function (req, res) {
+		
+		var C = elric.models.client.model;
+		var P = elric.models.clientCapability.model;
+		var par = {};
+		
+		// Find all the clients (for the sidebar)
+		par.clients = function(callback) {
+			C.find({}, function (err, clients) {
+				callback(null, clients);
+			});
+		}
+		
+		// Find the client we wish to edit
+		par.client = function(callback) {
+			C.findOne({_id: req.params.id}, function (err, client) {
+				callback(null, client);
+			});
+		}
+		
+		// Find all the set capabilities for this client
+		par.capabilitySettings = function(callback) {
+			P.find({client_id: req.params.id}, function (err, settings) {
+				callback(null, settings);
+			});
+		}
+		
+		// Perform both finds in parallell, and render the view once both are complete
+		async.parallel(
+			par,
+			function(err, results) {
+				
+				// Convert certain objects & arrays
+				results.capabilities = elric.makeArray(elric.capabilities);
+				results.settings = elric.makeObject(results.capabilitySettings, 'capability');
+				
+				// Expose certain variables for this request only
+				elric.expose('workingclient', results.client._id, res);
+				elric.expose('capsettings', results.settings, res);
+				
+				elric.render(req, res, 'clientEdit', results);
+			}
+		);
+	});
+	
+	/**
 	 * Home routes
 	 */
 	elric.app.get('/', function (req, res) {
@@ -58,7 +115,7 @@ module.exports = function Routes (elric) {
 	
 		var room = elric.models.room;
 		var element = elric.models.roomElement;
-		var par = {}
+		var par = {};
 		
 		// Prepare function to find all rooms
 		par.rooms = function(callback) {

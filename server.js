@@ -39,23 +39,30 @@ db.on('error', console.error.bind(console, 'connection error:'));
 /**
  * This variable will be passed allong to plugins
  */
-var elric = {}
+var elric = {};
 elric.isFirstRun = true; // Initial first run setting
-elric.classes = {}
+elric.classes = {};
 elric.routes = routes;
 elric.mongoose = mongoose;  // Mongoose DB wrapper
 elric.db = db;              // Direct DB access
 elric.app = app;
-elric.plugins = {}
-elric.models = {}
-elric.admin = {}
-elric.adminArray = []
+
+elric.plugins = {};
+elric.models = {};
+elric.capabilities = {};
+elric.elementTypes = {};
+
+elric.memobjects = {};
+elric.memobjects.elementTypes = elric.elementTypes;
+elric.memobjects.capabilities = elric.capabilities;
+
+elric.admin = {};
+elric.adminArray = [];
 elric.event = new EventEmitter();
-elric.menus = {}
-elric.memobjects = {}
+elric.menus = {};
 elric.randomstring = randomstring.generate;
-elric.activeUsers = {}
-elric.exposedObjects = {}
+elric.activeUsers = {};
+elric.exposedObjects = {};
 
 // Create the HTTP server
 elric.server = http.createServer(app);

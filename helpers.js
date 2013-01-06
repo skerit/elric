@@ -124,6 +124,13 @@ module.exports = function (elric) {
 		}
 	}
 	
+	/**
+	 * Check a user's password
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.27
+	 * @version  2013.01.06
+	 */
 	elric.checkPassword = function checkPassword (req, res, password, user) {
 		// See if password matches
 		var passMatch = bcrypt.compareSync(password, user.password);
@@ -152,14 +159,28 @@ module.exports = function (elric) {
 		}
 	}
 	
+	/**
+	 * Load a new plugin
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.27
+	 * @version  2013.01.06
+	 */
 	elric.loadPlugin = function loadPlugin (pluginName) {
 		
 		elric.log.debug('Initializing Plugin "' + pluginName + '"');
 		
-		var plugin = require('./plugins/' + pluginName + '/' + pluginName);
+		var plugin = require('./plugins/' + pluginName + '/' + pluginName + 'Plugin');
 		elric.plugins[pluginName] = new plugin(elric);
 	}
 	
+	/**
+	 * Load a new model
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.27
+	 * @version  2013.01.05
+	 */
 	elric.loadModel = function loadModel (modelName, pluginName) {
 		
 		var path = './models/' + modelName;
@@ -190,14 +211,15 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.31
+	 * @version  2013.01.05
 	 */
 	elric.loadElementType = function loadElementType (typeName, pluginName) {
 		
-		var path = './element_types/' + typeName;
+		var path = './element_types/' + typeName + 'Type';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
-			path = './plugins/' + pluginName + '/element_types/' + typeName;
+			path = './plugins/' + pluginName + '/element_types/' + typeName + 'Type';
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
@@ -210,7 +232,83 @@ module.exports = function (elric) {
 		et = new et(elric);
 		
 		// Store the new type
-		elric.memobjects.elementTypes[typeName] = et;
+		elric.elementTypes[typeName] = et;
+	}
+	
+	/**
+	 * Load a new capability
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.06
+	 * @version  2013.01.06
+	 */
+	elric.loadCapability = function loadCapability (capabilityName, pluginName) {
+		
+		var path = './capabilities/' + capabilityName + 'Capability';
+		var debugm = '';
+		
+		if (pluginName !== undefined) {
+			path = './plugins/' + pluginName + '/capabilities/' + capabilityName + 'Capability';
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		elric.log.debug('Initializing Capability "' + capabilityName + '"' + debugm);
+		
+		var constructor = require(path);
+		
+		var capability = elric.extend(elric.classes.BaseCapability, constructor);
+		
+		capability = new capability(elric);
+		
+		// Store the new type
+		elric.capabilities[capabilityName] = capability;
+	}
+	
+	/**
+	 * Turn an object into an array
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.06
+	 * @version  2013.01.06
+	 *
+	 * @param    {object}   object   The object to turn into an array
+	 *
+	 * @returns  {array}             The converted array
+	 */
+	elric.makeArray = function makeArray (object) {
+		
+		var returnArray = [];
+		
+		for (var i in object) {
+			returnArray.push(object[i]);
+		}
+		
+		return returnArray;
+	}
+	
+	/**
+	 * Turn an array into an object
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.06
+	 * @version  2013.01.06
+	 *
+	 * @param    {array}   array     The array to turn into an object
+	 * @param    {string}  keyname   The key inside the objects to use
+	 *
+	 * @returns  {array}             The converted array
+	 */
+	elric.makeObject = function makeObject (array, keyname) {
+		
+		var obj = {};
+		
+		for (var i in array) {
+			if (array[i][keyname] !== undefined) {
+				obj[array[i][keyname]] = array[i];
+			}
+		}
+		
+		return obj;
 	}
 	
 	/**

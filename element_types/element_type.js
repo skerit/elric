@@ -1,7 +1,5 @@
 module.exports = function (elric) {
 	
-	elric.memobjects.elementTypes = {}
-	
 	/**
 	 * The Base Element Type class
 	 *

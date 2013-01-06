@@ -10,22 +10,25 @@ module.exports = function RoomElement (elric) {
 			fieldType: 'Select',
 			source: {type: 'model', name: 'client'}
 		},
-		element_type: {
+		capability: {
 			type: String,
 			required: true,
 			fieldType: 'Select',
-			source: {type: 'memobject', name: 'clientCapabilities'}
+			source: {type: 'memobject', name: 'capabilities'}
 		},
 		enabled: {
 			type: Boolean,
 			required: true,
 			fieldType: 'Checkbox'
+		},
+		settings: {
+			type: mongoose.Schema.Types.Mixed
 		}
 	}
 	
 	this.admin = {
 		title: 'Client Capabilities',
-		fields: ['client_id', 'element_type', 'enabled']
+		fields: ['client_id', 'capability', 'enabled']
 	}
 
 	this.schema = elric.Schema(this.blueprint);

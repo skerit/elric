@@ -8,7 +8,7 @@
 			<div class="span2">
 				<div class="well sidebar-nav">
 					<ul class="nav nav-list">
-						<li class="nav-header">Sidebar</li>
+						<li class="nav-header">Models</li>
 						{@lilink dest=dest title="Dashboard" href="/admin" /}
 						{#admin dest=dest}
 							{@lilink dest=dest title=title href="/admin/:modelname/index" modelname=name /}

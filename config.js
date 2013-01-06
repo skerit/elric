@@ -2,6 +2,7 @@ module.exports = function Config (elric) {
 
 	// Load base class
 	require('./element_types/element_type')(elric);
+	require('./capabilities/capability')(elric);
 
 	// Load plugins
 	elric.loadPlugin('motion');
