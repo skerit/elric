@@ -21,6 +21,69 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Save a database record
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.07
+	 * @version  2013.01.07
+	 *
+	 * @param    {object}   item            The mongoose item
+	 * @param    {object}   res             The resource to send errors to
+	 * @param    {function} callback        The function to callback
+	 * @param    {string}   reportError     If applicable, send an error response
+	 * @param    {string}   reportSuccess   If applicable, send a success response
+	 */
+	elric.saveRecord = function saveRecord (item,
+																			res,
+																			callback,
+																			reportError,
+																			reportSuccess) {
+		
+		if (reportError === undefined || reportError === true) {
+			reportError = 'Saving record failed';
+		}
+		
+		if (reportSuccess === undefined || reportSuccess === true) {
+			reportSuccess = 'Record has been saved';
+		}
+		
+		// Save the item
+		item.save(function (err) {
+			
+			// If an error has been found ...
+			if (err) {
+				
+				// Send it to the client if reportError is set
+				// and we've been given a response object
+				if (reportError && res) {
+					res.send({
+						success: false,
+						error: {
+							errors: err,
+							message: reportError
+							}
+						});
+				}
+			} else {
+				
+				// Send a success message to the client if reportSuccess
+				// is set and we've been given a response object
+				if (reportSuccess && res) {
+					res.send({
+						success: {
+							message: reportSuccess
+							},
+						error: false
+					});
+				}
+			}
+			
+			// Make the callback
+			if (callback) callback(err);
+		});
+	}
+	
+	/**
 	 * Make a variable available in the browser
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>

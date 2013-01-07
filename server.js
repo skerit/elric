@@ -159,7 +159,7 @@ app.configure(function(){
 });
 
 // Initiate admin
-require('./admin.js')(elric);
+require('./admin')(elric);
 
 // Load helper functions
 require('./helpers')(elric);
@@ -169,6 +169,9 @@ require('./config')(elric);
 
 // Load our own dust helpers
 require('./dust-helpers')(dust, elric);
+
+// Initiate clients
+require('./client')(elric);
 
 // This function will initialize the normal routes
 app.initializeRoutes = function() {
