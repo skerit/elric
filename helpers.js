@@ -104,25 +104,6 @@ module.exports = function (elric) {
 	}
 	
 	/**
-	 * Submit something to all connected browsers (websockets)
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.01.05
-	 */
-	elric.submitAllBrowsers = function submitAllBrowsers (message, type) {
-		
-		if (type === undefined) type = 'message';
-		
-		for (var login in elric.activeUsers) {
-			
-			var socket = elric.activeUsers[login].socket;
-			
-			// If the socket is still connected
-			if (socket) socket.emit(type, message);
-		}
-	}
-	
-	/**
 	 * Create a notification
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>

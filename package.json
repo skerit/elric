@@ -21,6 +21,6 @@
     "email": "*",
     "jquery": "1.8.3",
     "async": "0.1.22",
-    "randomstring": "1.0.2",
+    "randomstring": "1.0.2"
   }
 }

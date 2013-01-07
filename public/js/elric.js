@@ -46,10 +46,12 @@ $('#ma-notifybutton').click(function(e){
  */
 Elric.submit = function (message, type) {
 	
-	if (type === undefined) type = 'browserdata';
+	if (type === undefined) type = 'data';
+	
+	var packet = {type: type, message: message};
 	
 	if (Elric.connected) {
-		Elric.socket.emit(type, message);
+		Elric.socket.emit('browser', packet);
 	} else {
 		Elric.ioqueue.push({type: type, message: message});
 	}
@@ -84,7 +86,7 @@ Elric.login = function () {
 		type: 'browser'
 	}
 	
-	Elric.submit(auth, 'browserlogin');
+	Elric.submit(auth, 'login');
 }
 
 // Create a connection
