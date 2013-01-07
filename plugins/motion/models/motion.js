@@ -5,8 +5,7 @@ module.exports = function Motion (elric) {
 	var mongoose = elric.mongoose;
 	
 	var identifierValidator = [validate({message: "Identifier should be between 3 and 50 characters"},
-																'len', 3, 50),
-											 validate('isAlphanumeric')];
+																'len', 3, 50)];
 	
 	this.blueprint = {
 		identifier: {
@@ -15,11 +14,21 @@ module.exports = function Motion (elric) {
 			validate: identifierValidator,
 			fieldType: 'String'
 		},
+		client_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			fieldType: 'Select',
+			source: {type: 'model', name: 'client'}
+		},
+		thread: {
+			type: String,
+			required: true,
+			validate: validate('isNumeric'),
+			fieldType: 'String'
+		},
 		host: {
 			type: String,
 			required: true,
-			validate: validate({message: "Host should be between 3 and 200 characters"},
-																'len', 3, 200),
 			fieldType: 'String'
 		},
 		port: {
@@ -32,7 +41,7 @@ module.exports = function Motion (elric) {
 	
 	this.admin = {
 		title: 'Motion Cameras',
-		fields: ['identifier', 'host', 'port']
+		fields: ['identifier', 'client_id', 'thread', 'host', 'port']
 	}
 	
 	/**
