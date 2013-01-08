@@ -112,6 +112,9 @@ module.exports = function (elric) {
 	 */
 	elric.notify = function notify (message, level, origin, payload, destination) {
 		
+		// Also send the message to the logger
+		elric.log.info('Notification: ' + message);
+		
 		var n = elric.models.notification.model;
 		
 		var notification = {

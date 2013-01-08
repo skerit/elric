@@ -2,7 +2,10 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
 module.exports = function (elric) {
-
+	
+	var Client = elric.models.client.model;
+	var ClientCapability = elric.models.clientCapability.model;
+	
 	/**
 	 * Submit something to all connected browsers (websockets)
 	 *
@@ -42,6 +45,9 @@ module.exports = function (elric) {
 	
 		// Address
 		var address = socket.handshake.address;
+		
+		// Submit helper function
+		var submit = function (message, type) {return elric.submit(socket, message, type)};
 	
 		// Store websocket client information in here
 		var instructions = {};
@@ -162,37 +168,54 @@ module.exports = function (elric) {
 			// Handle client login
 			if (type == 'login') {
 				
+				// Disable bubbling, we need to do asynchronous lookups
+				bubble = false;
+				
 				var login = data.login;
 				var key = data.key;
 				var capabilities = data.capabilities;
 				
-				var nmessage = util.format('Ip %s on port %d identified as a client',
+				var nmessage = util.format('Ip %s on port %d identified as a client, checking authentication',
 																 address.address,
 																 address.port);
 				
 				elric.log.info(nmessage);
-				elric.notify('Elric client has connected from ' + address.address);
 				
-				// Store the username
-				instructions.username = login;
-				instructions.type = 'client';
-				
-				instructions.client = new elric.classes.ElricClient(instructions);
-				
-				// Send a global event
-				elric.event.emit('clientconnected', instructions.client);
-				
-				var transfercount = 0;
-				var caps = {};
-				
-				for (var capname in elric.capabilities) {
-					transfercount++;
-					caps[capname] = false;
-				}
-				
-				socket.emit('notifyTransfer', {amount: transfercount, capabilities: caps})
-				
-				bubble = false;
+				Client.findOne({name: login, key: key}, function (err, clientItem) {
+					
+					if (clientItem) {
+						
+						elric.notify('Elric client has connected from ' + address.address);
+						
+						// Store the username
+						instructions.username = login;
+						instructions.type = 'client';
+						instructions.id = clientItem._id;
+						
+						instructions.client = new elric.classes.ElricClient(instructions);
+						
+						// Send a global event
+						elric.event.emit('clientconnected', instructions.client);
+						
+						var transfercount = 0;
+						var caps = {};
+						
+						for (var capname in elric.capabilities) {
+							transfercount++;
+							caps[capname] = false;
+						}
+						
+						submit({amount: transfercount, capabilities: caps}, 'notifyTransfer');
+					} else {
+						
+						// No client found with this info, log error
+						elric.log.error(util.format('Could not authenticate ip %s on port %d as a client',
+																 address.address,
+																 address.port));
+						
+					}
+					
+				});
 			}
 			
 			if (bubble && instructions.client) {

@@ -4,6 +4,9 @@ var $ = require('jquery');
 module.exports = function (client) {
 	
 	client.event.on('start', function() {
+		console.log(client.capabilities);
+
+		
 		console.log('Motion is starting after everything has loaded');
 		
 		request({ uri:'http://192.168.1.2:8084' }, function (error, response, body) {
@@ -11,6 +14,7 @@ module.exports = function (client) {
 			
 			console.log($('a', body).text());
 		});
+
 		
 	});
 	

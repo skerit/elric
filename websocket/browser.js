@@ -4,6 +4,7 @@ module.exports = function (elric) {
 	
 	/**
 	 * The Browser Client class
+	 * This is constructed when the login procedure has been completed.
 	 *
 	 * @constructor
 	 *
