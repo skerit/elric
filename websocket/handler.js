@@ -22,6 +22,20 @@ module.exports = function (elric) {
 			if (socket) socket.emit(type, message);
 		}
 	}
+	
+	/**
+	 * Submit something to a websocket client or browser
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.09
+	 * @version  2013.01.09
+	 */
+	elric.submit = function submit (socket, message, type) {
+		
+		if (type === undefined) type = 'message';
+		
+		socket.emit(type, message);
+	}
 
 	// Listen for any IO connection
 	elric.io.sockets.on('connection', function(socket) {
@@ -58,11 +72,12 @@ module.exports = function (elric) {
 			
 			if (instructions.type == 'browser') {
 				elric.event.emit('browserdisconnected', instructions.client);
+				elric.websocket.browser.emit('disconnect');
 			} else if (instructions.type == 'client') {
 				elric.event.emit('clientdisconnected', instructions.client);
+				elric.websocket.client.emit('disconnect');
 			}
 			
-			instructions.client.event.emit('disconnect');
 		});
 		
 		/**
@@ -181,35 +196,9 @@ module.exports = function (elric) {
 			}
 			
 			if (bubble && instructions.client) {
-				elric.websocket.client.emit(type, data, client);
+				elric.websocket.client.emit(type, data, instructions.client);
 				instructions.client.event.emit(type, data);
 			}
-		});
-		
-		// Await the transfer ready signal
-		socket.on('readyForTransfer', function (data) {
-			
-			// Send files to the client
-			for (var capname in elric.capabilities) {
-				
-				var cap = elric.capabilities[capname];
-				
-				var path = './client_files/' + capname + 'ClientFile.js';
-				
-				if (cap.plugin) {
-					path = './plugins/' + cap.plugin + '/client_files/' + capname + 'ClientFile.js';
-				}
-				
-				fs.readFile(path, 'utf-8', function (err, data) {
-					socket.emit('file', {
-							name: capname,
-							data: data,
-							type: 'clientfile'
-						});
-				});
-			}
-			
-			socket.emit('allFilesSent', 'done')
 		});
 		
 		// Listen for messages

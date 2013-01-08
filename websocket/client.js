@@ -1,4 +1,5 @@
 var util = require('util');
+var fs = require('fs');
 
 module.exports = function (elric) {
 	
@@ -12,20 +13,53 @@ module.exports = function (elric) {
 	 */
 	elric.classes.ElricClient = function ElricClient (instructions) {
 		
+		var socket = instructions.socket;
+		
 		this.address = instructions.address;
-		this.socker = instructions.socket;
+		this.socket = instructions.socket;
 		this.type = instructions.type;
 		this.event = instructions.event;
 		this.username = instructions.username;
 		
-		this.on = function(){};
+		// Submit helper function
+		var submit = function (message, type) {return elric.submit(socket, message, type)};
+
+		// Event on helper function
+		this.on = function (event, callback) {return this.event.on(event, callback)};
 		
-		this.event.on('disconnect', function () {
+		// Listen to the disconnect event
+		this.on('disconnect', function () {
 			
 		});
 		
-		this.event.on('test', function (data) {
+		this.on('test', function (data) {
 			console.log(data);
+		});
+		
+		// Await the transfer ready signal
+		this.on('readyForTransfer', function (data) {
+			
+			// Send files to the client
+			for (var capname in elric.capabilities) {
+				
+				var cap = elric.capabilities[capname];
+				
+				var path = './client_files/' + capname + 'ClientFile.js';
+				
+				if (cap.plugin) {
+					path = './plugins/' + cap.plugin + '/client_files/' + capname + 'ClientFile.js';
+				}
+				
+				fs.readFile(path, 'utf-8', function (err, data) {
+					submit({
+							name: capname,
+							data: data,
+							type: 'clientfile'
+						}, 'file');
+				});
+			}
+			
+			submit('done', 'allFilesSent');
 		});
 		
 	}
