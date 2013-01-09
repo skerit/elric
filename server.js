@@ -110,6 +110,12 @@ app.configure(function(){
 	// middleware
 	app.use(function(req, res, next){
 		
+		// Skip authentication if it's a noauth link
+		if (req.originalUrl.substring(0, 8) == "/noauth/") {
+			next();
+			return;
+		}
+		
 		// See if the authentication cookies have been set
 		if (req.cookies.user && req.cookies.pass) {
 			

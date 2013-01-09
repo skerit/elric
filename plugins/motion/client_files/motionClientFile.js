@@ -57,9 +57,44 @@ module.exports = function (client) {
 				disc.ports = ports;
 				submit('discovery', disc);
 			});
-			
 		});
 	});
+	
+	// Listen to the setoption events from the server
+	client.socket.on('setoption', function(packet) {
+		
+		console.log(packet);
+		//this.setOption(threadNr, 'on_motion_detected', 'wget -O - http://' + client.local.server + ':' + client.local.serverport + '/motion/detected/');
+		
+	});
+	
+	// Set on motion detected
+	client.socket.on('set_on_motion_detected', function(packet){
+		thisClient.setOption(packet.thread,
+                         'on_motion_detected',
+                         'wget -O - http://' + client.local.server + ':' + client.local.serverport + '/noauth/motion/detected/' + packet.cameraid);
+	});
+	
+	/**
+	 * Set a camera option
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.09
+	 * @version  2013.01.09
+	 *
+	 * @param    {integer}  threadnr        The camera thread nr
+	 * @param    {string}   option          The option name
+	 * @param    {string}   value           The option value
+	 */
+	this.setOption = function setOption (threadnr, option, value) {
+		
+		var url = location + threadnr + '/config/set?' + option + '=' + encodeURIComponent(value);
+		
+		request({uri: url}, function (error, response, body) {
+			// See if it's actually done
+		});
+		
+	}
 	
 	/**
 	 * Get the thread count & camera count from Motion
@@ -93,9 +128,7 @@ module.exports = function (client) {
 			}
 		});
 	}
-	
-	//http://192.168.1.2:8084/1/config/get?query=stream_port
-	
+
 	/**
 	 * Get the video stream port of a certain thread
 	 *
@@ -108,7 +141,7 @@ module.exports = function (client) {
 	 */
 	this.getThreadPort = function (threadnr, callback) {
 		
-		var url = location + threadnr + '/config/get?query=stream_port'
+		var url = location + threadnr + '/config/get?query=stream_port';
 		
 		// Request the main Motion page, with threadcount info
 		request({uri: url}, function (error, response, body) {
