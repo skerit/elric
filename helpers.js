@@ -33,7 +33,7 @@ module.exports = function (elric) {
 	elric.getWebsocketFilter = function (filter) {
 		
 		if (elric.websocket.filter[filter] === undefined) {
-			elric.websocket.filter[filter] = new EventEmitter(); 
+			elric.websocket.filter[filter] = new elric.classes.EventEmitter(); 
 		}
 		
 		return elric.websocket.filter[filter];

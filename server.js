@@ -43,6 +43,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
 var elric = {};
 elric.isFirstRun = true; // Initial first run setting
 elric.classes = {};
+elric.classes.EventEmitter = EventEmitter;
 elric.routes = routes;
 elric.mongoose = mongoose;  // Mongoose DB wrapper
 elric.db = db;              // Direct DB access
