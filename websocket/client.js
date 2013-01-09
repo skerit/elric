@@ -30,7 +30,7 @@ module.exports = function (elric) {
 		this.id = instructions.id;
 		
 		// Submit helper function
-		var submit = function (message, type) {return elric.submit(socket, message, type)};
+		var submit = function (type, data) {return elric.submit(socket, type, data)};
 		this.submit = submit;
 		
 		// Event on helper function
@@ -76,15 +76,15 @@ module.exports = function (elric) {
 				}
 				
 				fs.readFile(path, 'utf-8', function (err, data) {
-					submit({
+					submit('file', {
 							name: capname,
 							data: data,
 							type: 'clientfile'
-						}, 'file');
+						});
 				});
 			}
 			
-			submit('done', 'allFilesSent');
+			submit('allFilesSent');
 		});
 		
 		/**
@@ -132,7 +132,7 @@ module.exports = function (elric) {
 			}
 			
 			// Finally: send all capability settings to the client
-			submit(settings, 'settings');
+			submit('settings', settings);
 		});
 	}
 }

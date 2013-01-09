@@ -9,10 +9,10 @@ var Motion = function Motion (elric) {
 	var clients = elric.websocket.client;
 	
 	// The 'filter' event, only motion events go here
-	var motion = elric.getWebsocketFilter('motion');
+	var motion = elric.getEventspace('motion');
 
 	// Listen to motion discovery events
-	motion.on('discovery', function(message, client) {
+	motion.on('discovery', function(packet, client) {
 		console.log(message);
 	});
 	

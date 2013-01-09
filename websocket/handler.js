@@ -13,7 +13,7 @@ module.exports = function (elric) {
 	 * @since    2013.01.05
 	 * @version  2013.01.05
 	 */
-	elric.submitAllBrowsers = function submitAllBrowsers (message, type) {
+	elric.submitAllBrowsers = function submitAllBrowsers (type, data) {
 		
 		if (type === undefined) type = 'message';
 		
@@ -22,7 +22,7 @@ module.exports = function (elric) {
 			var socket = elric.activeUsers[login].socket;
 			
 			// If the socket is still connected
-			if (socket) socket.emit(type, message);
+			if (socket) socket.emit(type, data);
 		}
 	}
 	
@@ -33,11 +33,11 @@ module.exports = function (elric) {
 	 * @since    2013.01.09
 	 * @version  2013.01.09
 	 */
-	elric.submit = function submit (socket, message, type) {
+	elric.submit = function submit (socket, type, data) {
 		
 		if (type === undefined) type = 'message';
 		
-		socket.emit(type, message);
+		socket.emit(type, data);
 	}
 
 	// Listen for any IO connection
@@ -47,7 +47,7 @@ module.exports = function (elric) {
 		var address = socket.handshake.address;
 		
 		// Submit helper function
-		var submit = function (message, type) {return elric.submit(socket, message, type)};
+		var submit = function (type, data) {return elric.submit(socket, type, data)};
 	
 		// Store websocket client information in here
 		var instructions = {};
@@ -142,10 +142,10 @@ module.exports = function (elric) {
 			if (bubble && instructions.client) {
 				
 				// Transmit over the global event
-				elric.websocket.browser.emit(type, data, instructions.client);
+				elric.websocket.browser.emit(type, packet, instructions.client);
 				
 				// Transmit to the client object
-				instructions.client.event.emit(type, data);
+				instructions.client.event.emit(type, packet);
 			}
 		});
 		
@@ -159,6 +159,8 @@ module.exports = function (elric) {
 		 */
 		socket.on('client', function (packet) {
 			
+			elric.log.debug('Received packet "' + packet.type + '" from ' + address.address);
+
 			var type = packet.type;
 			var data = packet.message;
 			var filter = packet.filter;
@@ -206,7 +208,7 @@ module.exports = function (elric) {
 							caps[capname] = false;
 						}
 						
-						submit({amount: transfercount, capabilities: caps}, 'notifyTransfer');
+						submit('notifyTransfer', {amount: transfercount, capabilities: caps});
 					} else {
 						
 						// No client found with this info, log error
@@ -223,18 +225,13 @@ module.exports = function (elric) {
 				
 				// If a filter has been given, send it to that too
 				if (filter) {
-					elric.getWebsocketFilter(filter).emit(type, data, instructions.client);
+					elric.getEventspace(filter).emit(type, packet, instructions.client);
 				}
 				
-				elric.websocket.client.emit(type, data, instructions.client);
-				instructions.client.event.emit(type, data);
+				elric.websocket.client.emit(type, packet, instructions.client);
+				instructions.client.event.emit(type, packet);
 			}
 		});
 		
-		// Listen for messages
-		socket.on('data', function (data) {
-			console.log(data);
-		});
 	});
-
 }

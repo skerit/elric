@@ -21,7 +21,7 @@ module.exports = function (elric) {
 	}
 	
 	/**
-	 * Filter socket events
+	 * Get a namespace event emitter
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.09
@@ -30,7 +30,7 @@ module.exports = function (elric) {
 	 * @param    {string}   filter      The filter name
 	 * @returns  {EventEmitter}   An event emitter
 	 */
-	elric.getWebsocketFilter = function (filter) {
+	elric.getEventspace = function (filter) {
 		
 		if (elric.websocket.filter[filter] === undefined) {
 			elric.websocket.filter[filter] = new elric.classes.EventEmitter(); 
@@ -150,7 +150,7 @@ module.exports = function (elric) {
 		
 		var newrecord = new n(notification);
 		
-		elric.submitAllBrowsers(notification, 'notify');
+		elric.submitAllBrowsers('notify', notification);
 		
 		newrecord.save();
 	}
@@ -230,14 +230,26 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.27
-	 * @version  2013.01.06
+	 * @version  2013.01.09
 	 */
 	elric.loadPlugin = function loadPlugin (pluginName) {
 		
 		elric.log.debug('Initializing Plugin "' + pluginName + '"');
 		
-		var plugin = require('./plugins/' + pluginName + '/' + pluginName + 'Plugin');
-		elric.plugins[pluginName] = new plugin(elric);
+		var filepath = './plugins/' + pluginName + '/' + pluginName + 'Plugin';
+		
+		try {
+			var plugin = require(filepath);
+		} catch (err) {
+			elric.log.error('Error loading file: "' + filepath + '"');
+		}
+		
+		try {
+			elric.plugins[pluginName] = new plugin(elric);
+		} catch (err) {
+			elric.log.error('Error initializing plugin "' + pluginName + '": ' + err.message);
+		}
+		
 	}
 	
 	/**

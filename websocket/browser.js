@@ -22,7 +22,7 @@ module.exports = function (elric) {
 		this.username = instructions.username;
 		
 		// Submit helper function
-		var submit = function (message, type) {return elric.submit(socket, message, type)};
+		var submit = function (type, data) {return elric.submit(socket, type, data)};
 
 		// Event on helper function
 		this.on = function (event, callback) {return this.event.on(event, callback)};
