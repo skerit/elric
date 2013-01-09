@@ -75,6 +75,7 @@ elric.io = io.listen(elric.server);
 elric.websocket = {};
 elric.websocket.client = new EventEmitter();
 elric.websocket.browser = new EventEmitter();
+elric.websocket.filter = {};
 
 // Use IO's logger
 elric.log = elric.io.log;

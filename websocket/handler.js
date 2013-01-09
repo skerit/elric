@@ -161,6 +161,7 @@ module.exports = function (elric) {
 			
 			var type = packet.type;
 			var data = packet.message;
+			var filter = packet.filter;
 			
 			// Send the data to the browser event handler
 			var bubble = true;
@@ -219,6 +220,12 @@ module.exports = function (elric) {
 			}
 			
 			if (bubble && instructions.client) {
+				
+				// If a filter has been given, send it to that too
+				if (filter) {
+					elric.getWebsocketFilter(filter).emit(type, data, instructions.client);
+				}
+				
 				elric.websocket.client.emit(type, data, instructions.client);
 				instructions.client.event.emit(type, data);
 			}

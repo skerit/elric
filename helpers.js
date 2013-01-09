@@ -21,6 +21,25 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Filter socket events
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.09
+	 * @version  2013.01.09
+	 *
+	 * @param    {string}   filter      The filter name
+	 * @returns  {EventEmitter}   An event emitter
+	 */
+	elric.getWebsocketFilter = function (filter) {
+		
+		if (elric.websocket.filter[filter] === undefined) {
+			elric.websocket.filter[filter] = new EventEmitter(); 
+		}
+		
+		return elric.websocket.filter[filter];
+	}
+	
+	/**
 	 * Save a database record
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
