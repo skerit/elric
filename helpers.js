@@ -257,17 +257,19 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.27
-	 * @version  2013.01.05
+	 * @version  2013.01.11
 	 */
 	elric.loadModel = function loadModel (modelName, pluginName) {
 		
-		var path = './models/' + modelName;
+		var path = 'models/' + modelName + 'Model';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
-			path = './plugins/' + pluginName + '/models/' + modelName;
+			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
+		
+		path = './' + path;
 		
 		elric.log.debug('Initializing Model "' + modelName + '"' + debugm);
 		

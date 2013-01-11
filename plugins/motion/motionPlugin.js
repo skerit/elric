@@ -1,7 +1,7 @@
 var Motion = function Motion (elric) {
 
 	// Load models
-	elric.loadModel('motion', 'motion');
+	elric.loadModel('motionCamera', 'motion');
 	elric.loadElementType('camera', 'motion');
 	elric.loadCapability('motion', 'motion');
 	
@@ -12,12 +12,12 @@ var Motion = function Motion (elric) {
 	var motion = elric.getEventspace('motion');
 	
 	// The Motion model
-	var M = elric.models.motion.model;
+	var M = elric.models.motioncamera.model;
 	
 	// Route where motion detection arrives (very basic)
 	elric.app.get('/noauth/motion/detected/:cameraid', function (req, res) {
 		console.log('Motion detected on ' + req.params.cameraid);
-		 res.end('Motion received');
+		res.end('Motion received');
 		//console.log(req);
 	});
 
