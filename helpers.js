@@ -160,6 +160,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.05
+	 * @version  2013.01.13
 	 *
 	 * @param    {object}   blueprint   The schema blueprint
 	 * 
@@ -167,11 +168,46 @@ module.exports = function (elric) {
 	 */
 	elric.Schema = function Schema (blueprint) {
 		
+		// Add the created & updated field
+		// Created is strictly speaking not needed (_id)
 		blueprint.created = {type: Date, default: Date.now, fieldType: 'Date'}
 		blueprint.updated = {type: Date, default: Date.now, fieldType: 'Date'}
 		
-		var schema = elric.mongoose.Schema(blueprint);
+		// Create a blueprint clone, one we can edit
+		var blueprintClone = $.extend({}, blueprint);
 		
+		// Create an object to store the temporary schemas in
+		var tempSchemas = {};
+		
+		// See if any of the entries are arrays
+		for (var fieldname in blueprintClone) {
+			var e = blueprintClone[fieldname];
+			
+			if (e.array) {
+				var ns = {};
+				ns[fieldname] = {};
+				
+				// Now go over every entry in this field
+				for (var option in e) {
+	
+					// Add those options to a temporary blueprint,
+					// but only if it's not the array option
+					if (option !== 'array'){
+						ns[fieldname][option] = e[option];
+					}
+				}
+				
+				// Create the temporary array out of the temporary blueprint
+				tempSchemas[fieldname] = elric.mongoose.Schema(ns);
+				
+				// Overwrite the entry in the clone
+				blueprintClone[fieldname] = [tempSchemas[fieldname]];
+			}
+		}
+		console.log(blueprintClone);
+		var schema = elric.mongoose.Schema(blueprintClone);
+		
+		// Set the "updated" field to this timestamp before saving
 		schema.pre('save', function(next){
 			this.updated = Date.now();
 			next();
