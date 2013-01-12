@@ -14,11 +14,67 @@ var Motion = function Motion (elric) {
 	// The Motion model
 	var M = elric.models.motionCamera.model;
 	
+	// The movement event model
+	var ME = elric.models.movementEvent.model;
+	
+	// Store camera specific stuff in here
+	var storage = {};
+	
 	// Route where motion detection arrives (very basic)
-	elric.app.get('/noauth/motion/detected/:cameraid', function (req, res) {
-		console.log('Motion detected on ' + req.params.cameraid);
+	elric.app.post('/noauth/motion/begin/:cameraid', function (req, res) {
+		
+		// Cameraid is part of the request url
+		var cameraid = req.params.cameraid;
+		
+		// Number of pixels detected as Motion
+		// If labelling is enabled the number is the number of
+		// pixels in the largest labelled motion area. 
+		var pixels = req.body.pixels;
+		
+		// Coordinates in pixels of the center point of motion.
+		// Origin is upper left corner. 
+		var x = req.body.x;
+		var y = req.body.y;
+		
+		// Noise leven
+		var noise = req.body.noise;
+		
+		// The number of seconds since the Epoch, i.e.,
+		// since 1970-01-01 00:00:00 UTC. 
+		var epoch = req.body.epoch;
+		
+		// The event number, as defined by motion
+		// Scope is per camera, resets when motion restarts!
+		var event = req.body.event;
+		
+		// Create a new movementEvent record
+		var record = new ME({
+			begin: new Date(epoch*1000).toISOString(),
+			finished: false,
+			source_type: 'motion',
+			source_id: cameraid,
+			room_id: null,
+			room_element_id: null
+		});
+	
+		record.save();
+		
+		storage[cameraid].eventid = record._id;
+		storage[cameraid].eventnr = event;
+	
+		console.log('Motion event detected on ' + req.params.cameraid);
 		res.end('Motion received');
-		//console.log(req);
+
+	});
+	
+	elric.app.post('/noauth/motion/ongoing/:cameraid', function (req, res) {
+		console.log('Ongoing motion detected on ' + req.params.cameraid);
+		res.end('Motion received');
+	});
+	
+	elric.app.post('/noauth/motion/end/:cameraid', function (req, res) {
+		console.log('Motion event ended on ' + req.params.cameraid);
+		res.end('Motion received');
 	});
 
 	// Listen to motion discovery events
@@ -44,6 +100,9 @@ var Motion = function Motion (elric) {
 				// Save the camera
 				camera.save();
 				
+				// Store the id in the storage
+				storage[camera._id] = {};
+				
 				// Make sure the client sets the correct motion detection url callback
 				setMotionDetect(client, camera.thread, camera._id);
 			});
@@ -68,7 +127,7 @@ var Motion = function Motion (elric) {
 	}
 	
 	/**
-	 * Set the camera on_motion_detected option
+	 * Set the camera detection options
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.10
@@ -79,7 +138,7 @@ var Motion = function Motion (elric) {
 	 * @param    {string}   cameraid        The camera id in the db
 	 */
 	var setMotionDetect = function setMotionDetect (client, threadnr, cameraid) {
-		client.submit('set_on_motion_detected', {thread: threadnr, cameraid: cameraid});
+		client.submit('set_detection', {thread: threadnr, cameraid: cameraid});
 	}
 	
 	/**

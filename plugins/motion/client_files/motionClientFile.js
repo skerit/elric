@@ -68,11 +68,36 @@ module.exports = function (client) {
 		
 	});
 	
-	// Set on motion detected
-	client.socket.on('set_on_motion_detected', function(packet){
+	// Set detection options
+	client.socket.on('set_detection', function(packet){
+		
+		// Base url for callbacks
+		var base = 'http://' + client.local.server + ':' + client.local.serverport + '/noauth/motion/';
+		
+		// Begin the wget command (output to nothing)
+		var wget = 'wget -O - ';
+		
+		// Add post data to wget (motion "conversion specifiers")
+		wget += "--post-data 'pixels=%D&x=%K&y=%l&noise=%N&epoch=%s&event=%v'";
+		
+		// Add the base url
+		wget += ' ' + base;
+		
+		// When an event starts (first movement)
+		thisClient.setOption(packet.thread,
+                         'on_event_start',
+                         wget + 'begin/' + packet.cameraid);
+		
+		// On motion (every movement)
 		thisClient.setOption(packet.thread,
                          'on_motion_detected',
-                         'wget -O - http://' + client.local.server + ':' + client.local.serverport + '/noauth/motion/detected/' + packet.cameraid);
+                         wget + 'ongoing/' + packet.cameraid);
+		
+		// On event stop (last movement)
+		thisClient.setOption(packet.thread,
+                         'on_event_end',
+                         wget + 'end/' + packet.cameraid);
+		
 	});
 	
 	/**

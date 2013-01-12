@@ -4,9 +4,6 @@ module.exports = function Config (elric) {
 	require('./element_types/element_type')(elric);
 	require('./capabilities/capability')(elric);
 
-	// Load plugins
-	elric.loadPlugin('motion');
-	
 	// Load models
 	elric.loadModel('user');
 	elric.loadModel('room');
@@ -14,6 +11,10 @@ module.exports = function Config (elric) {
 	elric.loadModel('notification');
 	elric.loadModel('client');
 	elric.loadModel('clientCapability');
+	elric.loadModel('movementEvent');
+	
+	// Load plugins
+	elric.loadPlugin('motion');
 	
 	// Load element types
 	elric.loadElementType('wall');
