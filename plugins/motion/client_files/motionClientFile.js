@@ -75,28 +75,44 @@ module.exports = function (client) {
 		var base = 'http://' + client.local.server + ':' + client.local.serverport + '/noauth/motion/';
 		
 		// Begin the wget command (output to nothing)
-		var wget = 'wget -O - ';
+		// (-b = go to background, -O - sets output to standard output)
+		var wBegin = 'wget -b -O - ';
 		
 		// Add post data to wget (motion "conversion specifiers")
-		wget += "--post-data 'pixels=%D&x=%K&y=%l&noise=%N&epoch=%s&event=%v'";
+		wEvent = "--post-data 'pixels=%D&x=%K&y=%l&noise=%N&epoch=%s&event=%v&file=0'";
 		
-		// Add the base url
-		wget += ' ' + base;
+		// Add post data to wget file events
+		wFileEvent = "--post-data 'pixels=%D&x=%K&y=%l&noise=%N&epoch=%s&event=%v&file=%f'";
+		
+		// The wget command for events
+		var wgetEvent = wBegin + wEvent + ' ' + base;
+		
+		// The wget command for file events
+		var wgetFileEvent = wBegin + wFileEvent + ' ' + base;
 		
 		// When an event starts (first movement)
-		thisClient.setOption(packet.thread,
-                         'on_event_start',
-                         wget + 'begin/' + packet.cameraid);
+		thisClient.setOption(packet.thread, 'on_event_start',
+                         wgetEvent + 'begin/' + packet.cameraid);
 		
 		// On motion (every movement)
-		thisClient.setOption(packet.thread,
-                         'on_motion_detected',
-                         wget + 'ongoing/' + packet.cameraid);
+		thisClient.setOption(packet.thread, 'on_motion_detected',
+                         wgetEvent + 'ongoing/' + packet.cameraid);
 		
 		// On event stop (last movement)
-		thisClient.setOption(packet.thread,
-                         'on_event_end',
-                         wget + 'end/' + packet.cameraid);
+		thisClient.setOption(packet.thread, 'on_event_end',
+                         wgetEvent + 'end/' + packet.cameraid);
+		
+		// On creating a video
+		thisClient.setOption(packet.thread, 'on_movie_start',
+                         wgetFileEvent + 'moviestart/' + packet.cameraid);
+		
+		// On finishing a video
+		thisClient.setOption(packet.thread, 'on_movie_end',
+                         wgetFileEvent + 'movieend/' + packet.cameraid);
+		
+		// On saving a picture
+		thisClient.setOption(packet.thread, 'on_picture_save',
+                         wgetFileEvent + 'picturesave/' + packet.cameraid);
 		
 	});
 	

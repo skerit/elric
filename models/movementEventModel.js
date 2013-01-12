@@ -29,7 +29,7 @@ module.exports = function MovementEvent (elric) {
 			fieldType: 'Checkbox'
 		},
 		// Where did this movement event come from?
-		// EG: motion, x10, ...
+		// Capability, eg: motion, x10, ...
 		source_type: {
 			type: String,
 			fieldType: 'String'
@@ -50,6 +50,16 @@ module.exports = function MovementEvent (elric) {
 			type: mongoose.Schema.Types.ObjectId,
 			fieldType: 'Select',
 			source: {type: 'model', name: 'roomElement'}
+		},
+		// Is there a movie file?
+		movie: {
+			type: String,
+			fieldType: 'Filepath'
+		},
+		pictures: {
+			type: String,
+			array: true,
+			fieldType: 'Filepath'
 		}
 	}
 	

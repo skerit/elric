@@ -20,7 +20,13 @@ var Motion = function Motion (elric) {
 	// Store camera specific stuff in here
 	var storage = {};
 	
-	// Route where motion detection arrives (very basic)
+	/**
+	 * A motion event begins
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.11
+	 * @version  2013.01.11
+	 */
 	elric.app.post('/noauth/motion/begin/:cameraid', function (req, res) {
 		
 		// Cameraid is part of the request url
@@ -67,13 +73,63 @@ var Motion = function Motion (elric) {
 
 	});
 	
+	/**
+	 * Every movement in a motion event
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.11
+	 * @version  2013.01.11
+	 */
 	elric.app.post('/noauth/motion/ongoing/:cameraid', function (req, res) {
 		console.log('Ongoing motion detected on ' + req.params.cameraid);
 		res.end('Motion received');
 	});
 	
+	/**
+	 * A motion event has ended
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.11
+	 * @version  2013.01.11
+	 */
 	elric.app.post('/noauth/motion/end/:cameraid', function (req, res) {
 		console.log('Motion event ended on ' + req.params.cameraid);
+		res.end('Motion received');
+	});
+	
+	/**
+	 * A movie file has been created (and is being written to as we speak)
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.13
+	 * @version  2013.01.13
+	 */
+	elric.app.post('/noauth/motion/moviestart/:cameraid', function (req, res) {
+		
+		var filepath = req.body.file;
+		console.log(req.body);
+		res.end('Motion received');
+	});
+	
+	/**
+	 * A movie file has been finished
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.13
+	 * @version  2013.01.13
+	 */
+	elric.app.post('/noauth/motion/movieend/:cameraid', function (req, res) {
+		res.end('Motion received');
+	});
+	
+	/**
+	 * A picture file has been saved
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.13
+	 * @version  2013.01.13
+	 */
+	elric.app.post('/noauth/motion/picturesave/:cameraid', function (req, res) {
 		res.end('Motion received');
 	});
 
