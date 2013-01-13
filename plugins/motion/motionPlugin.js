@@ -149,7 +149,8 @@ var Motion = function Motion (elric) {
 	});
 	
 	/**
-	 * A picture file has been saved
+	 * Motion has created a picture file of a frame.
+	 * Store it on the server.
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.13
@@ -170,30 +171,37 @@ var Motion = function Motion (elric) {
 		// Increase the picture counter
 		cs.counter++;
 		
+		// Convert the epoch to a date
+		var eD = new Date(req.body.epoch * 1000);
+		
+		// Construct the filename
 		var filename = cs.eventid + '-' + req.body.epoch + '-' + String('00000'+cs.counter).slice(-5) + '.jpg';
+		
+		elric.getDirectory('motion/frames/', eD, function (err, dirpath) {
 
-		// Move the file from the client to the server
-		elric.moveFromClient(clientsocket,
-												 filepath,
-												 elric.local.storage + '/' + filename,
-												 function (err) {
-			
-			if (err) {
-				elric.log.error('Error moving file from client!');
-				console.log(err);
-			} else {
-				ME.update({_id: cs.eventid},
-		          {$push: { 'pictures' : elric.local.storage + '/' + filename }},
-							{upsert:true}, function(err, data) {
-								
-								if (err) {
-									elric.log.error('Error updating motion event!');
-									console.log(err);
-								}
-				});
-			}
-			
+			// Move the file from the client to the server
+			elric.moveFromClient(clientsocket,
+													 filepath,
+													 dirpath + filename,
+													 function (err) {
+				
+				if (err) {
+					elric.log.error('Error moving file from client!');
+					console.log(err);
+				} else {
+					ME.update({_id: cs.eventid},
+								{$push: { 'pictures' : dirpath + filename }},
+								{upsert:true}, function(err, data) {
+									
+									if (err) {
+										elric.log.error('Error updating motion event!');
+										console.log(err);
+									}
+					});
+				}
+			});
 		});
+
 	});
 
 	// Listen to motion discovery events

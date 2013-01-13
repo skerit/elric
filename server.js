@@ -74,7 +74,9 @@ elric.memobjects = {};
 elric.memobjects.elementTypes = elric.elementTypes;
 elric.memobjects.capabilities = elric.capabilities;
 
+elric.temp = {};
 elric.movecallbacks = {};
+elric.temp.dirs = {}; // Store if a directory exists in here
 
 elric.admin = {};
 elric.adminArray = [];

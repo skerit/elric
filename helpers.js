@@ -21,6 +21,63 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Get / create a directory
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.13
+	 * @version  2013.01.13
+	 *
+	 * @param    {string}   path          The path we want to create
+	 * @param    {object}   appenddate    The date object, if we want to add time dirs
+	 * @param    {function} callback
+	 */
+	elric.getDirectory = function (path, appenddate, callback) {
+
+		var timedir = '';
+		var basedir = '';
+		
+		if (appenddate) {
+			
+			var eD = appenddate;
+			
+			// Get a padded month
+			var month = String('00'+(eD.getMonth()+1)).slice(-2);
+		
+			// Construct the time portion of the directory
+			timedir = eD.getFullYear() + '/' + month + '-' + eD.getDate();
+		}
+		
+		// If the path is absolute, do not prepend the local storage path
+		if (path.charAt(0) != '/') {
+			basedir = elric.local.storage + '/';
+		}
+		
+		basedir += path + '/' + timedir + '/';
+		
+		basedir = basedir.replace(/\/\//g,'/').replace(/\/\//g,'/');
+		
+		// If the dir hasn't been stored in our temp object, check it
+		if (elric.temp.dirs[basedir] === undefined) {
+		
+			elric.tools.mkdirp(basedir, function (err) {
+				if (callback) {
+					if (err) {
+						callback(err, false);
+					} else {
+						callback(false, basedir);
+					}
+				}
+				
+				if (!err) elric.temp.dirs[basedir] = true;
+			});
+		} else {
+			
+			// We've already created it, call the callback directly
+			if (callback) callback(false, basedir);
+		}
+	}
+	
+	/**
 	 * Move 2 files
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
