@@ -21,6 +21,7 @@ var randomstring = require('randomstring');
 var fs = require('fs');
 var scp = require('scp');
 var mv = require('mv');
+var base64 = require('base64js');
 
 /**
  * Our own modules
@@ -56,6 +57,7 @@ elric.tools = {};
 elric.tools.scp = scp;
 elric.tools.fs = fs;
 elric.tools.mv = mv;
+elric.tools.base64 = base64;
 
 elric.plugins = {};
 elric.models = {};
