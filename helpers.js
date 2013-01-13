@@ -21,6 +21,97 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Move 2 files
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.13
+	 * @version  2013.01.13
+	 *
+	 * @param    {object}   source        The source object
+	 * @param    {object}   destination   The destination object
+	 * @param    {function} callback
+	 */
+	elric.moveFile = function moveFile (source, destination, callback) {
+		
+		/**
+		 * File packet structure:
+		 * type: base64 = ready for decoding
+		 *       path = ready for encoding or moving
+		 *       client = send command to client first!
+		 *       server
+		 * data: the base64 string
+		 * path: the path, if it exists
+		 * socket: destination or source socket
+		 */
+		
+		if (source.type == 'base64') {
+			if (destination.type == 'path') {
+				// Decode the base64 data to the destination
+				elric.tools.base64.decode(source.data, destination.path, function (err) {
+					
+					if (err) elric.log.error('File could not be saved to ' + destination.path);
+					
+					if (callback) callback(err);
+				});
+			}
+		} else if (source.type == 'path') {
+			
+			// Send a source file to a destination socket by base64 encoding it
+			if (destination.type == 'base64') {
+				elric.tools.base64.encode(source.path, function (err, base64string) {
+					
+					if (err) {
+						elric.log.error('Error encoding ' + source.path + ' to base64 string');
+					} else if (destination.socket) {
+						destination.socket.emit('moveFile', base64string, destination.path);
+					}
+					
+					if (callback) callback(err);
+				});
+			}
+		} else if (source.type == 'client') {
+			
+			// Send a request to the client first for the move
+			if (source.socket) {
+			
+				// Store the callback in a temporary variable
+				if (destination.id === undefined && callback) {
+					destination.id = elric.randomstring();
+					elric.movecallbacks[destination.id] = callback;
+				}
+				
+				source.socket.emit('requestFile', source.path, destination);
+			} else {
+				if (callback) callback({error: 'No source socket'});
+			}
+		}
+	}
+	
+	/**
+	 * Initiate a file transfer from a client to the server
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.13
+	 * @version  2013.01.13
+	 *
+	 * @param    {object}    clientsocket    The socket of the client
+	 * @param    {string}    sourcepath      The path on the client
+	 * @param    {string}    destination     The path on the server
+	 * @param    {function}  callback
+	 */
+	elric.moveFromClient = function moveFromClient (clientsocket,
+																									sourcepath,
+																									destination,
+																									callback) {
+		
+		elric.moveFile({type: 'client', path: sourcepath, socket: clientsocket},
+									 {type: 'server', path: destination},
+									 callback);
+		
+	}
+	
+	
+	/**
 	 * Get a namespace event emitter
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -30,7 +121,7 @@ module.exports = function (elric) {
 	 * @param    {string}   filter      The filter name
 	 * @returns  {EventEmitter}   An event emitter
 	 */
-	elric.getEventspace = function (filter) {
+	elric.getEventspace = function getEventspace (filter) {
 		
 		if (elric.websocket.filter[filter] === undefined) {
 			elric.websocket.filter[filter] = new elric.classes.EventEmitter(); 
@@ -285,7 +376,6 @@ module.exports = function (elric) {
 		} catch (err) {
 			elric.log.error('Error initializing plugin "' + pluginName + '": ' + err.message);
 		}
-		
 	}
 	
 	/**

@@ -19,9 +19,10 @@ var io = require('socket.io');
 var util = require('util');
 var randomstring = require('randomstring');
 var fs = require('fs');
-var scp = require('scp');
+//var scp = require('scp');
 var mv = require('mv');
 var base64 = require('base64js');
+var mkdirp = require('mkdirp');
 
 /**
  * Our own modules
@@ -54,10 +55,15 @@ elric.app = app;
 
 // Store tools in here
 elric.tools = {};
-elric.tools.scp = scp;
+//elric.tools.scp = scp;
+elric.tools.path = path;
 elric.tools.fs = fs;
 elric.tools.mv = mv;
 elric.tools.base64 = base64;
+elric.tools.mkdirp = mkdirp;
+
+// Create a link to the local settings
+elric.local = local;
 
 elric.plugins = {};
 elric.models = {};
@@ -67,6 +73,8 @@ elric.elementTypes = {};
 elric.memobjects = {};
 elric.memobjects.elementTypes = elric.elementTypes;
 elric.memobjects.capabilities = elric.capabilities;
+
+elric.movecallbacks = {};
 
 elric.admin = {};
 elric.adminArray = [];
@@ -200,6 +208,9 @@ require('./client')(elric);
 require('./websocket/handler')(elric);
 require('./websocket/client')(elric);
 require('./websocket/browser')(elric);
+
+// Make sure our storage folder exists
+elric.tools.mkdirp(local.storage);
 
 // This function will initialize the normal routes
 app.initializeRoutes = function() {

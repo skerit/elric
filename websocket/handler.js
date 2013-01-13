@@ -150,12 +150,50 @@ module.exports = function (elric) {
 		});
 		
 		/**
+		 * Handle a direct filemove request
+		 *
+		 * @author   Jelle De Loecker   <jelle@kipdola.be>
+		 * @since    2013.01.13
+		 * @version  2013.01.13
+		 */
+		socket.on('moveFileDirect', function (base64string, destinationpath, callbackid) {
+			
+			elric.log.info('A client is sending us a file we need to save directly');
+			
+			if (base64string) {
+			
+				elric.moveFile({type: 'base64', data: base64string},
+										 {type: 'path', path: destinationpath},
+										 function (err) {
+											
+											// If there was an error, log it
+											if (err) elric.log.error('requestFile error: moveFileDirect failed to save to ' + destinationpath);
+											
+											// See if the callbackid leads to something
+											if (elric.movecallbacks[callbackid] !== undefined) {
+												elric.movecallbacks[callbackid](err);
+												delete elric.movecallbacks[callbackid];
+											}
+											
+										 });
+			} else {
+				elric.log.error('The base64 string was empty! Not saving to ' + destinationpath);
+				
+				if (elric.movecallbacks[callbackid] !== undefined) {
+					elric.movecallbacks[callbackid]({error: 'The base64 string was empty! Not saving to ' + destinationpath});
+					delete elric.movecallbacks[callbackid];
+				}
+				
+			}
+			
+		});
+		
+		/**
 		 * Delegate client data
 		 *
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.07
 		 * @version  2013.01.07
-		 *
 		 */
 		socket.on('client', function (packet) {
 			

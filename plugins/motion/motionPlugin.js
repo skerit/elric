@@ -61,10 +61,16 @@ var Motion = function Motion (elric) {
 			source_type: 'motion',
 			source_id: cameraid,
 			room_id: null,
-			room_element_id: null
+			room_element_id: null,
+			pictures: [],
+			movie: ''
 		});
 	
 		record.save();
+		
+		// This should exist, but just in case:
+		// @todo: Make sure this exists!
+		if (storage[cameraid] === undefined) storage[cameraid] = {};
 		
 		// Create a link to this camera's storage
 		var cs = storage[cameraid];
@@ -72,6 +78,8 @@ var Motion = function Motion (elric) {
 		// Set our current event as active
 		cs.eventid = record._id;
 		cs.eventnr = event;
+		cs.eventrecord = record;
+		cs.counter = 0;
 		
 		// Add this event to the history
 		cs.history[event] = record._id;
@@ -101,12 +109,16 @@ var Motion = function Motion (elric) {
 	 * @version  2013.01.11
 	 */
 	elric.app.post('/noauth/motion/end/:cameraid', function (req, res) {
+		
 		console.log('Motion event ended on ' + req.params.cameraid);
 		res.end('Motion received');
+		
+		var cameraid = req.params.cameraid;
 		
 		// Indicate no event is set anymore
 		storage[cameraid].eventid = false;
 		storage[cameraid].eventnr = false;
+		storage[cameraid].counter = 0;
 		
 	});
 	
@@ -144,7 +156,44 @@ var Motion = function Motion (elric) {
 	 * @version  2013.01.13
 	 */
 	elric.app.post('/noauth/motion/picturesave/:cameraid', function (req, res) {
+		
+		// Close the request
 		res.end('Motion received');
+		
+		var filepath = req.body.file;
+		var cameraid = req.params.cameraid;
+		
+		var cs = storage[cameraid];
+		var record = storage[cameraid].eventrecord;
+		var clientsocket = cs.client.socket;
+		
+		// Increase the picture counter
+		cs.counter++;
+		
+		var filename = cs.eventid + '-' + req.body.epoch + '-' + String('00000'+cs.counter).slice(-5) + '.jpg';
+
+		// Move the file from the client to the server
+		elric.moveFromClient(clientsocket,
+												 filepath,
+												 elric.local.storage + '/' + filename,
+												 function (err) {
+			
+			if (err) {
+				elric.log.error('Error moving file from client!');
+				console.log(err);
+			} else {
+				ME.update({_id: cs.eventid},
+		          {$push: { 'pictures' : elric.local.storage + '/' + filename }},
+							{upsert:true}, function(err, data) {
+								
+								if (err) {
+									elric.log.error('Error updating motion event!');
+									console.log(err);
+								}
+				});
+			}
+			
+		});
 	});
 
 	// Listen to motion discovery events
@@ -171,7 +220,9 @@ var Motion = function Motion (elric) {
 				camera.save();
 				
 				// Store the id in the storage
-				storage[camera._id] = {eventid: false, eventnr: false, history: {}};
+				storage[camera._id] = {eventid: false, eventnr: false, history: {}, client: client};
+				
+				elric.log.info('Camera ' + camera._id + ' storage has been made');
 				
 				// Make sure the client sets the correct motion detection url callback
 				setMotionDetect(client, camera.thread, camera._id);
