@@ -19,6 +19,8 @@ var io = require('socket.io');
 var util = require('util');
 var randomstring = require('randomstring');
 var fs = require('fs');
+var scp = require('scp');
+var mv = require('mv');
 
 /**
  * Our own modules
@@ -48,6 +50,12 @@ elric.routes = routes;
 elric.mongoose = mongoose;  // Mongoose DB wrapper
 elric.db = db;              // Direct DB access
 elric.app = app;
+
+// Store tools in here
+elric.tools = {};
+elric.tools.scp = scp;
+elric.tools.fs = fs;
+elric.tools.mv = mv;
 
 elric.plugins = {};
 elric.models = {};
