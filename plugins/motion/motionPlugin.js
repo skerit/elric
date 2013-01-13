@@ -145,7 +145,55 @@ var Motion = function Motion (elric) {
 	 * @version  2013.01.13
 	 */
 	elric.app.post('/noauth/motion/movieend/:cameraid', function (req, res) {
+		
+		// Close the request
 		res.end('Motion received');
+		
+		var filepath = req.body.file;
+		var cameraid = req.params.cameraid;
+		var eventnr = req.body.event;
+		var cs = storage[cameraid];
+		
+		var eventid = cs.history[eventnr];
+		
+		var record = storage[cameraid].eventrecord;
+		var clientsocket = cs.client.socket;
+
+		// Convert the epoch to a date
+		var eD = new Date(req.body.epoch * 1000);
+		
+		// Get the extension with the dot
+		var extension = filepath.substring(filepath.lastIndexOf('.')); // .replace('.', '');
+		
+		// Construct the filename
+		var filename = eventid + '-' + req.body.epoch + '-' + String('00000'+cs.counter).slice(-5) + extension;
+		
+		// Get the videos directory relative to the local storage folder
+		elric.getDirectory('motion/videos/', eD, function (err, dirpath) {
+
+			// Move the file from the client to the server
+			elric.moveFromClient(clientsocket,
+													 filepath,
+													 dirpath + filename,
+													 function (err) {
+				
+				if (err) {
+					elric.log.error('Error moving video file from client!');
+					console.log(err);
+				} else {
+					ME.update({_id: eventid},
+								{movie: dirpath + filename},
+								{upsert:true}, function(err, data) {
+									
+									if (err) {
+										elric.log.error('Error updating movie field in motion event!');
+										console.log(err);
+									}
+					});
+				}
+			});
+		});
+
 	});
 	
 	/**
@@ -177,6 +225,7 @@ var Motion = function Motion (elric) {
 		// Construct the filename
 		var filename = cs.eventid + '-' + req.body.epoch + '-' + String('00000'+cs.counter).slice(-5) + '.jpg';
 		
+		// Get the frames directory relative to the local storage folder
 		elric.getDirectory('motion/frames/', eD, function (err, dirpath) {
 
 			// Move the file from the client to the server
@@ -186,7 +235,7 @@ var Motion = function Motion (elric) {
 													 function (err) {
 				
 				if (err) {
-					elric.log.error('Error moving file from client!');
+					elric.log.error('Error moving picture frame file from client!');
 					console.log(err);
 				} else {
 					ME.update({_id: cs.eventid},
@@ -194,7 +243,7 @@ var Motion = function Motion (elric) {
 								{upsert:true}, function(err, data) {
 									
 									if (err) {
-										elric.log.error('Error updating motion event!');
+										elric.log.error('Error updating pictures array field in motion event!');
 										console.log(err);
 									}
 					});
