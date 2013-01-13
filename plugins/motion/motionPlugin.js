@@ -17,7 +17,8 @@ var Motion = function Motion (elric) {
 	// The movement event model
 	var ME = elric.models.movementEvent.model;
 	
-	// Store camera specific stuff in here
+	// Every camera gets an entry in this variable
+	// We can store specific stuff in here, like active events
 	var storage = {};
 	
 	/**
@@ -65,12 +66,18 @@ var Motion = function Motion (elric) {
 	
 		record.save();
 		
-		storage[cameraid].eventid = record._id;
-		storage[cameraid].eventnr = event;
-	
+		// Create a link to this camera's storage
+		var cs = storage[cameraid];
+		
+		// Set our current event as active
+		cs.eventid = record._id;
+		cs.eventnr = event;
+		
+		// Add this event to the history
+		cs.history[event] = record._id;
+		
 		console.log('Motion event detected on ' + req.params.cameraid);
 		res.end('Motion received');
-
 	});
 	
 	/**
@@ -87,6 +94,7 @@ var Motion = function Motion (elric) {
 	
 	/**
 	 * A motion event has ended
+	 * Note: This can happen BEFORE a movie ends!
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.11
@@ -95,6 +103,11 @@ var Motion = function Motion (elric) {
 	elric.app.post('/noauth/motion/end/:cameraid', function (req, res) {
 		console.log('Motion event ended on ' + req.params.cameraid);
 		res.end('Motion received');
+		
+		// Indicate no event is set anymore
+		storage[cameraid].eventid = false;
+		storage[cameraid].eventnr = false;
+		
 	});
 	
 	/**
@@ -113,6 +126,7 @@ var Motion = function Motion (elric) {
 	
 	/**
 	 * A movie file has been finished
+	 * Note: This can happen AFTER an event has ended!
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.13
@@ -157,7 +171,7 @@ var Motion = function Motion (elric) {
 				camera.save();
 				
 				// Store the id in the storage
-				storage[camera._id] = {};
+				storage[camera._id] = {eventid: false, eventnr: false, history: {}};
 				
 				// Make sure the client sets the correct motion detection url callback
 				setMotionDetect(client, camera.thread, camera._id);

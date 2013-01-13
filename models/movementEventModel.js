@@ -56,6 +56,7 @@ module.exports = function MovementEvent (elric) {
 			type: String,
 			fieldType: 'Filepath'
 		},
+		// Does this event have pictures?
 		pictures: {
 			type: String,
 			array: true,
