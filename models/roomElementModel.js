@@ -74,8 +74,8 @@ module.exports = function RoomElement (elric) {
 
 	this.schema = elric.Schema(this.blueprint);
 	
-	this.model = mongoose.model('RoomElement', this.schema);
-	
+	this.model = elric.Model('roomElement', this.schema, true);
+
 	// Create the update routes
 	elric.app.post('/roomelement/updates', function (req, res) {
 		

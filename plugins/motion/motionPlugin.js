@@ -30,6 +30,9 @@ var Motion = function Motion (elric) {
 	 */
 	elric.app.post('/noauth/motion/begin/:cameraid', function (req, res) {
 		
+		// End the request
+		res.end('Motion received');
+		
 		// Cameraid is part of the request url
 		var cameraid = req.params.cameraid;
 		
@@ -85,7 +88,6 @@ var Motion = function Motion (elric) {
 		cs.history[event] = record._id;
 		
 		console.log('Motion event detected on ' + req.params.cameraid);
-		res.end('Motion received');
 	});
 	
 	/**
@@ -166,10 +168,18 @@ var Motion = function Motion (elric) {
 		var extension = filepath.substring(filepath.lastIndexOf('.')); // .replace('.', '');
 		
 		// Construct the filename
-		var filename = eventid + '-' + req.body.epoch + '-' + String('00000'+cs.counter).slice(-5) + extension;
+		var filename = eventid + '-' + req.body.epoch + extension;
+		var destinationdir = 'motion/videos/' + cameraid + '/';
+		
+		// If the movie is a timelapse, store it somewhere else
+		if (filepath.indexOf('timelapse') > -1) {
+			filename = 'timelapse-' + eD.getFullYear() + '-' + (eD.getMonth()+1) + eD.getDate() + extension;
+			destinationdir = 'motion/timelapses/' + cameraid + '/' + eD.getFullYear() + '/' + (eD.getMonth()+1) + '/';
+			eD = false; // Make sure the getDirectory function doesn't add any more date subfolders
+		}
 		
 		// Get the videos directory relative to the local storage folder
-		elric.getDirectory('motion/videos/', eD, function (err, dirpath) {
+		elric.getDirectory(destinationdir, eD, function (err, dirpath) {
 
 			// Move the file from the client to the server
 			elric.moveFromClient(clientsocket,

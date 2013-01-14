@@ -304,6 +304,75 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Cache an entire model recordset
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.14
+	 * @version  2013.01.14
+	 *
+	 * @param    {string}   name        The model name
+	 */
+	elric.cacheRecordset = function cacheRecordset (name, model) {
+		
+		// If we want to cache this, find all records and store them
+		elric.temp.models[name] = {};
+		
+		// Create a shortlink to the temp object
+		var t = elric.temp.models[name];
+
+		// Find all records in this model
+		model.find({}, function (err, items) {
+			
+			// Store every item in the temp var
+			for (var index in items) {
+				
+				var item = items[index];
+				
+				// Store the item in the cache object
+				// under its _id
+				t[item._id] = item;
+			}
+		});
+	}
+	
+	/**
+	 * Create a new Mongoose model
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.14
+	 * @version  2013.01.14
+	 *
+	 * @param    {string}   name        The model name
+	 * @param    {object}   schema      The schema blueprint
+	 * 
+	 * @returns  {object}   A mongoose model
+	 */
+	elric.Model = function Model (name, schema, cache) {
+		
+		if (cache === undefined) cache = false;
+		
+		var myObject = {};
+		myObject.model = {};
+		
+		// If cache is true, tell the schema to regenerate the cache upon save
+		if (cache) {
+			schema.post('save', function (doc) {
+				// Recreate the entire recordset
+				// This is overkill, maybe we can just use the doc given?
+				elric.cacheRecordset(name, myObject.model);
+			})
+		}
+		
+		// Create the model
+		myObject.model = elric.mongoose.model(name, schema);
+		
+		// Cache the recordset a first time if wanted
+		if (cache) elric.cacheRecordset(name, myObject.model);
+		
+		return myObject.model;
+	}
+	
+	/**
 	 * Create a new Mongoose schema, with certain fields auto created
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -352,7 +421,7 @@ module.exports = function (elric) {
 				blueprintClone[fieldname] = [tempSchemas[fieldname]];
 			}
 		}
-		console.log(blueprintClone);
+		
 		var schema = elric.mongoose.Schema(blueprintClone);
 		
 		// Set the "updated" field to this timestamp before saving

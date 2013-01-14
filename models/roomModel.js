@@ -1,6 +1,6 @@
 var validate = require('mongoose-validator').validate;
 
-module.exports = function Room (elric) {
+module.exports = function room (elric) {
 	
 	var mongoose = elric.mongoose;
 	
@@ -47,8 +47,8 @@ module.exports = function Room (elric) {
 		fields: ['name', 'z', 'x', 'y', 'width', 'height']
 	}
 
-	this.schema = elric.Schema(this.blueprint);
-	
-	this.model = mongoose.model('Room', this.schema);
+	this.schema = elric.Schema(this.blueprint, 'room');
+
+	this.model = elric.Model('room', this.schema, true);
 	
 }

@@ -1,4 +1,4 @@
-module.exports = function MovementEvent (elric) {
+module.exports = function movementEvent (elric) {
 	
 	var mongoose = elric.mongoose;
 	
@@ -71,5 +71,5 @@ module.exports = function MovementEvent (elric) {
 	
 	this.schema = elric.Schema(this.blueprint);
 	
-	this.model = mongoose.model('MovementEvent', this.schema);
+	this.model = elric.Model('movementEvent', this.schema);
 }

@@ -70,13 +70,18 @@ elric.models = {};
 elric.capabilities = {};
 elric.elementTypes = {};
 
+// Memobjects are like cakephp enums
+// A collection of records that can be used
+// as a source for a model's field.
 elric.memobjects = {};
 elric.memobjects.elementTypes = elric.elementTypes;
 elric.memobjects.capabilities = elric.capabilities;
 
+// Temporary storage & object cache
 elric.temp = {};
 elric.movecallbacks = {};
 elric.temp.dirs = {}; // Store if a directory exists in here
+elric.temp.models = {};
 
 elric.admin = {};
 elric.adminArray = [];
