@@ -22,70 +22,65 @@ var Motion = function Motion (elric) {
 	var storage = {};
 	
 	/**
-	 * A motion event begins
+	 * Motion lets us know a new event has started by wgetting this route
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.11
-	 * @version  2013.01.11
+	 * @version  2013.01.14
 	 */
 	elric.app.post('/noauth/motion/begin/:cameraid', function (req, res) {
 		
 		// End the request
 		res.end('Motion received');
 		
+		// Create the packet we can send with the global event
+		var packet = {};
+		
 		// Cameraid is part of the request url
-		var cameraid = req.params.cameraid;
+		packet.cameraid = req.params.cameraid;
+		var cameraid = packet.cameraid;
 		
 		// Number of pixels detected as Motion
 		// If labelling is enabled the number is the number of
 		// pixels in the largest labelled motion area. 
-		var pixels = req.body.pixels;
+		packet.pixels = req.body.pixels;
 		
 		// Coordinates in pixels of the center point of motion.
 		// Origin is upper left corner. 
-		var x = req.body.x;
-		var y = req.body.y;
+		packet.x = req.body.x;
+		packet.y = req.body.y;
 		
-		// Noise leven
-		var noise = req.body.noise;
+		// Noise level
+		packet.noise = req.body.noise;
 		
 		// The number of seconds since the Epoch, i.e.,
 		// since 1970-01-01 00:00:00 UTC. 
-		var epoch = req.body.epoch;
+		packet.epoch = req.body.epoch;
 		
 		// The event number, as defined by motion
 		// Scope is per camera, resets when motion restarts!
-		var event = req.body.event;
-		
-		// Create a new movementEvent record
-		var record = new ME({
-			begin: new Date(epoch*1000).toISOString(),
-			finished: false,
-			source_type: 'motion',
-			source_id: cameraid,
-			room_id: null,
-			room_element_id: null,
-			pictures: [],
-			movie: ''
-		});
-	
-		record.save();
+		packet.eventnr = req.body.event;
 		
 		// This should exist, but just in case:
 		// @todo: Make sure this exists!
 		if (storage[cameraid] === undefined) storage[cameraid] = {};
 		
+		// Create a new movementEvent record
+		var record = getMovementEvent(packet.eventnr,
+																	cameraid,
+																	packet.epoch,
+																	{x: packet.x, y: packet.y, pixels: packet.pixels, noise: packet.noise});
+
 		// Create a link to this camera's storage
 		var cs = storage[cameraid];
 		
 		// Set our current event as active
 		cs.eventid = record._id;
-		cs.eventnr = event;
+		cs.eventnr = packet.eventnr;
 		cs.eventrecord = record;
 		cs.counter = 0;
 		
-		// Add this event to the history
-		cs.history[event] = record._id;
+		packet.eventid = record._id;
 		
 		console.log('Motion event detected on ' + req.params.cameraid);
 	});
@@ -95,11 +90,33 @@ var Motion = function Motion (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.11
-	 * @version  2013.01.11
+	 * @version  2013.01.14
 	 */
 	elric.app.post('/noauth/motion/ongoing/:cameraid', function (req, res) {
 		console.log('Ongoing motion detected on ' + req.params.cameraid);
 		res.end('Motion received');
+		
+		var cameraid = req.params.cameraid;
+		var eventnr = req.body.event;
+		var eventid = getMovementEvent(eventnr, cameraid);
+		
+		// Create the packet we can send with the global event
+		var packet = {};
+		packet.pixels = req.body.pixels;
+		packet.x = req.body.x;
+		packet.y = req.body.y;
+		packet.noise = req.body.noise;
+		
+		ME.update({_id: eventid},
+							{$push: { rawdata: JSON.stringify({x: packet.x, y: packet.y, pixels: packet.pixels, noise: packet.noise}) }},
+							{upsert:true}, function(err, data) {
+								
+								if (err) {
+									elric.log.error('Error updating rawdata field in motion event!');
+									console.log(err);
+								}
+				});
+		
 	});
 	
 	/**
@@ -134,7 +151,6 @@ var Motion = function Motion (elric) {
 	elric.app.post('/noauth/motion/moviestart/:cameraid', function (req, res) {
 		
 		var filepath = req.body.file;
-		console.log(req.body);
 		res.end('Motion received');
 	});
 	
@@ -156,7 +172,7 @@ var Motion = function Motion (elric) {
 		var eventnr = req.body.event;
 		var cs = storage[cameraid];
 		
-		var eventid = cs.history[eventnr];
+		var eventid = getMovementEvent(eventnr, cameraid);
 		
 		var record = storage[cameraid].eventrecord;
 		var clientsocket = cs.client.socket;
@@ -168,7 +184,7 @@ var Motion = function Motion (elric) {
 		var extension = filepath.substring(filepath.lastIndexOf('.')); // .replace('.', '');
 		
 		// Construct the filename
-		var filename = eventid + '-' + req.body.epoch + extension;
+		var filename = req.body.epoch + '-' + eventid + extension;
 		var destinationdir = 'motion/videos/' + cameraid + '/';
 		
 		// If the movie is a timelapse, store it somewhere else
@@ -222,9 +238,17 @@ var Motion = function Motion (elric) {
 		var filepath = req.body.file;
 		var cameraid = req.params.cameraid;
 		
+		// Do nothing if the camera isn't known to the server (yet)
+		if (storage[cameraid] === undefined) {
+			elric.log.error('Camera ' + cameraid + ' isn\'t known to the server yet.');
+			return;
+		}
+		
 		var cs = storage[cameraid];
-		var record = storage[cameraid].eventrecord;
 		var clientsocket = cs.client.socket;
+		
+		var eventnr = req.body.event;
+		var eventid = getMovementEvent(eventnr, cameraid);
 		
 		// Increase the picture counter
 		cs.counter++;
@@ -233,7 +257,7 @@ var Motion = function Motion (elric) {
 		var eD = new Date(req.body.epoch * 1000);
 		
 		// Construct the filename
-		var filename = cs.eventid + '-' + req.body.epoch + '-' + String('00000'+cs.counter).slice(-5) + '.jpg';
+		var filename = cameraid + '-' + req.body.epoch + '-' + eventid + '-' + String('00000'+cs.counter).slice(-5) + '.jpg';
 		
 		// Get the frames directory relative to the local storage folder
 		elric.getDirectory('motion/frames/', eD, function (err, dirpath) {
@@ -248,7 +272,7 @@ var Motion = function Motion (elric) {
 					elric.log.error('Error moving picture frame file from client!');
 					console.log(err);
 				} else {
-					ME.update({_id: cs.eventid},
+					ME.update({_id: eventid},
 								{$push: { 'pictures' : dirpath + filename }},
 								{upsert:true}, function(err, data) {
 									
@@ -297,6 +321,58 @@ var Motion = function Motion (elric) {
 		}
 		
 	});
+	
+	/**
+	 * Get or create a movementEvent record
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.14
+	 * @version  2013.01.14
+	 *
+	 * @param    {integer}  eventnr         The number of the event according to motion
+	 * @param    {string}   cameraid        The id of the camera
+	 * @param    {integer}  epoch           The epoch begin of the event (Creation only)
+	 * @param    {object}   rawdata         Rawdata to add to the record (Creation only)
+	 *
+	 * @returns  {object|string}   The (unsaved) movementEvent record or the id
+	 */
+	var getMovementEvent = function getMovementEvent (eventnr, cameraid, epoch, rawdata) {
+		
+		// Get this camera's storage object
+		var cs = storage[cameraid];
+		
+		// Do nothing if the camera isn't known to the server (yet)
+		if (cs === undefined) {
+			elric.log.error('Camera ' + cameraid + ' isn\'t known to the server yet, can\'t get event id');
+			return false;
+		}
+		
+		if (cs.history[eventnr] === undefined) {
+			
+			if (epoch === undefined) epoch = parseInt(new Date().getTime()/1000);
+			
+			var record = new ME({
+				begin: new Date(epoch*1000).toISOString(),
+				finished: false,
+				source_type: 'motion',
+				source_id: cameraid,
+				room_id: null,
+				room_element_id: null,
+				pictures: [],
+				movie: '',
+				rawdata: [rawdata]
+			});
+			
+			record.save();
+			
+			// Store the id in the history
+			cs.history[eventnr] = record._id;
+			
+			return record;
+		}
+		
+		return cs.history[eventnr];
+	}
 	
 	/**
 	 * Set a camera option by sending an event to the client

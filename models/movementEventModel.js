@@ -61,6 +61,13 @@ module.exports = function movementEvent (elric) {
 			type: String,
 			array: true,
 			fieldType: 'Filepath'
+		},
+		// Motion detection variables
+		// (How many pixels have changes, ...)
+		rawdata: {
+			type: String,
+			array: true,
+			fieldType: false
 		}
 	}
 	
