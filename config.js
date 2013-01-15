@@ -22,4 +22,7 @@ module.exports = function Config (elric) {
 	elric.loadElementType('client');
 	elric.loadElementType('closet');
 	
+	// Prepare all the clients
+	elric.prepareForClients();
+	
 }

@@ -92,6 +92,9 @@ elric.randomstring = randomstring.generate;
 elric.activeUsers = {};
 elric.exposedObjects = {};
 
+// Instances of the ElricClient class go here (even unconnected)
+elric.clients = {};
+
 // Create the HTTP server
 elric.server = http.createServer(app);
 

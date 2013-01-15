@@ -40,22 +40,27 @@ module.exports = function (elric) {
 		socket.emit(type, data);
 	}
 
-	// Listen for any IO connection
+	/**
+	 * Handle connections
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    
+	 * @version  2013.01.15
+	 */
 	elric.io.sockets.on('connection', function(socket) {
 	
 		// Address
 		var address = socket.handshake.address;
 		
-		// Submit helper function
+		// Submit helper function for this connection
 		var submit = function (type, data) {return elric.submit(socket, type, data)};
 	
 		// Store websocket client information in here
-		var instructions = {};
-		instructions.address = address;
-		instructions.socket = socket;
-		instructions.type = false;
-		instructions.event = new EventEmitter();
-		instructions.client = false;
+		var thisConnection = {};
+		thisConnection.address = address;
+		thisConnection.socket = socket;
+		thisConnection.type = false;
+		thisConnection.client = false;
 	
 		// Log any connection
 		elric.log.info(util.format('IO connection from ip %s on port %d',
@@ -67,8 +72,7 @@ module.exports = function (elric) {
 		 *
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.07
-		 * @version  2013.01.07
-		 *
+		 * @version  2013.01.15
 		 */
 		socket.on('disconnect', function() {
 			
@@ -76,14 +80,7 @@ module.exports = function (elric) {
 															 address.address,
 															 address.port));
 			
-			if (instructions.type == 'browser') {
-				elric.event.emit('browserdisconnected', instructions.client);
-				elric.websocket.browser.emit('disconnect');
-			} else if (instructions.type == 'client') {
-				elric.event.emit('clientdisconnected', instructions.client);
-				elric.websocket.client.emit('disconnect');
-			}
-			
+			thisConnection.client.event.emit('disconnect');
 		});
 		
 		/**
@@ -92,7 +89,6 @@ module.exports = function (elric) {
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.07
 		 * @version  2013.01.07
-		 *
 		 */
 		socket.on('browser', function (packet) {
 			
@@ -123,13 +119,13 @@ module.exports = function (elric) {
 						elric.activeUsers[login].socket = socket;
 						
 						// Store the username
-						instructions.username = login;
-						instructions.type = 'browser';
+						thisConnection.username = login;
+						thisConnection.type = 'browser';
 						
-						instructions.client = new elric.classes.BrowserClient(instructions);
+						thisConnection.client = new elric.classes.BrowserClient(thisConnection);
 						
 						// Send a global event
-						elric.event.emit('browserconnected', instructions.client);
+						elric.event.emit('browserconnected', thisConnection.client);
 					} else {
 						elric.log.error(util.format('Ip %s on port %d did not identify as %s (browser)',
 																 address.address,
@@ -139,13 +135,13 @@ module.exports = function (elric) {
 				}
 			}
 			
-			if (bubble && instructions.client) {
+			if (bubble && thisConnection.client) {
 				
 				// Transmit over the global event
-				elric.websocket.browser.emit(type, packet, instructions.client);
+				elric.websocket.browser.emit(type, packet, thisConnection.client);
 				
 				// Transmit to the client object
-				instructions.client.event.emit(type, packet);
+				thisConnection.client.event.emit(type, packet);
 			}
 		});
 		
@@ -193,7 +189,7 @@ module.exports = function (elric) {
 		 *
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.07
-		 * @version  2013.01.07
+		 * @version  2013.01.15
 		 */
 		socket.on('client', function (packet) {
 			
@@ -228,15 +224,18 @@ module.exports = function (elric) {
 						
 						elric.notify('Elric client has connected from ' + address.address);
 						
-						// Store the username
-						instructions.username = login;
-						instructions.type = 'client';
-						instructions.id = clientItem._id;
+						// Get the ElricClient object, it should exist already
+						var ec = elric.clients[clientItem._id];
 						
-						instructions.client = new elric.classes.ElricClient(instructions);
+						// Set the connection type
+						thisConnection.type = 'client';
 						
-						// Send a global event
-						elric.event.emit('clientconnected', instructions.client);
+						// Create a link to the client
+						thisConnection.client = ec;
+						
+						// Send the connected event to the client
+						// The client will inform the globel events
+						ec.event.emit('connect', socket, address);
 						
 						var transfercount = 0;
 						var caps = {};
@@ -246,7 +245,8 @@ module.exports = function (elric) {
 							caps[capname] = false;
 						}
 						
-						submit('notifyTransfer', {amount: transfercount, capabilities: caps});
+						ec.submit('notifyTransfer', {amount: transfercount, capabilities: caps});
+						
 					} else {
 						
 						// No client found with this info, log error
@@ -259,15 +259,15 @@ module.exports = function (elric) {
 				});
 			}
 			
-			if (bubble && instructions.client) {
+			if (bubble && thisConnection.client) {
 				
 				// If a filter has been given, send it to that too
 				if (filter) {
-					elric.getEventspace(filter).emit(type, packet, instructions.client);
+					elric.getEventspace(filter).emit(type, packet, thisConnection.client);
 				}
 				
-				elric.websocket.client.emit(type, packet, instructions.client);
-				instructions.client.event.emit(type, packet);
+				elric.websocket.client.emit(type, packet, thisConnection.client);
+				thisConnection.client.event.emit(type, packet);
 			}
 		});
 		

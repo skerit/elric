@@ -145,28 +145,43 @@ module.exports = function (elric) {
 	}
 	
 	/**
-	 * Initiate a file transfer from a client to the server
+	 * Create a client object for every client, even unconnected.
+	 * Skip already created clients.
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.01.13
-	 * @version  2013.01.13
-	 *
-	 * @param    {object}    clientsocket    The socket of the client
-	 * @param    {string}    sourcepath      The path on the client
-	 * @param    {string}    destination     The path on the server
-	 * @param    {function}  callback
+	 * @since    2013.01.15
+	 * @version  2013.01.15
 	 */
-	elric.moveFromClient = function moveFromClient (clientsocket,
-																									sourcepath,
-																									destination,
-																									callback) {
+	elric.prepareForClients = function prepareForClients () {
 		
-		elric.moveFile({type: 'client', path: sourcepath, socket: clientsocket},
-									 {type: 'server', path: destination},
-									 callback);
+		var C = elric.models.client.model;
 		
+		C.find({}, function (err, clients) {
+			
+			for (var i in clients) {
+				
+				var client = clients[i];
+				
+				// Only create the object if it doesn't already exist!
+				if (elric.clients[client._id] === undefined) {
+					
+					var instructions = {
+						id: client._id,
+						key: client.key,
+						name: client.hostname,
+						ip: client.ip
+					};
+					
+					// Create the new object
+					var co = new elric.classes.ElricClient(instructions);
+					
+					// Store it in the clients object
+					elric.clients[client._id] = co;
+					
+				}
+			}
+		});
 	}
-	
 	
 	/**
 	 * Get a namespace event emitter

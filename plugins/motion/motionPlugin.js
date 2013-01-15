@@ -1,4 +1,10 @@
-var Motion = function Motion (elric) {
+var elric = {};
+
+var Motion = function Motion (elriclink) {
+
+	elric = elriclink;
+
+	var thisMotion = this;
 
 	// Load models
 	elric.loadModel('motionCamera', 'motion');
@@ -11,15 +17,19 @@ var Motion = function Motion (elric) {
 	// The 'filter' event, only motion events go here
 	var motion = elric.getEventspace('motion');
 	
-	// The Motion model
+	// Model links
 	var M = elric.models.motionCamera.model;
-	
-	// The movement event model
 	var ME = elric.models.movementEvent.model;
+	this.M = M;
+	this.ME = ME;
 	
 	// Every camera gets an entry in this variable
 	// We can store specific stuff in here, like active events
 	var storage = {};
+	this.storage = storage;
+	
+	// Load all the cameras
+	this.registerAllCameras();
 	
 	/**
 	 * Motion lets us know a new event has started by wgetting this route
@@ -198,10 +208,9 @@ var Motion = function Motion (elric) {
 		elric.getDirectory(destinationdir, eD, function (err, dirpath) {
 
 			// Move the file from the client to the server
-			elric.moveFromClient(clientsocket,
-													 filepath,
-													 dirpath + filename,
-													 function (err) {
+			cs.client.getFile(filepath,
+												dirpath + filename,
+											  function (err) {
 				
 				if (err) {
 					elric.log.error('Error moving video file from client!');
@@ -245,7 +254,6 @@ var Motion = function Motion (elric) {
 		}
 		
 		var cs = storage[cameraid];
-		var clientsocket = cs.client.socket;
 		
 		var eventnr = req.body.event;
 		var eventid = getMovementEvent(eventnr, cameraid);
@@ -263,10 +271,9 @@ var Motion = function Motion (elric) {
 		elric.getDirectory('motion/frames/', eD, function (err, dirpath) {
 
 			// Move the file from the client to the server
-			elric.moveFromClient(clientsocket,
-													 filepath,
-													 dirpath + filename,
-													 function (err) {
+			cs.client.getFile(filepath,
+												dirpath + filename,
+												function (err) {
 				
 				if (err) {
 					elric.log.error('Error moving picture frame file from client!');
@@ -291,7 +298,7 @@ var Motion = function Motion (elric) {
 	motion.on('discovery', function(packet, client) {
 
 		for (var cameranr in packet.message.ports) {
-			
+
 			var thisPort = packet.message.ports[cameranr];
 			
 			// Get the camera from the database (autocreates an item)
@@ -302,7 +309,7 @@ var Motion = function Motion (elric) {
 				}
 				
 				// Set the camera host
-				camera.host = client.address.address;
+				camera.host = client.ip;
 				
 				// Set the camera port
 				camera.port = thisPort;
@@ -310,18 +317,8 @@ var Motion = function Motion (elric) {
 				// Save the camera
 				camera.save();
 				
-				// Store the id in the storage
-				storage[camera._id] = {eventid: false,
-                                eventnr: false,
-                                history: {},
-                                client: client,
-                                counter: 0,
-                                name: camera.identifier};
-				
-				elric.log.info('Camera ' + camera._id + ' storage has been made');
-				
-				// Make sure the client sets the correct motion detection url callback
-				setMotionDetect(client, camera.thread, camera._id);
+				// Register the camera, if it hasn't been already
+				thisMotion.registerCamera(camera);
 			});
 		}
 		
@@ -396,21 +393,6 @@ var Motion = function Motion (elric) {
 	}
 	
 	/**
-	 * Set the camera detection options
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.01.10
-	 * @version  2013.01.10
-	 *
-	 * @param    {object}   client          The client to send it to
-	 * @param    {integer}  threadnr        The camera thread nr
-	 * @param    {string}   cameraid        The camera id in the db
-	 */
-	var setMotionDetect = function setMotionDetect (client, threadnr, cameraid) {
-		client.submit('set_detection', {thread: threadnr, cameraid: cameraid});
-	}
-	
-	/**
 	 * Get a camera from the database, create one if needed
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -426,20 +408,92 @@ var Motion = function Motion (elric) {
 		M.findOne({client_id: clientid, thread: threadnr}, function (err, camera) {
 			
 			var newCamera = false;
-			
+
 			if (!camera) {
 				newCamera = true;
-				
+
 				camera = new M({
 						client_id: clientid,
 						thread: threadnr,
-						identifier: 'newcamera-' + threadnr
+						identifier: 'newcamera-' + threadnr,
+						host: '',
+						port: 0
 					});
 			}
 			
 			callback(camera, newCamera);
 		});
 	}
+
+}
+
+var mp = Motion.prototype;
+
+/**
+ * Set the camera detection options
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.10
+ * @version  2013.01.10
+ *
+ * @param    {object}   client          The client to send it to
+ * @param    {integer}  threadnr        The camera thread nr
+ * @param    {string}   cameraid        The camera id in the db
+ */
+mp.setMotionDetect = function setMotionDetect (client, threadnr, cameraid) {
+	client.submit('set_detection', {thread: threadnr, cameraid: cameraid});
+}
+
+/**
+ * Add camera to the storage object
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.15
+ * @version  2013.01.15
+ *
+ * @param    {object}   camerarecord     The camerarecord from the db
+ */
+mp.registerCamera = function registerCamera (camerarecord) {
+	
+	var clientid = camerarecord.client_id;
+	var client = elric.clients[clientid];
+	
+	if (this.storage[camerarecord._id] === undefined) {
+
+		// Store the id in the storage
+		this.storage[camerarecord._id] = {eventid: false,
+														eventnr: false,
+														history: {},
+														client: client,
+														counter: 0,
+														name: camerarecord.identifier};
+		
+		elric.log.info('Camera ' + camerarecord._id + ' storage has been made');
+	}
+	
+	// Make sure the client sets the correct motion detection url callback
+	this.setMotionDetect(client, camerarecord.thread, camerarecord._id);
+}
+
+/**
+ * Register all cameras in the database
+ * 
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.15
+ * @version  2013.01.15
+ */
+mp.registerAllCameras = function registerAllCameras () {
+	
+	var thisMotion = this;
+	
+	this.M.find({}, function (err, cameras) {
+		
+		for (var i in cameras) {
+			var camera = cameras[i];
+			
+			thisMotion.registerCamera(camera);
+		}
+	});
 }
 
 module.exports = Motion;
