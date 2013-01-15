@@ -1,6 +1,14 @@
-module.exports = function Client (elric) {
+/**
+ * The client model
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.06
+ * @version  2013.01.15
+ */
+module.exports = function client (elric) {
 	
-	var mongoose = elric.mongoose;
+	// Enable caching this model
+	this.enableCache = true;
 	
 	this.blueprint = {
 		name: {
@@ -29,8 +37,4 @@ module.exports = function Client (elric) {
 		title: 'Clients',
 		fields: ['name', 'key', 'hostname', 'ip']
 	}
-
-	this.schema = elric.Schema(this.blueprint);
-	
-	this.model = mongoose.model('Client', this.schema);
 }

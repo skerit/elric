@@ -1,6 +1,11 @@
+/**
+ * The movementEvent model
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.12
+ * @version  2013.01.15
+ */
 module.exports = function movementEvent (elric) {
-	
-	var mongoose = elric.mongoose;
 	
 	this.blueprint = {
 		// When did this event begin?
@@ -36,18 +41,18 @@ module.exports = function movementEvent (elric) {
 		},
 		// The source_type's source_id
 		source_id: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: this.mongoose.Schema.Types.ObjectId,
 			fieldType: 'String'
 		},
 		// In what room did this happen
 		room_id: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: this.mongoose.Schema.Types.ObjectId,
 			fieldType: 'Select',
 			source: {type: 'model', name: 'room'}
 		},
 		// Is there a room_element_id
 		room_element_id: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: this.mongoose.Schema.Types.ObjectId,
 			fieldType: 'Select',
 			source: {type: 'model', name: 'roomElement'}
 		},
@@ -76,7 +81,4 @@ module.exports = function movementEvent (elric) {
 		fields: ['begin', 'end', 'source_type']
 	}
 	
-	this.schema = elric.Schema(this.blueprint);
-	
-	this.model = elric.Model('movementEvent', this.schema);
 }

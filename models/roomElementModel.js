@@ -1,10 +1,19 @@
 var validate = require('mongoose-validator').validate;
 var async = require('async');
 
-module.exports = function RoomElement (elric) {
-	
-	var mongoose = elric.mongoose;
+/**
+ * The roomElement model
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2012.12.28
+ * @version  2013.01.15
+ */
+module.exports = function roomElement (elric) {
+
 	var thisModel = this;
+	
+	// Enable caching this model
+	this.enableCache = true;
 	
 	var nameValidator = [validate({message: "Room Element name should be between 3 and 50 characters"},
 																'len', 3, 50),
@@ -18,7 +27,7 @@ module.exports = function RoomElement (elric) {
 			fieldType: 'String'
 		},
 		room_id: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: this.mongoose.Schema.Types.ObjectId,
 			required: true,
 			fieldType: 'Select',
 			source: {type: 'model', name: 'room'}
@@ -30,7 +39,7 @@ module.exports = function RoomElement (elric) {
 			source: {type: 'memobject', name: 'elementTypes'}
 		},
 		type_external_id: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: this.mongoose.Schema.Types.ObjectId,
 			required: false,
 			fieldType: 'Select',
 			source: {type: 'object', name: 'elementType'} // @todo: This is just a copy so far
@@ -71,10 +80,6 @@ module.exports = function RoomElement (elric) {
 		title: 'Room Elements',
 		fields: ['name', 'room_id', 'element_type', 'type_external_id', 'x', 'y', 'dx', 'dy', 'width', 'height']
 	}
-
-	this.schema = elric.Schema(this.blueprint);
-	
-	this.model = elric.Model('roomElement', this.schema, true);
 
 	// Create the update routes
 	elric.app.post('/roomelement/updates', function (req, res) {

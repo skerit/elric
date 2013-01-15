@@ -1,11 +1,17 @@
-var validate = require('mongoose-validator').validate;
-
-module.exports = function MotionCamera (elric) {
+/**
+ * The motionCamera model
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2012.12.27
+ * @version  2013.01.15
+ */
+module.exports = function motionCamera (elric) {
 	
-	var mongoose = elric.mongoose;
-	
-	var identifierValidator = [validate({message: "Identifier should be between 3 and 50 characters"},
+	var identifierValidator = [this.validate({message: "Identifier should be between 3 and 50 characters"},
 																'len', 3, 50)];
+	
+	// Enable caching this model
+	this.enableCache = true;
 	
 	this.blueprint = {
 		identifier: {
@@ -15,7 +21,7 @@ module.exports = function MotionCamera (elric) {
 			fieldType: 'String'
 		},
 		client_id: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: this.mongoose.Schema.Types.ObjectId,
 			required: true,
 			fieldType: 'Select',
 			source: {type: 'model', name: 'client'}
@@ -23,7 +29,7 @@ module.exports = function MotionCamera (elric) {
 		thread: {
 			type: String,
 			required: true,
-			validate: validate('isNumeric'),
+			validate: this.validate('isNumeric'),
 			fieldType: 'String'
 		},
 		host: {
@@ -34,7 +40,7 @@ module.exports = function MotionCamera (elric) {
 		port: {
 			type: String,
 			required: true,
-			validate: validate('isNumeric'),
+			validate: this.validate('isNumeric'),
 			fieldType: 'String'
 		},
 	}
@@ -43,12 +49,5 @@ module.exports = function MotionCamera (elric) {
 		title: 'Motion Cameras',
 		fields: ['identifier', 'client_id', 'thread', 'host', 'port']
 	}
-	
-	/**
-	 * The motion schema
-	 */
-	this.schema = mongoose.Schema(this.blueprint);
-	
-	this.model = mongoose.model('MotionCamera', this.schema);
 	
 }

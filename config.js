@@ -1,6 +1,7 @@
 module.exports = function Config (elric) {
 
-	// Load base class
+	// Load base classes
+	require('./models/model')(elric);
 	require('./element_types/element_type')(elric);
 	require('./capabilities/capability')(elric);
 

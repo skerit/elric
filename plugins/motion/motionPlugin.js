@@ -185,12 +185,12 @@ var Motion = function Motion (elric) {
 		
 		// Construct the filename
 		var filename = req.body.epoch + '-' + eventid + extension;
-		var destinationdir = 'motion/videos/' + cameraid + '/';
+		var destinationdir = 'motion/videos/' + cs.name + '/';
 		
 		// If the movie is a timelapse, store it somewhere else
 		if (filepath.indexOf('timelapse') > -1) {
 			filename = 'timelapse-' + eD.getFullYear() + '-' + (eD.getMonth()+1) + eD.getDate() + extension;
-			destinationdir = 'motion/timelapses/' + cameraid + '/' + eD.getFullYear() + '/' + (eD.getMonth()+1) + '/';
+			destinationdir = 'motion/timelapses/' + cs.name + '/' + eD.getFullYear() + '/' + (eD.getMonth()+1) + '/';
 			eD = false; // Make sure the getDirectory function doesn't add any more date subfolders
 		}
 		
@@ -257,7 +257,7 @@ var Motion = function Motion (elric) {
 		var eD = new Date(req.body.epoch * 1000);
 		
 		// Construct the filename
-		var filename = cameraid + '-' + req.body.epoch + '-' + eventid + '-' + String('00000'+cs.counter).slice(-5) + '.jpg';
+		var filename = cs.name + '-' + req.body.epoch + '-' + eventid + '-' + String('00000'+cs.counter).slice(-5) + '.jpg';
 		
 		// Get the frames directory relative to the local storage folder
 		elric.getDirectory('motion/frames/', eD, function (err, dirpath) {
@@ -298,7 +298,7 @@ var Motion = function Motion (elric) {
 			getCamera(client.id, cameranr, function (camera, newCamera) {
 				
 				if (newCamera) {
-					camera.identifier = 'Camera ' + camera.thread + ' on ' + client.username;
+					camera.identifier = client.username.toLocaleLowerCase() + '_camera_' + camera.thread;
 				}
 				
 				// Set the camera host
@@ -311,7 +311,12 @@ var Motion = function Motion (elric) {
 				camera.save();
 				
 				// Store the id in the storage
-				storage[camera._id] = {eventid: false, eventnr: false, history: {}, client: client};
+				storage[camera._id] = {eventid: false,
+                                eventnr: false,
+                                history: {},
+                                client: client,
+                                counter: 0,
+                                name: camera.identifier};
 				
 				elric.log.info('Camera ' + camera._id + ' storage has been made');
 				

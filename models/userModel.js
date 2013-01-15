@@ -1,10 +1,18 @@
 var bcrypt = require('bcrypt');
 var validate = require('mongoose-validator').validate;
 
-module.exports = function User (elric) {
+/**
+ * The user model
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2012.12.27
+ * @version  2013.01.15
+ */
+module.exports = function user (elric) {
 	
-	var mongoose = elric.mongoose;
-	
+	// Enable caching this model
+	this.enableCache = true;
+
 	var nameValidator = [validate({message: "Username should be between 3 and 50 characters"},
 																'len', 3, 50),
 											 validate('isAlphanumeric')];
@@ -35,16 +43,8 @@ module.exports = function User (elric) {
 		fields: ['username', 'firstname', 'lastname', 'email']
 	}
 	
-	/**
-	 * The user schema
-	 */
-	this.schema = elric.Schema(this.blueprint);
-	
-	this.schema.pre('save', function(next){
+	this.pre('save', function(next){
 		if (this.password) this.password = bcrypt.hashSync(this.password, 10);
 		next();
 	});
-	
-	this.model = mongoose.model('User', this.schema);
-	
 }

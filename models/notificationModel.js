@@ -1,6 +1,11 @@
-module.exports = function Notification (elric) {
-	
-	var mongoose = elric.mongoose;
+/**
+ * The notification model
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.05
+ * @version  2013.01.15
+ */
+module.exports = function notification (elric) {
 	
 	this.blueprint = {
 		message: {
@@ -25,15 +30,11 @@ module.exports = function Notification (elric) {
 			fieldType: 'String',
 			default: 'wide'
 		},
-		payload: mongoose.Schema.Types.Mixed
+		payload: this.mongoose.Schema.Types.Mixed
 	}
 	
 	this.admin = {
 		title: 'Notifications',
 		fields: ['created', 'message', 'level', 'origin']
 	}
-	
-	this.schema = elric.Schema(this.blueprint);
-	
-	this.model = mongoose.model('Notification', this.schema);
 }

@@ -82,6 +82,7 @@ elric.temp = {};
 elric.movecallbacks = {};
 elric.temp.dirs = {}; // Store if a directory exists in here
 elric.temp.models = {};
+elric.temp.misc = {}; // Misc storage
 
 elric.admin = {};
 elric.adminArray = [];

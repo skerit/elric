@@ -303,136 +303,6 @@ module.exports = function (elric) {
 		newrecord.save();
 	}
 	
-	/**
-	 * Cache an entire model recordset
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.01.14
-	 * @version  2013.01.14
-	 *
-	 * @param    {string}   name        The model name
-	 */
-	elric.cacheRecordset = function cacheRecordset (name, model) {
-		
-		// If we want to cache this, find all records and store them
-		elric.temp.models[name] = {};
-		
-		// Create a shortlink to the temp object
-		var t = elric.temp.models[name];
-
-		// Find all records in this model
-		model.find({}, function (err, items) {
-			
-			// Store every item in the temp var
-			for (var index in items) {
-				
-				var item = items[index];
-				
-				// Store the item in the cache object
-				// under its _id
-				t[item._id] = item;
-			}
-		});
-	}
-	
-	/**
-	 * Create a new Mongoose model
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.01.14
-	 * @version  2013.01.14
-	 *
-	 * @param    {string}   name        The model name
-	 * @param    {object}   schema      The schema blueprint
-	 * 
-	 * @returns  {object}   A mongoose model
-	 */
-	elric.Model = function Model (name, schema, cache) {
-		
-		if (cache === undefined) cache = false;
-		
-		var myObject = {};
-		myObject.model = {};
-		
-		// If cache is true, tell the schema to regenerate the cache upon save
-		if (cache) {
-			schema.post('save', function (doc) {
-				// Recreate the entire recordset
-				// This is overkill, maybe we can just use the doc given?
-				elric.cacheRecordset(name, myObject.model);
-			})
-		}
-		
-		// Create the model
-		myObject.model = elric.mongoose.model(name, schema);
-		
-		// Cache the recordset a first time if wanted
-		if (cache) elric.cacheRecordset(name, myObject.model);
-		
-		return myObject.model;
-	}
-	
-	/**
-	 * Create a new Mongoose schema, with certain fields auto created
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.01.05
-	 * @version  2013.01.13
-	 *
-	 * @param    {object}   blueprint   The schema blueprint
-	 * 
-	 * @returns  {object}   A mongoose schema
-	 */
-	elric.Schema = function Schema (blueprint) {
-		
-		// Add the created & updated field
-		// Created is strictly speaking not needed (_id)
-		blueprint.created = {type: Date, default: Date.now, fieldType: 'Date'}
-		blueprint.updated = {type: Date, default: Date.now, fieldType: 'Date'}
-		
-		// Create a blueprint clone, one we can edit
-		var blueprintClone = $.extend({}, blueprint);
-		
-		// Create an object to store the temporary schemas in
-		var tempSchemas = {};
-		
-		// See if any of the entries are arrays
-		for (var fieldname in blueprintClone) {
-			var e = blueprintClone[fieldname];
-			
-			if (e.array) {
-				var ns = {};
-				ns[fieldname] = {};
-				
-				// Now go over every entry in this field
-				for (var option in e) {
-	
-					// Add those options to a temporary blueprint,
-					// but only if it's not the array option
-					if (option !== 'array'){
-						ns[fieldname][option] = e[option];
-					}
-				}
-				
-				// Create the temporary array out of the temporary blueprint
-				tempSchemas[fieldname] = elric.mongoose.Schema(ns);
-				
-				// Overwrite the entry in the clone
-				blueprintClone[fieldname] = [tempSchemas[fieldname]];
-			}
-		}
-		
-		var schema = elric.mongoose.Schema(blueprintClone);
-		
-		// Set the "updated" field to this timestamp before saving
-		schema.pre('save', function(next){
-			this.updated = Date.now();
-			next();
-		});
-		
-		return schema;
-	}
-	
 	elric.redirectLogin = function redirectLogin (res, req) {
 		if (!elric.isFirstRun && req.originalUrl != '/login') {
 			req.session.destination = req.originalUrl;
@@ -506,10 +376,11 @@ module.exports = function (elric) {
 	
 	/**
 	 * Load a new model
+	 * Extends from the base model class
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.27
-	 * @version  2013.01.11
+	 * @version  2013.01.15
 	 */
 	elric.loadModel = function loadModel (modelName, pluginName) {
 		
@@ -525,8 +396,20 @@ module.exports = function (elric) {
 		
 		elric.log.debug('Initializing Model "' + modelName + '"' + debugm);
 		
-		var model = require(path);
+		// Get the constructor, the actual model file
+		var constructor = require(path);
+		
+		// Extend the base model with this constructor
+		var model = elric.extend(elric.classes.BaseModel, constructor);
+		
+		// Set the model name
+		model.prototype.name = modelName;
+		
+		// Instantiate this new model
 		var m = new model(elric);
+		
+		// Now run the _init function
+		m._init();
 		
 		// Store the new model
 		elric.models[modelName] = m;

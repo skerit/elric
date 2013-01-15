@@ -1,8 +1,13 @@
 var validate = require('mongoose-validator').validate;
 
+/**
+ * The room model
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2012.12.28
+ * @version  2013.01.15
+ */
 module.exports = function room (elric) {
-	
-	var mongoose = elric.mongoose;
 	
 	var nameValidator = [validate({message: "Room name should be between 3 and 50 characters"},
 																'len', 3, 50),
@@ -46,9 +51,4 @@ module.exports = function room (elric) {
 		title: 'Rooms',
 		fields: ['name', 'z', 'x', 'y', 'width', 'height']
 	}
-
-	this.schema = elric.Schema(this.blueprint, 'room');
-
-	this.model = elric.Model('room', this.schema, true);
-	
 }
