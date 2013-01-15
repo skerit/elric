@@ -70,7 +70,7 @@ module.exports = function movementEvent (elric) {
 		// Motion detection variables
 		// (How many pixels have changes, ...)
 		rawdata: {
-			type: String,
+			type: {},
 			array: true,
 			fieldType: false
 		}

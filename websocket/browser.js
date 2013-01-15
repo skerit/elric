@@ -1,4 +1,5 @@
 var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 module.exports = function (elric) {
 	
@@ -10,22 +11,43 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.07
+	 * @version  2013.01.16
 	 */
 	elric.classes.BrowserClient = function BrowserClient (instructions) {
 		
-		var socket = instructions.socket;
+		var thisClient = this;
 		
-		this.address = instructions.address;
-		this.socket = instructions.socket;
-		this.type = instructions.type;
-		this.event = instructions.event;
+		this.socket = false;
+		
+		this.type = 'browser';
+		this.id = instructions.id;
+		this.key = instructions.key;
 		this.username = instructions.username;
+		this.name = instructions.username;
+		this.ip = instructions.ip;
 		
-		// Submit helper function
-		var submit = function (type, data) {return elric.submit(socket, type, data)};
-
+		this.event = new EventEmitter();
+		
 		// Event on helper function
 		this.on = function (event, callback) {return this.event.on(event, callback)};
+		
+		/**
+		 * Set things when the browser client connects
+		 * 
+		 * @author   Jelle De Loecker   <jelle@kipdola.be>
+		 * @since    2013.01.16
+		 * @version  2013.01.16
+		 */
+		this.on('connect', function (socket, address) {
+			
+			// Set the socket
+			thisClient.socket = socket;
+			
+			elric.event.emit('browserconnected', thisClient);
+			
+			elric.activeUsers[thisClient.name].socket = socket;
+			
+		});
 		
 		// Remove the socket from the active users object
 		this.on('disconnect', function () {

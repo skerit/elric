@@ -100,10 +100,10 @@ var Motion = function Motion (elriclink) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.11
-	 * @version  2013.01.14
+	 * @version  2013.01.16
 	 */
 	elric.app.post('/noauth/motion/ongoing/:cameraid', function (req, res) {
-		console.log('Ongoing motion detected on ' + req.params.cameraid);
+		elric.log.info('Ongoing motion detected on ' + req.params.cameraid);
 		res.end('Motion received');
 		
 		var cameraid = req.params.cameraid;
@@ -117,16 +117,17 @@ var Motion = function Motion (elriclink) {
 		packet.y = req.body.y;
 		packet.noise = req.body.noise;
 		
-		ME.update({_id: eventid},
-							{$push: { rawdata: JSON.stringify({x: packet.x, y: packet.y, pixels: packet.pixels, noise: packet.noise}) }},
-							{upsert:true}, function(err, data) {
-								
-								if (err) {
-									elric.log.error('Error updating rawdata field in motion event!');
-									console.log(err);
-								}
-				});
-		
+		ME.findOne({_id: eventid}, function (err, mevent) {
+			
+			if (mevent) {
+				var obj = {x: packet.x, y: packet.y, pixels: packet.pixels, noise: packet.noise};
+				mevent.rawdata.push(obj);
+				mevent.save();
+			} else {
+				elric.log.error('Error updating rawdata field in motion event ' + eventid);
+				if (err) console.log(err);
+			}
+		});
 	});
 	
 	/**
@@ -135,20 +136,33 @@ var Motion = function Motion (elriclink) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.11
-	 * @version  2013.01.11
+	 * @version  2013.01.16
 	 */
 	elric.app.post('/noauth/motion/end/:cameraid', function (req, res) {
 		
-		console.log('Motion event ended on ' + req.params.cameraid);
+		elric.log.info('Motion event ended on ' + req.params.cameraid);
 		res.end('Motion received');
 		
 		var cameraid = req.params.cameraid;
+		
+		var eventnr = req.body.event;
+		var eventid = getMovementEvent(eventnr, cameraid);
+		
+		ME.findOne({_id: eventid}, function (err, mevent) {
+			
+			if (mevent) {
+				mevent.finished = true;
+				mevent.save();
+			} else {
+				elric.log.error('Could not finish motion event ' + eventid);
+				if (err) console.log(err);
+			}
+		});
 		
 		// Indicate no event is set anymore
 		storage[cameraid].eventid = false;
 		storage[cameraid].eventnr = false;
 		storage[cameraid].counter = 0;
-		
 	});
 	
 	/**
@@ -200,7 +214,7 @@ var Motion = function Motion (elriclink) {
 		// If the movie is a timelapse, store it somewhere else
 		if (filepath.indexOf('timelapse') > -1) {
 			filename = 'timelapse-' + eD.getFullYear() + '-' + (eD.getMonth()+1) + eD.getDate() + extension;
-			destinationdir = 'motion/timelapses/' + cs.name + '/' + eD.getFullYear() + '/' + (eD.getMonth()+1) + '/';
+			destinationdir = 'motion/timelapses/' + cs.name + '/' + eD.getFullYear() + '/' + eD.getFullYear() + '-' + (eD.getMonth()+1) + '/';
 			eD = false; // Make sure the getDirectory function doesn't add any more date subfolders
 		}
 		

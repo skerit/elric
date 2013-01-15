@@ -162,24 +162,31 @@ module.exports = function (elric) {
 			var e = blueprintClone[fieldname];
 			
 			if (e.array) {
-				var ns = {};
-				ns[fieldname] = {};
 				
-				// Now go over every entry in this field
-				for (var option in e) {
-	
-					// Add those options to a temporary blueprint,
-					// but only if it's not the array option
-					if (option !== 'array'){
-						ns[fieldname][option] = e[option];
+				// If it's an empty object,
+				// just create an array of mixed, not subdocuments
+				if ($.isEmptyObject(e.type)) {
+					blueprintClone[fieldname] = [{}];
+				} else {
+					var ns = {};
+					ns[fieldname] = {};
+					
+					// Now go over every entry in this field
+					for (var option in e) {
+						
+						// Add those options to a temporary blueprint,
+						// but only if it's not the array option
+						if (option !== 'array'){
+							ns[fieldname][option] = e[option];
+						}
 					}
+					
+					// Create the temporary array out of the temporary blueprint
+					tempSchemas[fieldname] = elric.mongoose.Schema(ns);
+					
+					// Overwrite the entry in the clone
+					blueprintClone[fieldname] = [tempSchemas[fieldname]];
 				}
-				
-				// Create the temporary array out of the temporary blueprint
-				tempSchemas[fieldname] = elric.mongoose.Schema(ns);
-				
-				// Overwrite the entry in the clone
-				blueprintClone[fieldname] = [tempSchemas[fieldname]];
 			}
 		}
 		

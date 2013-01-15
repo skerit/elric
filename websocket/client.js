@@ -16,27 +16,9 @@ module.exports = function (elric) {
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.07
 	 * @version  2013.01.15
-	 * 
 	 */
 	elric.classes.ElricClient = function ElricClient (instructions) {
-		
-		/* OLD WAY CODE:
-		var socket = instructions.socket;
-		var thisClient = this;
-		
-		this.address = instructions.address;
-		this.socket = instructions.socket;
-		this.type = instructions.type;
-		this.event = instructions.event;
-		this.username = instructions.username;
-		this.id = instructions.id;
-		id: client._id,
-						key: client.key,
-						name: client.hostname,
-						hostname: client.hostname,
-						ip: client.ip
-		*/
-		
+
 		var thisClient = this;
 		
 		this.id = instructions.id;

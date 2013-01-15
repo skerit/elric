@@ -115,17 +115,14 @@ module.exports = function (elric) {
 																 address.port,
 																 login));
 						
-						// Store the socket
-						elric.activeUsers[login].socket = socket;
-						
-						// Store the username
 						thisConnection.username = login;
-						thisConnection.type = 'browser';
 						
 						thisConnection.client = new elric.classes.BrowserClient(thisConnection);
 						
-						// Send a global event
-						elric.event.emit('browserconnected', thisConnection.client);
+						// Send the connected event to the client
+						// The client will inform the global events
+						thisConnection.client.event.emit('connect', socket, address);
+						
 					} else {
 						elric.log.error(util.format('Ip %s on port %d did not identify as %s (browser)',
 																 address.address,

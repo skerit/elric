@@ -33,7 +33,7 @@ module.exports = function (elric) {
 	 */
 	elric.getDirectory = function (path, appenddate, callback) {
 
-		var timedir = '';
+		var timedir = false;
 		var basedir = '';
 		
 		if (appenddate) {
@@ -52,7 +52,11 @@ module.exports = function (elric) {
 			basedir = elric.local.storage + '/';
 		}
 		
-		basedir += path + '/' + timedir + '/';
+		if (timedir) {
+			basedir += path + '/' + timedir + '/';
+		} else {
+			basedir += path + '/';
+		}
 		
 		basedir = basedir.replace(/\/\//g,'/').replace(/\/\//g,'/');
 		
