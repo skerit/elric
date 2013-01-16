@@ -42,6 +42,24 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Get the public url for a file in storage
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.16
+	 * @version  2013.01.16
+	 *
+	 * @param    {string}   path   The absolute path to the file
+	 * @returns  {string}          The public url
+	 */
+	elric.getStorageUrl = function getStorageUrl (path) {
+		
+		var newpath = path.replace(elric.local.storage, '/storage/');
+		
+		return newpath;
+	}
+	
+	
+	/**
 	 * Copy dust templates to the public view directory
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>

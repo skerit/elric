@@ -52,6 +52,7 @@ elric.routes = routes;
 elric.mongoose = mongoose;  // Mongoose DB wrapper
 elric.db = db;              // Direct DB access
 elric.app = app;
+elric.http = http;
 
 // Store tools in here
 elric.tools = {};
@@ -132,6 +133,7 @@ app.configure(function(){
 	app.use(express.cookieParser('wigglybits'));
 	app.use(express.session({ secret: 'humanTransmutationIsANoNo', store: store }));
 	app.use(express.session());
+	app.use('/storage', express.static(local.storage));
 	app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 	app.use('/js/bootstrap', express.static(path.join(bootstrapPath, 'js')));
 	app.use(lessmw({src    : path.join(__dirname, 'assets', 'less'),
@@ -288,53 +290,7 @@ app.get('/m', function(req, res){
 
 
 /*
-app.get('/motion', function(req, res) {
-	
-	var boundary = "BoundaryString";
 
-  var options = {
-    // host to forward to
-    host:   '192.168.1.2',
-    // port to forward to
-    port:   8302,
-    // path to forward to
-    path:   '/',
-    // request method
-    method: 'GET',
-    // headers to send
-    headers: req.headers
-  };
-
-  var creq = http.request(options, function(cres) {
-
-		res.setHeader('Content-Type', 'multipart/x-mixed-replace;boundary="' + boundary + '"');
-		res.setHeader('Connection', 'close');
-		res.setHeader('Pragma', 'no-cache');
-		res.setHeader('Cache-Control', 'no-cache, private');
-		res.setHeader('Expires', 0);
-		res.setHeader('Max-Age', 0);
-
-    // wait for data
-    cres.on('data', function(chunk){
-      res.write(chunk);
-    });
-
-    cres.on('close', function(){
-      // closed, let's end client request as well 
-      res.writeHead(cres.statusCode);
-      res.end();
-    });
-
-  }).on('error', function(e) {
-    // we got an error, return 500 error to client and log error
-    console.log(e.message);
-    res.writeHead(500);
-    res.end();
-  });
-
-  creq.end();
-
-});
 */
 
 // Start the server

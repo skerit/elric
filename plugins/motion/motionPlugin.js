@@ -306,13 +306,16 @@ var Motion = function Motion (elriclink) {
 	// Listen to motion discovery events
 	this.on('discovery', function(packet, client) {
 
-		for (var cameranr in packet.message.ports) {
+		// Get the ports message from the client
+		for (var camerathreadnr in packet.message.ports) {
 
-			var thisPort = packet.message.ports[cameranr];
-			
 			// Get the camera from the database (autocreates an item)
-			getCamera(client.id, cameranr, function (camera, newCamera) {
+			getCamera(client.id, camerathreadnr, function (camera, newCamera) {
 				
+				// Get the port number
+				var thisPort = packet.message.ports[camera.thread];
+				
+				// Add an identifier if it's a new camera
 				if (newCamera) {
 					camera.identifier = client.username.toLocaleLowerCase() + '_camera_' + camera.thread;
 				}
@@ -330,6 +333,42 @@ var Motion = function Motion (elriclink) {
 				thisMotion.registerCamera(camera);
 			});
 		}
+	});
+	
+	// Add a route
+	/**
+	 * Elric routes
+	 */
+	elric.addRoute('/motion/index', ['topbar'], 'Motion', function (req, res) {
+	
+		var results = {};
+		results.cameras = [];
+		
+		for (var i in storage) {
+			results.cameras.push(storage[i]);
+		}
+		
+		console.log(results.cameras);
+		
+		ME.find({}).sort('-created').limit(10).execFind(function (err, events) {
+			
+			var newEvents = [];
+			
+			for (var i in events) {
+				var e = events[i];
+				
+				e.picture = false;
+				
+				if (e.pictures.length > 0) {
+					e.picture = elric.getStorageUrl(e.pictures[1]);
+				}
+				
+				newEvents.push(e);
+			}
+			
+			results.events = newEvents;
+			elric.render(req, res, 'motionIndex', results);
+		});
 	});
 	
 	/**
@@ -432,6 +471,74 @@ var Motion = function Motion (elriclink) {
 			callback(camera, newCamera);
 		});
 	}
+	
+	/**
+	 * Create a motion MJPEG stream proxy
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.27
+	 * @version  2013.01.16
+	 *
+	 * @param    {string}   clientid        The id of the client
+	 * @param    {integer}  threadnr        The camera thread nr
+	 * @param    {function} callback        The function to callback
+	 */
+	elric.app.get('/motion/camera/:cameraid', function(req, res) {
+		
+		// Store the wanted cameraid
+		var cameraid = req.params.cameraid;
+		
+		// Get the camera info
+		var camera = elric.models.motionCamera.cache[cameraid];
+		
+		// The boundary string of motion, this is always the same
+		var boundary = "BoundaryString";
+	
+		var options = {
+			// host to forward to
+			host:   camera.host,
+			// port to forward to
+			port:   camera.port,
+			// path to forward to
+			path:   '/',
+			// request method
+			method: 'GET',
+			// headers to send
+			headers: req.headers
+		};
+		
+		elric.log.debug('Serving camera MJPEG stream ' + cameraid);
+	
+		var creq = elric.http.request(options, function(cres) {
+	
+			res.setHeader('Content-Type', 'multipart/x-mixed-replace;boundary="' + boundary + '"');
+			res.setHeader('Connection', 'close');
+			res.setHeader('Pragma', 'no-cache');
+			res.setHeader('Cache-Control', 'no-cache, private');
+			res.setHeader('Expires', 0);
+			res.setHeader('Max-Age', 0);
+	
+			// wait for data
+			cres.on('data', function(chunk){
+				res.write(chunk);
+			});
+	
+			cres.on('close', function(){
+				// closed, let's end client request as well 
+				res.writeHead(cres.statusCode);
+				res.end();
+			});
+	
+		}).on('error', function(e) {
+			// we got an error, return 500 error to client and log error
+			console.log(e.message);
+			res.writeHead(500);
+			res.end();
+		});
+	
+		creq.end();
+	
+	});
 
 }
 
@@ -469,7 +576,10 @@ mp.registerCamera = function registerCamera (camerarecord) {
 	if (this.storage[camerarecord._id] === undefined) {
 
 		// Store the id in the storage
-		this.storage[camerarecord._id] = {eventid: false,
+		this.storage[camerarecord._id] = {
+                            id: camerarecord._id,
+														port: camerarecord.port,
+                            eventid: false,
 														eventnr: false,
 														history: {},
 														client: client,
