@@ -42,11 +42,6 @@
     {/content}
     <script src="/js/elric.js"></script>
     {>scriptDoek/}
-    <div id="notifications" style="display:none;">
-      {#notifications}
-        {>notification-entry notification=. /}
-      {/notifications}
-    </div>
   </body>
 <!--
 {session}

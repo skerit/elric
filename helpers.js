@@ -580,6 +580,8 @@ module.exports = function (elric) {
 			elric.expose('username', req.session.username, res);
 		}
 		
+		elric.expose('notifications', res.locals.notifications, res);
+		
 		if (res.locals.exposedObjects !== undefined) robj = res.locals.exposedObjects;
 		
 		res.render(view,

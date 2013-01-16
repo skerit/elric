@@ -5,6 +5,17 @@ Elric.iokey = $.cookie('iokey');
 // Disable the pnotify history button
 $.pnotify.defaults.history = false;
 
+// Elric storage
+Elric.storage = {};
+
+// Activate the popover
+$('#ma-notifybutton').popover({placement: 'bottom', content: 'No notifications found', html: true});
+
+// Store the notification popover in here
+Elric.notifications = {};
+Elric.notifications.popover = $('#ma-notifybutton').data('popover');
+Elric.notifications.messages = Elric.exposed.notifications;
+
 /**
  * Handle the toggling of radio buttons
  */
@@ -33,8 +44,7 @@ $('div.btn-group[data-toggle-name]').each(function(){
 
 $('#ma-notifybutton').click(function(e){
 	e.preventDefault();
-	var content = $('#notifications').html();
-	$('#ma-notifybutton').popover({placement: 'bottom', content: content, html: true});
+	$('#ma-notifybutton').popover({placement: 'bottom'});
 });
 
 /**
@@ -58,18 +68,58 @@ Elric.submit = function (message, type) {
 }
 
 /**
- * Login to the server
+ * Show the user a notifications we received from the server
  * 
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.05
+ * @version  2013.01.16
  */
 Elric.notify = function (message) {
+	
+	// Link to the notifications
+	var n = Elric.notifications;
+	
+	// Remove the first element if there are too many messages
+	if (n.messages.length > 6) n.messages.shift();
+	
+	// Notify us of the new message
 	$.pnotify({
     title: 'Regular Notice',
     text: message
 	});
 	
-	$('#notifications').append('<div>New:<br/>' + message + '<hr/></div>')
+	// Add the new message to the array
+	var obj = {message: message};
+	n.messages.push(obj);
+	
+	
+}
+
+/**
+ * Repopulate the notifications in the popover
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.05
+ * @version  2013.01.16
+ */
+Elric.repopulateNotifications = function () {
+	
+	// Link to the notifications
+	var n = Elric.notifications;
+	
+	// Link to the popover options
+	var o = n.popover.options;
+	
+	// Clear the popover content
+	o.content = '';
+	
+	for (var i in n.messages) {
+		o.content += '<div>New:<br/>' + n.messages[i].message + '<hr/></div>';
+	}
+	
+	// If the popover is open at this time, also replace that data
+	$('.popover-inner .popover-content',
+		$('#ma-notifybutton').siblings('div.popover')).html(o.content);
 }
 
 /**
@@ -112,3 +162,5 @@ if (Elric.exposed.iokey) {
 		Elric.notify(data.message);
 	});
 }
+
+Elric.repopulateNotifications();

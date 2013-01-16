@@ -85,7 +85,9 @@ var handler = function handler (elric) {
 															 address.address,
 															 address.port));
 
-			thisConnection.client.event.emit('disconnect');
+			if (thisConnection.client.event !== undefined) {
+				thisConnection.client.event.emit('disconnect');
+			}
 		});
 		
 		/**
