@@ -2,6 +2,7 @@ var $ = require('jquery');
 var bcrypt = require('bcrypt');
 var async = require('async');
 var fs = require('fs');
+var dust = require('dustjs-linkedin');
 
 module.exports = function (elric) {
 	
@@ -58,6 +59,44 @@ module.exports = function (elric) {
 		return newpath;
 	}
 	
+	/**
+	 * Compile dust template for client side rendering
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.17
+	 * @version  2013.01.17
+	 *
+	 * @param    {string}   path   The file to compile
+	 */
+	elric.compileTemplate = function compileTemplate (path) {
+		
+		// If we've been given just a filename, look for it in the dust folder
+		if (path.indexOf('/') < 0) {
+			path = './public/views/' + path;
+		}
+		
+		// Open the file
+		fs.readFile(path, function(err, data) {
+			
+			if (err) {
+				elric.log.error('Could not compile template, error opening ' + path);
+				console.log(err);
+			}
+	
+			var filename = path.split('/').reverse()[0].replace('.dust', '');
+			var filepath = './public/views/' + filename + '.js';
+			var compiled = dust.compile(new String(data), filename);
+	
+			fs.writeFile(filepath, compiled, function(err) {
+				if (err) {
+					elric.log.error('Could not compile template, error writing ' + filepath);
+					console.log(err);
+				} else {
+					elric.templates.compiled[filepath] = filepath;
+				}
+			});
+		});
+	}
 	
 	/**
 	 * Copy dust templates to the public view directory
@@ -91,14 +130,29 @@ module.exports = function (elric) {
 					
 					var filename = files[i];
 					
-					// Open the original file
-					var origin = fs.createReadStream(dir + '/' + filename);
+					(function(filename) {
 					
-					// Open the destination file
-					var destination = fs.createWriteStream('./public/views/' + filename);     
+						// Open the original file
+						var origin = fs.createReadStream(dir + '/' + filename);
+						
+						// Open the destination file
+						var destination = fs.createWriteStream('./public/views/' + filename);     
+						
+						origin.on('end', function(err) {
+							
+							if (err) {
+								elric.log.error('Template could not be loaded: ' + filename);
+								console.log(err);
+							} else {
+								elric.compileTemplate(filename);
+							}
+						});
+						
+						// Pipe the original file into the destination
+						origin.pipe(destination);
+						
+					})(filename);
 					
-					// Pipe the original file into the destination
-					origin.pipe(destination);
 				}
 			}
 		});
@@ -667,20 +721,20 @@ module.exports = function (elric) {
 	/**
 	 * Our wrapper function for setting a route
 	 *
-	 * @param   {string}   path   The url
-	 * @param   {array}    menu   To what menus we should add this route
+	 * @param   {string}   path       The url
+	 * @param   {array}    menus      To what menus we should add this route
 	 * @param   {object}   callback   The callback function
 	 * @param   {string}   methid     What method to use, default = get
 	 */
-	elric.addRoute = function addRoute (path, menu, title, callback, method) {
+	elric.addRoute = function addRoute (path, menus, title, callback, method) {
 		
 		if (method === undefined) method = 'get';
 		
 		elric.app[method](path, callback);
 		
-		for (var i in menu) {
-			if (elric.menus[menu[i]] === undefined) elric.menus[menu[i]] = []
-			elric.menus[menu[i]].push({href: path, title: title});
+		for (var i in menus) {
+			if (elric.menus[menus[i]] === undefined) elric.menus[menus[i]] = []
+			elric.menus[menus[i]].push({href: path, title: title});
 		}
 	}
 }

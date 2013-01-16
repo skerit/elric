@@ -66,6 +66,10 @@ elric.tools.mkdirp = mkdirp;
 // Create a link to the local settings
 elric.local = local;
 
+// Template info
+elric.templates = {};
+elric.templates.compiled = {};
+
 elric.plugins = {};
 elric.models = {};
 elric.capabilities = {};
