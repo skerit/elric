@@ -14,9 +14,6 @@ var Motion = function Motion (elriclink) {
 	// The 'global' client event, all socket messages go here
 	var clients = elric.events.clients;
 	
-	// The 'filter' event, only motion events go here
-	var motion = elric.getEventspace('motion');
-	
 	// Model links
 	var M = elric.models.motionCamera.model;
 	var ME = elric.models.movementEvent.model;
@@ -27,7 +24,7 @@ var Motion = function Motion (elriclink) {
 	// We can store specific stuff in here, like active events
 	var storage = {};
 	this.storage = storage;
-	
+
 	// Load all the cameras
 	this.registerAllCameras();
 	
@@ -242,7 +239,6 @@ var Motion = function Motion (elriclink) {
 				}
 			});
 		});
-
 	});
 	
 	/**
@@ -305,11 +301,10 @@ var Motion = function Motion (elriclink) {
 				}
 			});
 		});
-
 	});
 
 	// Listen to motion discovery events
-	motion.on('discovery', function(packet, client) {
+	this.on('discovery', function(packet, client) {
 
 		for (var cameranr in packet.message.ports) {
 
@@ -335,7 +330,6 @@ var Motion = function Motion (elriclink) {
 				thisMotion.registerCamera(camera);
 			});
 		}
-		
 	});
 	
 	/**
@@ -497,7 +491,7 @@ mp.registerCamera = function registerCamera (camerarecord) {
  * @version  2013.01.15
  */
 mp.registerAllCameras = function registerAllCameras () {
-	
+
 	var thisMotion = this;
 	
 	this.M.find({}, function (err, cameras) {

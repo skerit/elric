@@ -1,7 +1,12 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-module.exports = function (elric) {
+/**
+ * The handler code function
+ *
+ * @param   {elric}   elric   The main elric object
+ */
+var handler = function handler (elric) {
 	
 	var Client = elric.models.client.model;
 	var ClientCapability = elric.models.clientCapability.model;
@@ -48,7 +53,7 @@ module.exports = function (elric) {
 	 * @version  2013.01.15
 	 */
 	elric.io.sockets.on('connection', function(socket) {
-	
+
 		// Address
 		var address = socket.handshake.address;
 		
@@ -79,7 +84,7 @@ module.exports = function (elric) {
 			elric.log.info(util.format('IO Connection closed from ip %s on port %d',
 															 address.address,
 															 address.port));
-			
+
 			thisConnection.client.event.emit('disconnect');
 		});
 		
@@ -135,7 +140,7 @@ module.exports = function (elric) {
 			if (bubble && thisConnection.client) {
 				
 				// Transmit over the global event
-				elric.events.browsers.emit(type, packet, thisConnection.client);
+				elric.events.browsers.emit(type, {source: 'client', global: true}, packet, thisConnection.client);
 				
 				// Transmit to the client object
 				thisConnection.client.event.emit(type, packet);
@@ -263,10 +268,12 @@ module.exports = function (elric) {
 					elric.getEventspace(filter).emit(type, packet, thisConnection.client);
 				}
 				
-				elric.events.clients.emit(type, packet, thisConnection.client);
+				elric.events.clients.emit(type, {source: 'client', global: true}, packet, thisConnection.client);
 				thisConnection.client.event.emit(type, packet);
 			}
 		});
 		
 	});
 }
+
+module.exports = handler;

@@ -9,14 +9,34 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.31
+	 * @version  2013.01.16
 	 */
 	elric.extend = function (parent, constructor) {
-		var intermediateConstructor = constructor;
-		
-		for(var i in parent.prototype) {
-			intermediateConstructor.prototype[i] = parent.prototype[i];                  
+
+		// The actual constructor will loop over an array of constructors
+		var intermediateConstructor = function() {
+			for (var i in this._constructors) {
+				this._constructors[i].apply(this, arguments);
+			}
 		}
 		
+		// Prepare an array for all our constructors
+		intermediateConstructor.prototype._constructors = [];
+		
+		// Add the constructors to that array
+		for (var i = 1; i < arguments.length; i++) {
+			intermediateConstructor.prototype._constructors.push(arguments[i]);
+			
+			// Add the prototypes of these constructors
+			for (var j in arguments[i].prototype) {
+				intermediateConstructor.prototype[j] = arguments[i].prototype[j];
+			}
+		}
+		
+		for(var i in parent.prototype) {
+			intermediateConstructor.prototype[i] = parent.prototype[i];
+		}
+
 		return intermediateConstructor;
 	}
 	
@@ -185,25 +205,6 @@ module.exports = function (elric) {
 				}
 			}
 		});
-	}
-	
-	/**
-	 * Get a namespace event emitter
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.01.09
-	 * @version  2013.01.16
-	 *
-	 * @param    {string}        filter    The filter name
-	 * @returns  {EventEmitter}            An event emitter
-	 */
-	elric.getEventspace = function getEventspace (filter) {
-		
-		if (elric.events.filters[filter] === undefined) {
-			elric.events.filters[filter] = new elric.classes.EventEmitter(); 
-		}
-		
-		return elric.events.filters[filter];
 	}
 	
 	/**
@@ -381,7 +382,16 @@ module.exports = function (elric) {
 		var filepath = './plugins/' + pluginName + '/' + pluginName + 'Plugin';
 		
 		try {
-			var plugin = require(filepath);
+			// Get the constructor, the actual plugin file
+			var constructor = require(filepath);
+			
+			// Extend the base plugin with this constructor
+			var plugin = elric.extend(elric.classes.BasePlugin,
+																elric.classes.BasePlugin.prototype._preConstructor,
+																constructor);
+
+			plugin.prototype.name = pluginName;
+		
 		} catch (err) {
 			elric.log.error('Error loading file: "' + filepath + '"');
 		}

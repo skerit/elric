@@ -51,12 +51,7 @@ module.exports = function (elric) {
 		
 		// Remove the socket from the active users object
 		this.on('disconnect', function () {
-			elric.activeUsers[this.username].socket = false;
+			elric.activeUsers[thisClient.username].socket = false;
 		});
-		
-		this.on('test', function (data) {
-			console.log(data);
-		});
-		
 	}
 }

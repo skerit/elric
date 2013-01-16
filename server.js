@@ -8,7 +8,6 @@ var less = require('less');
 var lessmw = require('less-middleware')
 var dust = require('dustjs-linkedin');
 dust.helpers = require('dustjs-helpers');
-var EventEmitter = require('events').EventEmitter;
 var cons = require('consolidate');
 var path = require('path');
 var store = new express.session.MemoryStore;
@@ -45,9 +44,10 @@ db.on('error', console.error.bind(console, 'connection error:'));
  * This variable will be passed allong to plugins
  */
 var elric = {};
+
 elric.isFirstRun = true; // Initial first run setting
 elric.classes = {};
-elric.classes.EventEmitter = EventEmitter;
+
 elric.routes = routes;
 elric.mongoose = mongoose;  // Mongoose DB wrapper
 elric.db = db;              // Direct DB access
@@ -103,16 +103,14 @@ elric.io = io.listen(elric.server);
 // Create a websocket object
 elric.websocket = {};
 
-// Elric event emitters
-elric.events = {};
-elric.events.main = new EventEmitter();
-elric.events.clients = new EventEmitter();
-elric.events.browsers = new EventEmitter();
-elric.events.filters = {};
+// Load the Elric Event class
+require('./event')(elric);
 
-elric.websocket.client = elric.events.clients;
-elric.websocket.browser = elric.events.browsers;
-elric.websocket.filter = elric.events.filters;
+// Prepare an object for storing event emitters
+elric.events = {};
+elric.events.all = new elric.classes.ElricEvent('all', elric);
+elric.events.clients = new elric.classes.ElricEvent('clients');
+elric.events.browsers = new elric.classes.ElricEvent('browsers');
 
 // Use IO's logger
 elric.log = elric.io.log;
