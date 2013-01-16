@@ -12,7 +12,7 @@ var Motion = function Motion (elriclink) {
 	elric.loadCapability('motion', 'motion');
 	
 	// The 'global' client event, all socket messages go here
-	var clients = elric.websocket.client;
+	var clients = elric.events.clients;
 	
 	// The 'filter' event, only motion events go here
 	var motion = elric.getEventspace('motion');

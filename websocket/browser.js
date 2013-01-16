@@ -43,7 +43,7 @@ module.exports = function (elric) {
 			// Set the socket
 			thisClient.socket = socket;
 			
-			elric.event.emit('browserconnected', thisClient);
+			elric.events.all.emit('browserconnected', thisClient);
 			
 			elric.activeUsers[thisClient.name].socket = socket;
 			

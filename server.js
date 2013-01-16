@@ -86,7 +86,6 @@ elric.temp.misc = {}; // Misc storage
 
 elric.admin = {};
 elric.adminArray = [];
-elric.event = new EventEmitter();
 elric.menus = {};
 elric.randomstring = randomstring.generate;
 elric.activeUsers = {};
@@ -103,9 +102,17 @@ elric.io = io.listen(elric.server);
 
 // Create a websocket object
 elric.websocket = {};
-elric.websocket.client = new EventEmitter();
-elric.websocket.browser = new EventEmitter();
-elric.websocket.filter = {};
+
+// Elric event emitters
+elric.events = {};
+elric.events.main = new EventEmitter();
+elric.events.clients = new EventEmitter();
+elric.events.browsers = new EventEmitter();
+elric.events.filters = {};
+
+elric.websocket.client = elric.events.clients;
+elric.websocket.browser = elric.events.browsers;
+elric.websocket.filter = elric.events.filters;
 
 // Use IO's logger
 elric.log = elric.io.log;

@@ -36,7 +36,7 @@ module.exports = function (elric) {
 		 * 
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.15
-		 * @version  2013.01.15
+		 * @version  2013.01.16
 		 */
 		this.on('connect', function (socket, address) {
 			
@@ -46,7 +46,7 @@ module.exports = function (elric) {
 			// Set the (new) host
 			thisClient.host = address.address;
 			
-			elric.event.emit('clientconnected', thisClient);
+			elric.events.all.emit('clientconnected', thisClient);
 			
 			// Process the file queue
 			thisClient.processFileQueue();
@@ -60,13 +60,13 @@ module.exports = function (elric) {
 		 * 
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.15
-		 * @version  2013.01.15
+		 * @version  2013.01.16
 		 */
 		this.on('disconnect', function () {
 		
 			thisClient.socket = false;
 		
-			elric.event.emit('clientdisconnected', thisClient);
+			elric.events.all.emit('clientdisconnected', thisClient);
 		});
 		
 		/**

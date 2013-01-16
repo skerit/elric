@@ -88,7 +88,7 @@ module.exports = function (elric) {
 		 *
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.07
-		 * @version  2013.01.07
+		 * @version  2013.01.16
 		 */
 		socket.on('browser', function (packet) {
 			
@@ -135,7 +135,7 @@ module.exports = function (elric) {
 			if (bubble && thisConnection.client) {
 				
 				// Transmit over the global event
-				elric.websocket.browser.emit(type, packet, thisConnection.client);
+				elric.events.browsers.emit(type, packet, thisConnection.client);
 				
 				// Transmit to the client object
 				thisConnection.client.event.emit(type, packet);
@@ -263,7 +263,7 @@ module.exports = function (elric) {
 					elric.getEventspace(filter).emit(type, packet, thisConnection.client);
 				}
 				
-				elric.websocket.client.emit(type, packet, thisConnection.client);
+				elric.events.clients.emit(type, packet, thisConnection.client);
 				thisConnection.client.event.emit(type, packet);
 			}
 		});

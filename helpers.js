@@ -192,18 +192,18 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.09
-	 * @version  2013.01.09
+	 * @version  2013.01.16
 	 *
-	 * @param    {string}   filter      The filter name
-	 * @returns  {EventEmitter}   An event emitter
+	 * @param    {string}        filter    The filter name
+	 * @returns  {EventEmitter}            An event emitter
 	 */
 	elric.getEventspace = function getEventspace (filter) {
 		
-		if (elric.websocket.filter[filter] === undefined) {
-			elric.websocket.filter[filter] = new elric.classes.EventEmitter(); 
+		if (elric.events.filters[filter] === undefined) {
+			elric.events.filters[filter] = new elric.classes.EventEmitter(); 
 		}
 		
-		return elric.websocket.filter[filter];
+		return elric.events.filters[filter];
 	}
 	
 	/**
