@@ -1,6 +1,7 @@
 var $ = require('jquery');
 var bcrypt = require('bcrypt');
 var async = require('async');
+var fs = require('fs');
 
 module.exports = function (elric) {
 	
@@ -38,6 +39,51 @@ module.exports = function (elric) {
 		}
 
 		return intermediateConstructor;
+	}
+	
+	/**
+	 * Copy dust templates to the public view directory
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.16
+	 * @version  2013.01.16
+	 *
+	 * @param    {string}   sourcedir     The directory with the source files
+	 */
+	elric.loadTemplates = function getTemplates (sourcedir) {
+		
+		// Set the base dir
+		var dir = './';
+		
+		// If the given dir is absolute, remove the basedir
+		if (sourcedir.charAt(0) == '/') dir = '';
+		
+		// Now add the given dir
+		dir += sourcedir;
+		
+		fs.readdir(dir, function (err, files){
+			
+			if (err) {
+				elric.log.info('Dust templates directory does not exists: ' + dir);
+			} else {
+			
+				elric.log.info('Copying over dust templates from ' + sourcedir);
+			
+				for (var i in files) {
+					
+					var filename = files[i];
+					
+					// Open the original file
+					var origin = fs.createReadStream(dir + '/' + filename);
+					
+					// Open the destination file
+					var destination = fs.createWriteStream('./public/views/' + filename);     
+					
+					// Pipe the original file into the destination
+					origin.pipe(destination);
+				}
+			}
+		});
 	}
 	
 	/**
@@ -397,7 +443,13 @@ module.exports = function (elric) {
 		}
 		
 		try {
+			
+			// Create the new plugin
 			elric.plugins[pluginName] = new plugin(elric);
+			
+			// Copy over dust templates, if they exist
+			elric.loadTemplates('plugins/' + pluginName + '/views/');
+			
 		} catch (err) {
 			elric.log.error('Error initializing plugin "' + pluginName + '": ' + err.message);
 		}

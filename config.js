@@ -5,6 +5,9 @@ module.exports = function Config (elric) {
 	require('./plugins/plugin')(elric);
 	require('./element_types/element_type')(elric);
 	require('./capabilities/capability')(elric);
+	
+	// Copy over all core dust templates
+	elric.loadTemplates('assets/views/');
 
 	// Load models
 	elric.loadModel('user');
@@ -25,5 +28,4 @@ module.exports = function Config (elric) {
 	
 	// Prepare all the clients
 	elric.prepareForClients();
-	
 }

@@ -123,7 +123,7 @@ app.configure(function(){
 
 	var bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap');
 	app.set('template_engine', 'dust');
-	app.set('views', __dirname + '/views');
+	app.set('views', __dirname + '/public/views');
 	app.set('view engine', 'dust');
 	app.use(express.favicon());
 	app.use(express.logger('dev'));
