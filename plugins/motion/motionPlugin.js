@@ -347,9 +347,7 @@ var Motion = function Motion (elriclink) {
 		for (var i in storage) {
 			results.cameras.push(storage[i]);
 		}
-		
-		console.log(results.cameras);
-		
+
 		ME.find({}).sort('-created').limit(10).execFind(function (err, events) {
 			
 			var newEvents = [];
@@ -531,6 +529,7 @@ var Motion = function Motion (elriclink) {
 	
 		}).on('error', function(e) {
 			// we got an error, return 500 error to client and log error
+			elric.log.error('Error received!');
 			console.log(e.message);
 			res.writeHead(500);
 			res.end();

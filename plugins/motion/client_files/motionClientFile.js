@@ -63,7 +63,7 @@ module.exports = function (client) {
 	// Listen to the setoption events from the server
 	client.socket.on('setoption', function(packet) {
 		
-		console.log(packet);
+		//console.log(packet);
 		//this.setOption(threadNr, 'on_motion_detected', 'wget -O - http://' + client.local.server + ':' + client.local.serverport + '/motion/detected/');
 		
 	});

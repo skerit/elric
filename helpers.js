@@ -47,14 +47,21 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.16
-	 * @version  2013.01.16
+	 * @version  2013.01.17
 	 *
 	 * @param    {string}   path   The absolute path to the file
 	 * @returns  {string}          The public url
 	 */
 	elric.getStorageUrl = function getStorageUrl (path) {
 		
-		var newpath = path.replace(elric.local.storage, '/storage/');
+		/**
+		 * @todo Return an "image not found" image if the path is invalid
+		 */
+		var newpath = false;
+		
+		if (path) {
+			newpath = path.replace(elric.local.storage, '/storage/');
+		}
 		
 		return newpath;
 	}

@@ -154,8 +154,7 @@ if (Elric.exposed.iokey) {
 	});
 	
 	Elric.socket.on('message', function (data) {
-		console.log(data);
-		//socket.emit('my other event', { my: 'data' });
+
 	});
 	
 	Elric.socket.on('notify', function (data) {
