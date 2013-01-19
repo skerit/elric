@@ -1,24 +1,27 @@
-var jQuery = require('jquery');
-var jsdom = require('jsdom').jsdom;
+var cheerio = require('cheerio');
 var ejs = require('ejs');
 var fs = require('fs');
-var $ = jQuery;
 var bigHawk = {};
 
 /**
- * A function to strip useless whitespaces
+ * The timer class
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
  */
-jQuery.fn.htmlClean = function() {
-    this.contents().filter(function() {
-        if (this.nodeType != 3) {
-            $(this).htmlClean();
-            return false;
-        }
-        else {
-            return !/\S/.test(this.nodeValue);
-        }
-    }).remove();
-    return this;
+var Timer = function Timer () {
+	
+	this.begin = new Date().getTime();
+	this.end = 0;
+	this.result = 0;
+}
+
+Timer.prototype.get = function () {
+	this.end = new Date().getTime();
+	this.result = this.end - this.begin;
+	
+	return this.result;
 }
 
 /**
@@ -107,6 +110,8 @@ hp.templates = {};
  * @version  2013.01.19
  */
 hp.render = function render (template, variables) {
+	
+	var t = new Timer();
 
 	var checkTemplate = this.getTemplate(template);
 
@@ -134,6 +139,9 @@ hp.render = function render (template, variables) {
 	// Elements (other templates) will be stored in here
 	payload.request.elements = {};
 	
+	// Tags to be injected are stored here
+	payload.request.tags = {};
+	
 	// Also create a link to the variables in the payload,
 	// even though we'll also add them one level further down
 	payload.scope.variables = variables;
@@ -148,7 +156,7 @@ hp.render = function render (template, variables) {
 	 * => This way no variable can override a helper
 	 *    This also means certain variables can't be set in the root
 	 */
-	$.extend(payload, variables, this.helpers);
+	jQuery.extend(payload, variables, this.helpers);
 	
 	// This variable will be used to check for infinite loops
 	var doCounter = 0;
@@ -161,7 +169,6 @@ hp.render = function render (template, variables) {
 	
 	// The template to render
 	var doTemplate;
-	
 	
 	// Start rendering templates
 	do {
@@ -200,7 +207,7 @@ hp.render = function render (template, variables) {
 		var blockHtml = block.buf.join('\n');
 		
 		// Store the html back into the item
-		payload.request.blocks[i] = {html: blockHtml, element: jsdom(blockHtml)};
+		payload.request.blocks[i] = {html: blockHtml, $: cheerio.load(blockHtml)};
 	}
 	
 	// Create an element we can modify with jquery
@@ -209,28 +216,45 @@ hp.render = function render (template, variables) {
 		// Get the element
 		var el = payload.request.elements[i];
 		
-		payload.request.elements[i] = {html: el, element: jsdom(el)}
+		payload.request.elements[i] = {html: el, $: cheerio.load(el)}
 	}
 	
 	// Store the element we originally requested
 	var requested = payload.request.elements[template];
 	
 	// Prepare the finished element
-	var resultElement = requested.element;
+	var $result = requested.$;
 
-	// Layouts "extend" the wanted element
+	// Expand the elements with other elements if wanted
 	for (var i in payload.request.layout) {
 		
 		var layoutName = payload.request.layout[i];
 		var layout = payload.request.elements[layoutName];
 		
-		resultElement = this._renderLayout(layout, resultElement, payload);
+		$result = this._renderLayout(layout, $result, payload);
+	}
+	
+	console.log('Rendering ' + template + ' took ' + t.get() + 'ms before injecting tags');
+	
+	// Inject tags (scripts, styles)
+	for (var i in payload.request.tags) {
+		
+		var tag = payload.request.tags[i];
+		
+		if (tag.type == 'script') {
+			this._addScript(tag, $result);
+		} else if (tag.type == 'style') {
+			this._addStyle(tag, $result);
+		}
+		
 	}
 	
 	// Strip away extra whitespaces
 	//$(resultElement).htmlClean();
 	
-	return resultElement.innerHTML;
+	console.log('Rendering ' + template + ' took ' + t.get() + 'ms');
+	
+	return $result.html();
 }
 
 /**
@@ -241,60 +265,144 @@ hp.render = function render (template, variables) {
  * @version  2013.01.18
  *
  * @param    {object}   layoutObject   The layout object
- * @param    {object}   reqElement     The original element
+ * @param    {Cheerio}  $              The original element
  * @param    {object}   payload        The payload
  */
-hp._renderLayout = function _renderLayout (layoutObject, reqElement, payload) {
+hp._renderLayout = function _renderLayout (layoutObject, $, payload) {
 	
 	// Insert blocks into spaces
-	this._insertBlock(layoutObject.element, payload);
+	this._insertBlock(layoutObject.$, payload);
 	
 	// Return the element
-	return layoutObject.element;
+	return layoutObject.$;
 	
 }
 
 /**
  * Fill in all spaces inside an element or block.
- * You pass de JSDOM Element, and it looks for things inside the payload
+ * You pass the Cheerio document, and it looks for things inside the payload
  * 
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.18
- * @version  2013.01.18
+ * @version  2013.01.19
  *
- * @param    {object}   origin   The origin element
+ * @param    {Cheerio}   $         The origin element
+ * @param    {Object}    payload   The payload
  */
-hp._insertBlock = function _insertBlock (origin, payload) {
+hp._insertBlock = function _insertBlock ($, payload) {
 
-	var $spaces = $('[data-hawkejs-space]', origin);
+	var $spaces = $('[data-hawkejs-space]');
 	
 	// Store the amount of spaces
 	var spaceNr = $spaces.length;
 	
-	// Go over every spice like this (don't use for...in! It goes over properties)
+	// Go over every space like this (don't use for...in! It goes over properties)
 	for (var i = 0; i < spaceNr; i++) {
 		
 		// jQueryfy this space
 		var $this = $($spaces[i]);
 		
 		var blockname = $this.attr('data-hawkejs-space');
-		
+
 		// If a block exists, fill it in!
 		if (payload.request.blocks[blockname]) {
 			
 			// Create a link to the block
 			var b = payload.request.blocks[blockname];
 			
-			// Clone the block
-			var clone = jsdom(b.html);
+			// Create a clone of the block we want to insert
+			// Because we might need the original block for another space
+			var $clone = cheerio.load(b.html);
 			
 			// insert the blocks here, too
-			this._insertBlock(clone, payload);
+			this._insertBlock($clone, payload);
 			
-			$this.html(clone.innerHTML);
+			$this.html($clone.html());
 		}
 	}
+}
+
+/**
+ * Add a script to the element
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {object}   script   The script object
+ * @param    {Cheerio}  element  The element to insert it into
+ *
+ * @returns  {Cheerio}           The modified Cheerio object
+ */
+hp._addScript = function _addScript (script, $) {
+
+	var html = '<script type="text/javascript" src="' + script.path + '"></script>';
 	
+	var newElement = this._addHtml($, script.destination, html);
+	
+	return newElement;
+}
+
+/**
+ * Add a stylesheet to the element
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {object}   style    The style object
+ * @param    {Cheerio}  element  The element to insert it into
+ *
+ * @returns  {Cheerio}           The modified Cheerio object
+ */
+hp._addStyle = function _addStyle (style, $) {
+
+	var attributes = ' ';
+	
+	for (var name in style.attributes) {
+		
+		var value = style.attributes[name];
+		
+		attributes += name + '="' + value + '" ';
+		
+	}
+
+	var html = '<link type="text/css" rel="stylesheet" href="' + style.path + '"' + attributes + '/>';
+	
+	var newElement = this._addHtml($, style.destination, html);
+	
+	return newElement;
+}
+
+/**
+ * Inject some html to the element
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {object}   $            The element to insert it into
+ * @param    {string}   destination  Where it should go
+ * @param    {string}   html         The html to inject
+ *
+ * @returns  {Cheerio}               The modified Cheerio object
+ */
+hp._addHtml = function _addHtml ($, destination, html) {
+	
+	// See where this script has to be added
+	if (destination == 'anywhere') {
+		
+		// Try to get the head element
+		var $dest = $('head');
+		
+		// If no head was found, take the element itself as destination
+		// Warning: if the element has <html> tags, nothing will be appended
+		if (!$dest) $dest = $;
+
+		$dest.append(html);
+	}
+	
+	return $;
 }
 
 /**
@@ -303,6 +411,9 @@ hp._insertBlock = function _insertBlock (origin, payload) {
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.18
  * @version  2013.01.18
+ *
+ * @param    {string}   templatesource   The template code
+ * @param    {object}   payload          The payload, options, variables, ...
  */
 hp._render = function _render (templatesource, payload) {
 	
@@ -319,7 +430,7 @@ hp._render = function _render (templatesource, payload) {
 	var result = {html: '', instructions: []};
 	
 	// Render using ejs
-	result.html = ejs.render(templatesource, $.extend({}, payload, prive));
+	result.html = ejs.render(templatesource, jQuery.extend({}, payload, prive));
 	
 	// Get possible instructions by cloning prive's instructions
 	result.instructions = prive.prive.instructions.slice(0);
@@ -706,6 +817,61 @@ helpers.print_element = function print_element (elementname) {
 	var html = bigHawk.render(elementname, this.scope.variables);
 	
 	this.scope.buf.push(html);
+}
+
+/**
+ * Indicate this request needs a script, and add it to it if needed
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {string}   scriptpath   The path of the script to add
+ * @param    {string}   destination  Where this script should be added
+ *                                   Defaults to anywhere
+ */
+helpers.script = function script (scriptpath, destination) {
+	
+	// Create an alias to the scripts object
+	var s = this.request.tags;
+	
+	if (destination === undefined) destination = 'anywhere';
+	
+	if (s[scriptpath] === undefined) {
+		s[scriptpath] = {
+			type: 'script',
+			path: scriptpath,
+			destination: destination
+		}
+	}
+}
+
+/**
+ * Indicate this request needs a stylesheet, and add it to it if needed
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {string}   scriptpath   The path of the script to add
+ * @param    {string}   destination  Where this script should be added
+ *                                   Defaults to anywhere
+ */
+helpers.style = function style (stylepath, attributes, destination) {
+	
+	// Create an alias to the scripts object
+	var s = this.request.tags;
+	
+	if (destination === undefined) destination = 'anywhere';
+	
+	if (s[stylepath] === undefined) {
+		s[stylepath] = {
+			type: 'style',
+			path: stylepath,
+			attributes: attributes,
+			destination: destination
+		}
+	}
 }
 
 /**
