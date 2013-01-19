@@ -138,6 +138,9 @@ hp.render = function render (template, variables) {
 	// even though we'll also add them one level further down
 	payload.scope.variables = variables;
 	
+	// Add an object in the scope to store temporary stuff
+	payload.scope.temp = {};
+	
 	/**
 	 * Extend the payload:
 	 * - First add all the variables to the root of the object
@@ -225,7 +228,7 @@ hp.render = function render (template, variables) {
 	}
 	
 	// Strip away extra whitespaces
-	$(resultElement).htmlClean();
+	//$(resultElement).htmlClean();
 	
 	return resultElement.innerHTML;
 }
@@ -484,27 +487,111 @@ helpers.render_start = function (buf) {
 	this.prive.buflink = buf;
 }
 
+/**
+ * The render has ended, finalise some things
+ */
 helpers.render_end = function(buf) {
+	
+	// Make sure all assigns are closed
+	if (this.scope.temp.assign !== undefined) {
+		
+		var ta = this.scope.temp.assign;
+		
+		for (var blockname in ta) {
+			
+			var tab = ta[blockname];
+			
+			// If this assign wasn't finished
+			if (!tab.finished) {
+				
+				// Add a closing div now
+				this.scope.buf[tab.beginline] += '</div>';
+				
+			}
+		}
+	}
+	
+	// Write the buffer back
 	this.prive.buflink = this.scope.buf;
 }
 
 /**
- * Assign a block
+ * Create a place where we can store a block in later on
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.17
- * @version  2013.01.17
+ * @version  2013.01.19
  */
 helpers.assign = function assign (blockname, removewrapper) {
 	
-	if (removewrapper === undefined) removewrapper = false;
+	// Make sure the assign temp var exists
+	if (this.scope.temp.assign == undefined) {
+		this.scope.temp.assign = {};
+	}
 	
-	var div = '<div id="hawkejs-space-' + blockname + '" '
-	          + 'data-hawkejs-space="' + blockname + '" '
-						+ 'data-remove="' + removewrapper + '">'
-						+ '</div>';
+	// Create an alias
+	var ta = this.scope.temp.assign;
 	
-	this.scope.buf.push(div);
+	// Create an entry for this block
+	if (ta[blockname] === undefined) {
+		ta[blockname] = {
+			name: false,
+			beginline: false,
+			finished: false
+		};
+	}
+	
+	var tab = ta[blockname];
+	
+	// If we're already working on the assign, do nothing
+	if (tab.name) {
+		
+	} else {
+		
+		tab.name = blockname;
+		
+		if (removewrapper === undefined) removewrapper = false;
+	
+		var div = '<div id="hawkejs-space-' + blockname + '" '
+							+ 'data-hawkejs-space="' + blockname + '" '
+							+ 'data-remove="' + removewrapper + '">';
+		
+		var newLength = this.scope.buf.push(div);
+		
+		tab.beginline = newLength - 1;
+	}
+}
+
+/**
+ * Optional assign_end function.
+ * When not used, the assign will be put on 1 single line
+ * If used, the part between assign() & assign_end() will
+ * be the "standard" text, in case nothing else is filled in
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ */
+helpers.assign_end = function assign_end (blockname) {
+	
+	// Make sure the assign temp var exists
+	if (this.scope.temp.assign == undefined) {
+		this.scope.temp.assign = {};
+		
+		// If we had to make it, the assign was never created
+		return '';
+	}
+	
+	// Create an alias
+	var ta = this.scope.temp.assign;
+	
+	if (ta[blockname] && !ta[blockname].finished) {
+		this.scope.buf.push('</div>');
+		ta[blockname].finished = true;
+	} else {
+		return '';
+	}
+	
 }
 
 /**
