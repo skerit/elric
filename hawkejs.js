@@ -1,4 +1,5 @@
 var cheerio = require('cheerio');
+var jQuery = require('jquery');
 var ejs = require('ejs');
 var fs = require('fs');
 var bigHawk = {};
@@ -22,6 +23,21 @@ Timer.prototype.get = function () {
 	this.result = this.end - this.begin;
 	
 	return this.result;
+}
+
+/**
+ * Get a cheerio object,
+ * create it if needed
+ * 
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ */
+var getCheerio = function getCheerio (object) {
+	
+	if (!object.$) object.$ = cheerio.load(object.html);
+
+	return object.$;
 }
 
 /**
@@ -196,6 +212,8 @@ hp.render = function render (template, variables) {
 	
 	if (doCounter > 100) console.error('Possible infinite loop detected while rendering template "' + template + '"');
 	
+	console.log('Rendering ' + template + ' took ' + t.get() + 'ms for all EJS to finish');
+	
 	// The elements are strings, but the blocks still need joining
 	// Also: create a workable element
 	for (var i in payload.request.blocks) {
@@ -207,23 +225,23 @@ hp.render = function render (template, variables) {
 		var blockHtml = block.buf.join('\n');
 		
 		// Store the html back into the item
-		payload.request.blocks[i] = {html: blockHtml, $: cheerio.load(blockHtml)};
+		payload.request.blocks[i] = {html: blockHtml, $: false, name: i};
 	}
 	
-	// Create an element we can modify with jquery
+	// Prepare the element objects
 	for (var i in payload.request.elements) {
 		
 		// Get the element
 		var el = payload.request.elements[i];
 		
-		payload.request.elements[i] = {html: el, $: cheerio.load(el)}
+		payload.request.elements[i] = {html: el, $: false, name: i}
 	}
 	
 	// Store the element we originally requested
 	var requested = payload.request.elements[template];
 	
 	// Prepare the finished element
-	var $result = requested.$;
+	var $result = getCheerio(requested);
 
 	// Expand the elements with other elements if wanted
 	for (var i in payload.request.layout) {
@@ -233,8 +251,6 @@ hp.render = function render (template, variables) {
 		
 		$result = this._renderLayout(layout, $result, payload);
 	}
-	
-	console.log('Rendering ' + template + ' took ' + t.get() + 'ms before injecting tags');
 	
 	// Inject tags (scripts, styles)
 	for (var i in payload.request.tags) {
@@ -248,9 +264,6 @@ hp.render = function render (template, variables) {
 		}
 		
 	}
-	
-	// Strip away extra whitespaces
-	//$(resultElement).htmlClean();
 	
 	console.log('Rendering ' + template + ' took ' + t.get() + 'ms');
 	
@@ -271,7 +284,7 @@ hp.render = function render (template, variables) {
 hp._renderLayout = function _renderLayout (layoutObject, $, payload) {
 	
 	// Insert blocks into spaces
-	this._insertBlock(layoutObject.$, payload);
+	this._insertBlock(getCheerio(layoutObject), payload);
 	
 	// Return the element
 	return layoutObject.$;
@@ -429,8 +442,12 @@ hp._render = function _render (templatesource, payload) {
 	// The return var
 	var result = {html: '', instructions: []};
 	
+	var t = new Timer();
+	
 	// Render using ejs
 	result.html = ejs.render(templatesource, jQuery.extend({}, payload, prive));
+	
+	console.log('EJS render took ' + t.get() + 'ms');
 	
 	// Get possible instructions by cloning prive's instructions
 	result.instructions = prive.prive.instructions.slice(0);
