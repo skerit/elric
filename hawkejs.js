@@ -2,7 +2,12 @@ var jQuery = require('jquery');
 var jsdom = require('jsdom').jsdom;
 var ejs = require('ejs');
 var fs = require('fs');
+var $ = jQuery;
+var bigHawk = {};
 
+/**
+ * A function to strip useless whitespaces
+ */
 jQuery.fn.htmlClean = function() {
     this.contents().filter(function() {
         if (this.nodeType != 3) {
@@ -16,35 +21,77 @@ jQuery.fn.htmlClean = function() {
     return this;
 }
 
-var $ = jQuery;
-var bigHawk = {};
-
 /**
  * The Hawkejs class
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.17
- * @version  2013.01.18
+ * @version  2013.01.19
  */
-var Hawkejs = function Hawkejs (expressapp) {
+var Hawkejs = function Hawkejs () {
 	
-	var thisHawk = this;
-	bigHawk = this;
-
-	expressapp.get('/h', function (req, res) {
-		
-		var html = thisHawk.render('article', {'start': "test", 'testtitel': 'De beste template engine ever!'});
-		res.setHeader('Content-Type', 'text/html');
-		res.setHeader('Content-Length', html.length);
-		res.end(html);
-	});
-
 }
 
 /**
  * A link to Hawkejs' prototype
  */
 var hp = Hawkejs.prototype;
+
+/**
+ * Require attempt are cached in here
+ */
+hp._requireCache = {};
+
+/**
+ * The base view dir is here
+ */
+hp._baseDir = false;
+
+/**
+ * Render a template based on its path,
+ * used for Express integration
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {string}    path
+ * @param    {object}    options
+ * @param    {function}  callback
+ */
+hp.renderFile = function renderFile (path, options, callback) {
+	
+	if (!this._baseDir) {
+		// Get the base view directory
+		this._baseDir = options.settings.views;
+	}
+	
+	// Get the filename
+	var filename = path.replace(this._baseDir + '/', '');
+	
+	// Get the view/element name (filename without extension)
+	var elementname = filename.split('/').reverse()[0].replace('.ejs', '');
+	
+	var result = this.render(elementname, options);
+	
+	callback(null, result);
+}
+
+/**
+ * Export the express render function through this simple closure
+ * 
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {string}    path
+ * @param    {object}    options
+ * @param    {function}  callback
+ */
+hp.__express = function (path, options, callback) {
+	hp.renderFile(path, options, callback);
+};
+
 
 /**
  * Store templates in here
@@ -57,13 +104,13 @@ hp.templates = {};
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.17
- * @version  2013.01.18
+ * @version  2013.01.19
  */
 hp.render = function render (template, variables) {
-	
-	var begin = new Date().getTime();
-	
-	if (this.templates[template] === undefined) {
+
+	var checkTemplate = this.getTemplate(template);
+
+	if (!checkTemplate) {
 		console.error('Hawkejs template "' + template + '" does not exist');
 		return '';
 	}
@@ -122,8 +169,11 @@ hp.render = function render (template, variables) {
 		// Increase the counter
 		doCounter++;
 		
+		// Get the template
+		var templateSource = this.getTemplate(doTemplate);
+		
 		// Render the template
-		doResult = this._render(this.templates[doTemplate], payload);
+		doResult = this._render(templateSource, payload);
 
 		for (var i in doResult.instructions) {
 			doStack.push(doResult.instructions[i]);
@@ -176,10 +226,6 @@ hp.render = function render (template, variables) {
 	
 	// Strip away extra whitespaces
 	$(resultElement).htmlClean();
-	
-	var end = new Date().getTime();
-	
-	console.log('Rendering ' + template + ' took ' + (end-begin) + 'ms');
 	
 	return resultElement.innerHTML;
 }
@@ -279,6 +325,75 @@ hp._render = function _render (templatesource, payload) {
 }
 
 /**
+ * If a template hasn't been loaded already, get it
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {string}   name    The template name to get
+ * @returns  {string}   The template code
+ */
+hp.getTemplate = function getTemplate (name) {
+	
+	// See if we already tried to get this template
+	if (this._requireCache[name]) {
+		
+		// We required it before, see if it was found, too
+		if (this.templates[name]) {
+			return this.templates[name];
+		} else {
+			// Not found, return empty string
+			console.error('Tried to get template that does not exist: ' + name);
+			return '';
+		}
+		
+	} else {
+		
+		// Only attempt to load it if the basedir is set
+		if (this._baseDir) {
+			
+			// We'll read the file synchronous
+			var original = fs.readFileSync(this._baseDir + '/' + name + '.ejs', 'utf-8');
+			
+			// Store the template and return it
+			return this.storeTemplate(name, original);
+		
+		} else {
+			console.error('Tried to get template, but base view dir is not set. Template not loaded: ' + name);
+			return '';
+		}
+	}
+	
+}
+
+/**
+ * Store a template
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.19
+ * @version  2013.01.19
+ *
+ * @param    {string}    name     The template name to store
+ * @param    {string}    source   The template code
+ * @returns  {string}    The modified template code
+ */
+hp.storeTemplate = function storeTemplate (name, source) {
+	
+	// Always prepend this code to the template, in order to expose the buffer
+	var buffercode = '<% this.buf = buf %><% render_start(buf) %>';
+	var endcode = '<% render_end(buf) %>';
+	
+	// Store the template content in this variable
+	this.templates[name] = buffercode + source + endcode;
+	
+	// Also indicate this file has been loaded already
+	this._requireCache[name] = true;
+	
+	return this.templates[name];
+}
+
+/**
  * Load a template directory
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -339,12 +454,7 @@ hp.loadDirectory = function loadDirectory (path, subdir) {
 									throw err;
 								} else {
 									
-									// Always prepend this code to the template, in order to expose the buffer
-									var buffercode = '<% this.buf = buf %><% render_start(buf) %>';
-									var endcode = '<% render_end(buf) %>';
-									
-									// Store the template content in this variable
-									thisHawk.templates[template] = buffercode + data + endcode;
+									thisHawk.storeTemplate(template, data);
 								}
 							});
 						}
@@ -544,4 +654,4 @@ helpers.expands = function expands (elementname) {
 	
 
 // Export the Hawkejs class
-module.exports = Hawkejs;
+module.exports = new Hawkejs();
