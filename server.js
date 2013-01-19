@@ -264,38 +264,12 @@ db.once('open', function callback () {
 	
 });
 
-/*
-app.get('/m', function(req, res){
-  var body = '<img src="http://192.168.1.3:3000/motion" class="motion">';
-  res.setHeader('Content-Type', 'text/html');
-  res.setHeader('Content-Length', body.length);
-  res.end(body);
-});
-*/
+// Initiate our own template engine
+var hawkejs = require('./hawkejs');
+var H = new hawkejs(elric.app);
+elric.hawkejs = H;
 
-
-//db.once('open', function callback () {
-	
-	/*var silence = new Kitten({ name: 'Silence' })
-	console.log(silence.name) // 'Silence'
-	
-	silence.save();*/
-	
-	/*var skerit = new models.User({username: 'Skerit', firstname: 'Jelle', lastname: 'De Loecker', email: 'jelle@kipdola.be', password: 'Twadi8923'});
-	skerit.save();*/
-	
-	/*models.Kitten.findOne({ name: /^Silen/ }, function callback(err, kitten) {
-		console.log(kitten);
-		kitten.name = 'Silencios';
-		kitten.save();
-	});*/
-  
-//});
-
-
-/*
-
-*/
+H.loadDirectory('./assets/hawkejs/');
 
 // Start the server
 elric.server.listen(local.serverport, function(){
