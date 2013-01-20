@@ -2,7 +2,6 @@ var cheerio = require('cheerio');
 var jQuery = require('jquery');
 var ejs = require('ejs');
 var fs = require('fs');
-var bigHawk = {};
 
 /**
  * The timer class
@@ -48,7 +47,7 @@ var getCheerio = function getCheerio (object) {
  * @version  2013.01.19
  */
 var Hawkejs = function Hawkejs () {
-	
+
 }
 
 /**
@@ -72,7 +71,7 @@ hp._baseDir = false;
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.19
- * @version  2013.01.19
+ * @version  2013.01.20
  *
  * @param    {string}    path
  * @param    {object}    options
@@ -89,7 +88,7 @@ hp.renderFile = function renderFile (path, options, callback) {
 	var filename = path.replace(this._baseDir + '/', '');
 	
 	// Get the view/element name (filename without extension)
-	var elementname = filename.split('/').reverse()[0].replace('.ejs', '');
+	var elementname = filename.replace('.ejs', '');
 	
 	var result = this.render(elementname, options);
 	
@@ -123,7 +122,7 @@ hp.templates = {};
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.17
- * @version  2013.01.19
+ * @version  2013.01.20
  */
 hp.render = function render (template, variables) {
 	
@@ -147,12 +146,19 @@ hp.render = function render (template, variables) {
 	// The buffer will be stored in here
 	payload.scope = {};
 	payload.request = {};
-	payload.request.layout = [];
+	
+	// Expansions of the current element, happen in order
+	// (Working element will be inserted into this expansion)
+	payload.request.expand = [];
+	
+	// Elements to be implemented
+	// (Implementations will be inserted into the working element)
+	payload.request.implement = [];
 	
 	// Blocks generated inside a template will be stored in here
 	payload.request.blocks = {};
 	
-	// Elements (other templates) will be stored in here
+	// Elements (other templates, like expansions & implementations)
 	payload.request.elements = {};
 	
 	// Tags to be injected are stored here
@@ -183,8 +189,12 @@ hp.render = function render (template, variables) {
 	// The render stack
 	var doStack = [template];
 	
-	// The template to render
+	// The template name to render
 	var doTemplate;
+	
+	// Make sure we don't repeat ourselves:
+	// Element that have already been rendered get an entry here
+	var doNotRepeat = {};
 	
 	// Start rendering templates
 	do {
@@ -199,14 +209,24 @@ hp.render = function render (template, variables) {
 		var templateSource = this.getTemplate(doTemplate);
 		
 		// Render the template
-		doResult = this._render(templateSource, payload);
+		doResult = this._EjsRender(templateSource, payload);
 
 		for (var i in doResult.instructions) {
-			doStack.push(doResult.instructions[i]);
+			
+			var iEName = doResult.instructions[i];
+			
+			// If this element hasn't been rendered already,
+			// add it to the todo list
+			if (doNotRepeat[iEName] === undefined) {
+				doStack.push(doResult.instructions[i]);
+			}
 		}
 		
 		// Store the result in the elements object
 		payload.request.elements[doTemplate] = doResult.html;
+		
+		// Indicate this element has been rendered
+		doNotRepeat[doTemplate] = true;
 		
 	} while (doStack.length && doCounter < 500);
 	
@@ -244,12 +264,21 @@ hp.render = function render (template, variables) {
 	var $result = getCheerio(requested);
 
 	// Expand the elements with other elements if wanted
-	for (var i in payload.request.layout) {
+	if (payload.request.expand.length) {
 		
-		var layoutName = payload.request.layout[i];
-		var layout = payload.request.elements[layoutName];
+		for (var i in payload.request.expand) {
+			
+			var elementName = payload.request.expand[i];
+			var expansionElement = payload.request.elements[elementName];
+			
+			$result = this._postEjsRender(expansionElement, payload);
+		}
 		
-		$result = this._renderLayout(layout, $result, payload);
+	} else {
+
+		// No expansions were requested, so just finalize the original element
+		$result = this._postEjsRender(requested, payload);
+		
 	}
 	
 	// Inject tags (scripts, styles)
@@ -271,17 +300,20 @@ hp.render = function render (template, variables) {
 }
 
 /**
- * Render a layout
+ * After the EJS render has finished,
+ * we need to implement some of our Hawkejs magic
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.18
- * @version  2013.01.18
+ * @version  2013.01.20
  *
  * @param    {object}   layoutObject   The layout object
- * @param    {Cheerio}  $              The original element
  * @param    {object}   payload        The payload
  */
-hp._renderLayout = function _renderLayout (layoutObject, $, payload) {
+hp._postEjsRender = function _postEjsRender (layoutObject, payload) {
+
+	// Insert implementations
+	this._insertImplementation(getCheerio(layoutObject), payload);
 	
 	// Insert blocks into spaces
 	this._insertBlock(getCheerio(layoutObject), payload);
@@ -289,6 +321,50 @@ hp._renderLayout = function _renderLayout (layoutObject, $, payload) {
 	// Return the element
 	return layoutObject.$;
 	
+}
+
+/**
+ * Fill in all implementation spaces
+ * You pass the Cheerio document, and it looks for things inside the payload
+ * 
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.20
+ * @version  2013.01.20
+ *
+ * @param    {Cheerio}   $         The origin element
+ * @param    {Object}    payload   The payload
+ */
+hp._insertImplementation = function _insertImplementation ($, payload) {
+
+	var $spaces = $('[data-hawkejs-implement]');
+	
+	// Store the amount of spaces
+	var spaceNr = $spaces.length;
+	
+	// Go over every space like this (don't use for...in! It goes over properties)
+	for (var i = 0; i < spaceNr; i++) {
+		
+		// Cheeriofy this space
+		var $this = $($spaces[i]);
+		
+		var elementname = $this.attr('data-hawkejs-implement');
+
+		// If the element exists, fill it in!
+		if (payload.request.elements[elementname]) {
+			
+			// Create a link to the block
+			var b = payload.request.elements[elementname];
+			
+			// Create a clone of the block we want to insert
+			// Because we might need the original block for another space
+			var $clone = cheerio.load(b.html);
+			
+			// insert the implementations here, too
+			this._insertImplementation($clone, payload);
+			
+			$this.html($clone.html());
+		}
+	}
 }
 
 /**
@@ -312,7 +388,7 @@ hp._insertBlock = function _insertBlock ($, payload) {
 	// Go over every space like this (don't use for...in! It goes over properties)
 	for (var i = 0; i < spaceNr; i++) {
 		
-		// jQueryfy this space
+		// Cheeriofy this space
 		var $this = $($spaces[i]);
 		
 		var blockname = $this.attr('data-hawkejs-space');
@@ -392,7 +468,7 @@ hp._addStyle = function _addStyle (style, $) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.19
- * @version  2013.01.19
+ * @version  2013.01.20
  *
  * @param    {object}   $            The element to insert it into
  * @param    {string}   destination  Where it should go
@@ -404,16 +480,18 @@ hp._addHtml = function _addHtml ($, destination, html) {
 	
 	// See where this script has to be added
 	if (destination == 'anywhere') {
-		
-		// Try to get the head element
-		var $dest = $('head');
-		
-		// If no head was found, take the element itself as destination
-		// Warning: if the element has <html> tags, nothing will be appended
-		if (!$dest) $dest = $;
-
-		$dest.append(html);
+		destination = 'head';
+	} else if (destination == 'bottom') {
+		destination = 'body'
 	}
+	
+	// Try to get the head element
+	var $dest = $(destination);
+	
+	// If nothing was found, take the element itself as destination
+	if (!$dest) $dest = $;
+
+	$dest.append(html);
 	
 	return $;
 }
@@ -428,14 +506,16 @@ hp._addHtml = function _addHtml ($, destination, html) {
  * @param    {string}   templatesource   The template code
  * @param    {object}   payload          The payload, options, variables, ...
  */
-hp._render = function _render (templatesource, payload) {
+hp._EjsRender = function _EjsRender (templatesource, payload) {
 	
 	// A "local" scope object, only to be used during this render
 	var prive = {
 		prive: {
 			blocks: {},
 			chain: ['_'],
-			instructions: []
+			instructions: [],
+			assign: {},
+			hawkejs: this
 		}
 	};
 	
@@ -446,8 +526,6 @@ hp._render = function _render (templatesource, payload) {
 	
 	// Render using ejs
 	result.html = ejs.render(templatesource, jQuery.extend({}, payload, prive));
-	
-	console.log('EJS render took ' + t.get() + 'ms');
 	
 	// Get possible instructions by cloning prive's instructions
 	result.instructions = prive.prive.instructions.slice(0);
@@ -619,26 +697,21 @@ helpers.render_start = function (buf) {
  * The render has ended, finalise some things
  */
 helpers.render_end = function(buf) {
+
+	var ta = this.prive.assign;
 	
 	// Make sure all assigns are closed
-	if (this.scope.temp.assign !== undefined) {
+	for (var blockname in ta) {
 		
-		var ta = this.scope.temp.assign;
+		var tab = ta[blockname];
 		
-		for (var blockname in ta) {
-			
-			var tab = ta[blockname];
-			
-			// If this assign wasn't finished
-			if (!tab.finished) {
-				
-				// Add a closing div now
-				this.scope.buf[tab.beginline] += '</div>';
-				
-			}
+		// If this assign wasn't finished
+		if (!tab.finished) {
+			// Add a closing div now
+			this.scope.buf[tab.beginline] += '</div>';
 		}
 	}
-	
+
 	// Write the buffer back
 	this.prive.buflink = this.scope.buf;
 }
@@ -648,17 +721,12 @@ helpers.render_end = function(buf) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.17
- * @version  2013.01.19
+ * @version  2013.01.20
  */
 helpers.assign = function assign (blockname, removewrapper) {
 	
-	// Make sure the assign temp var exists
-	if (this.scope.temp.assign == undefined) {
-		this.scope.temp.assign = {};
-	}
-	
 	// Create an alias
-	var ta = this.scope.temp.assign;
+	var ta = this.prive.assign;
 	
 	// Create an entry for this block
 	if (ta[blockname] === undefined) {
@@ -682,12 +750,14 @@ helpers.assign = function assign (blockname, removewrapper) {
 	
 		var div = '<div id="hawkejs-space-' + blockname + '" '
 							+ 'data-hawkejs-space="' + blockname + '" '
-							+ 'data-remove="' + removewrapper + '">';
+							+ 'data-remove="' + removewrapper + '" '
+						+ 'data-hawkejs="true">';
 		
 		var newLength = this.scope.buf.push(div);
 		
 		tab.beginline = newLength - 1;
 	}
+	
 }
 
 /**
@@ -698,26 +768,16 @@ helpers.assign = function assign (blockname, removewrapper) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.19
- * @version  2013.01.19
+ * @version  2013.01.20
  */
 helpers.assign_end = function assign_end (blockname) {
 	
-	// Make sure the assign temp var exists
-	if (this.scope.temp.assign == undefined) {
-		this.scope.temp.assign = {};
-		
-		// If we had to make it, the assign was never created
-		return '';
-	}
-	
 	// Create an alias
-	var ta = this.scope.temp.assign;
+	var ta = this.prive.assign;
 	
 	if (ta[blockname] && !ta[blockname].finished) {
 		this.scope.buf.push('</div>');
 		ta[blockname].finished = true;
-	} else {
-		return '';
 	}
 	
 }
@@ -820,18 +880,13 @@ helpers.print_block = function print_block (blockname) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.18
- * @version  2013.01.18
+ * @version  2013.01.20
  *
  * @param    {string}   elementname   The name of the element to print out
  */
 helpers.print_element = function print_element (elementname) {
-	
-	if (bigHawk.templates[elementname] === undefined) {
-		console.log('Element "' + elementname + '" was not found');
-		return;
-	}
 
-	var html = bigHawk.render(elementname, this.scope.variables);
+	var html = this.prive.hawkejs.render(elementname, this.scope.variables);
 	
 	this.scope.buf.push(html);
 }
@@ -910,18 +965,49 @@ helpers.print = function print (variable) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.17
- * @version  2013.01.18
+ * @version  2013.01.20
  */
 helpers.expands = function expands (elementname) {
 	
-	// Add this elementname to the layout array
+	// Add this elementname to the expansion array
 	// The current element should "expand" this element
-	this.request.layout.push(elementname);
+	this.request.expand.push(elementname);
 	
 	// Add it to the local instructions
+	// These will be returned when ejs has finished rendering this element
+	// And will in turn be rendered, too
 	this.prive.instructions.push(elementname);
 }
+
+/**
+ * Implement another element inside this one
+ * Contrary to print_element(), this will hapen later
+ * 
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.01.20
+ * @version  2013.01.20
+ *
+ * @param    {string}   elementname   The element to print
+ */
+helpers.implement = function implement (elementname) {
 	
+	var removewrapper = false;
+	
+	this.request.implement.push(elementname);
+	
+	// Add it to the local instructions.
+	// These will be returned when ejs has finished rendering this element
+	// And will in turn be rendered, too
+	this.prive.instructions.push(elementname);
+	
+	// Add an object we can put this element in later
+	var div = '<div id="hawkejs-implement-' + elementname + '" '
+						+ 'data-hawkejs-implement="' + elementname + '" '
+						+ 'data-remove="' + removewrapper + '" '
+						+ 'data-hawkejs="true"></div>';
+		
+	this.scope.buf.push(div);
+}
 
 // Export the Hawkejs class
 module.exports = new Hawkejs();

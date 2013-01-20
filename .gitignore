@@ -4,4 +4,4 @@ public/bootstrap
 public/stylesheets
 public/views
 local.js
-npm-debug.log
+*.log
