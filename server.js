@@ -132,7 +132,7 @@ app.configure(function(){
 
 	var bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap');
 	app.set('views', __dirname + '/assets/hawkejs');
-	app.set('view engine', 'hawkejs');
+	app.set('view engine', 'ejs');
 	app.use(express.favicon());
 	app.use(express.logger('dev'));
 	app.use(express.bodyParser());
@@ -274,7 +274,6 @@ db.once('open', function callback () {
 // Start the server
 elric.server.listen(local.serverport, function(){
 	elric.log.info(util.format('Elric server listening on port %d in %s mode',
-		 local.serverport,
-		 app.settings.env);
-								 );
+		local.serverport,
+		app.settings.env));
 });
