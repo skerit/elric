@@ -22,6 +22,7 @@ var fs = require('fs');
 var mv = require('mv');
 var base64 = require('base64js');
 var mkdirp = require('mkdirp');
+var hawkejs = require('./hawkejs');
 
 /**
  * Our own modules
@@ -120,16 +121,18 @@ elric.events.browsers = new elric.classes.ElricEvent('browsers');
 // Use IO's logger
 elric.log = elric.io.log;
 
-// Set Dust as our template engine
-app.engine('dust', cons.dust);
+// Use hawkejs as our template engine, map it to the .ejs extension
+app.engine('ejs', hawkejs.__express);
+
+// Add client side suport
+hawkejs.enableClientSide(path.join(__dirname, 'public', 'js'), '/js/');
 
 // Express configurations
 app.configure(function(){
 
 	var bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap');
-	app.set('template_engine', 'dust');
-	app.set('views', __dirname + '/public/views');
-	app.set('view engine', 'dust');
+	app.set('views', __dirname + '/assets/hawkejs');
+	app.set('view engine', 'hawkejs');
 	app.use(express.favicon());
 	app.use(express.logger('dev'));
 	app.use(express.bodyParser());
@@ -139,6 +142,7 @@ app.configure(function(){
 	app.use(express.session());
 	app.use('/storage', express.static(local.storage));
 	app.use('/img', express.static(path.join(bootstrapPath, 'img')));
+	app.use('/hawkejs', express.static(path.join(__dirname, 'assets', 'hawkejs')));
 	app.use('/js/bootstrap', express.static(path.join(bootstrapPath, 'js')));
 	app.use(lessmw({src    : path.join(__dirname, 'assets', 'less'),
 					paths  : [path.join(bootstrapPath, 'less')],
@@ -146,6 +150,9 @@ app.configure(function(){
 					prefix : '/stylesheets'
 					}));
 	app.use(express.static(path.join(__dirname, 'public')));
+	
+	// Add Hawkejs' middleware
+	app.use(hawkejs.middleware);
 	
 	// middleware
 	app.use(function(req, res, next){
@@ -264,17 +271,10 @@ db.once('open', function callback () {
 	
 });
 
-// Initiate our own template engine
-var hawkejs = require('./hawkejs');
-var H = new hawkejs(elric.app);
-elric.hawkejs = H;
-
-H.loadDirectory('./assets/hawkejs/');
-
 // Start the server
 elric.server.listen(local.serverport, function(){
 	elric.log.info(util.format('Elric server listening on port %d in %s mode',
-														 local.serverport,
-														 app.settings.env)
+		 local.serverport,
+		 app.settings.env);
 								 );
 });

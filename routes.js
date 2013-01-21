@@ -48,7 +48,7 @@ module.exports = function Routes (elric) {
 	 * Home routes
 	 */
 	elric.app.get('/', function (req, res) {
-		elric.render(req, res, 'index', {username: req.session.username});
+		elric.render(req, res, 'page/index', {username: req.session.username});
 	});
 	
 	/**

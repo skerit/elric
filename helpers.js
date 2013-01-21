@@ -698,7 +698,7 @@ module.exports = function (elric) {
 	elric.render = function render (req, res, view, options) {
 		
 		if (options === undefined) options = {}
-		
+		/*
 		var iokey = false;
 		var objects = {};
 		var robj = {};
@@ -714,15 +714,16 @@ module.exports = function (elric) {
 		elric.expose('notifications', res.locals.notifications, res);
 		
 		if (res.locals.exposedObjects !== undefined) robj = res.locals.exposedObjects;
+		*/
 		
-		res.render(view,
+		res.render(view/*,
 							 $.extend(true,
 												{dest: req.originalUrl,
 												username: req.session.username,
 												notifications: res.locals.notifications,
 												iokey: iokey,
 												exposedObjects: $.extend({}, objects, robj)},
-												options));
+												options)*/);
 	}
 	
 	/**

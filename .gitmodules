@@ -7,3 +7,6 @@
 [submodule "public/js/cookie"]
 	path = public/js/cookie
 	url = git://github.com/carhartl/jquery-cookie.git
+[submodule "hawkejs"]
+	path = hawkejs
+	url = ssh://skerit@ddsde1.kipdola.be/home/gitadmin/hawkejs.git

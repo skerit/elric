@@ -3,5 +3,6 @@ node_modules
 public/bootstrap
 public/stylesheets
 public/views
+public/js/hawkejs-client-side.js
 local.js
 *.log
