@@ -1,0 +1,18 @@
+<% expands('layout/body-main') %>
+<% start('container-fluid') %>
+
+<div class="row-fluid">
+	
+	<div class="span2">
+		<% implement('admin/sidebar') %>
+		<% assign('admin-sidebar') %>
+	</div>
+	
+	<div class="span10">
+		<div id="error"></div>
+		<% assign('admin-main') %>
+	</div>
+	
+</div>
+
+<% end('container-fluid') %>

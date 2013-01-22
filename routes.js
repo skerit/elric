@@ -41,7 +41,7 @@ module.exports = function Routes (elric) {
 	 * Admin routes
 	 */
 	elric.app.get('/admin', function (req, res) {
-		elric.render(req, res, 'adminDashboard', {username: req.session.username, admin: elric.adminArray});
+		elric.render(req, res, 'admin/index', {username: req.session.username, admin: elric.adminArray});
 	});
 	
 	/**
