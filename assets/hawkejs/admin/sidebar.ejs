@@ -2,10 +2,11 @@
 <div class="well sidebar-nav">
 	<ul class="nav nav-list">
 		<li class="nav-header">Models</li>
-		{@lilink dest=dest title="Dashboard" href="/admin" /}
-		{#admin dest=dest}
-			{@lilink dest=dest title=title href="/admin/:modelname/index" modelname=name /}
-		{/admin}
+		<li><% add_link('/admin', {title: 'Dashboard', matchref: {class: 'active'}}) %></li>
+		<% for (var i in admin){ %>
+			<% var m = admin[i] %>
+			<li><% add_link('/admin/:modelname/index', {title: m.title, matchref: {class: 'active'}, urlvars: {modelname: m.modelname}}) %></li>
+		<% } %>
 	</ul>
-</div><!--/.well -->
+</div>
 <% end('admin-sidebar') %>

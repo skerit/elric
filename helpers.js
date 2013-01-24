@@ -540,7 +540,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.27
-	 * @version  2013.01.15
+	 * @version  2013.01.24
 	 */
 	elric.loadModel = function loadModel (modelName, pluginName) {
 		
@@ -576,8 +576,13 @@ module.exports = function (elric) {
 		
 		// Create an admin interface?
 		if (m.admin) {
-			elric.admin[modelName] = new elric.classes.Admin(m, $.extend(true, {name: modelName}, m.admin));
-			elric.adminArray.push(elric.admin[modelName]);
+			var nA = new elric.classes.Admin(m, $.extend(true, {name: modelName}, m.admin));
+			
+			elric.admin[modelName] = nA;
+			
+			var m = {title: nA.title, modelname: modelName};
+			
+			elric.adminArray.push(m);
 		}
 	}
 	

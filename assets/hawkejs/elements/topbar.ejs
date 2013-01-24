@@ -12,12 +12,10 @@
 					Logged in as <a href="#" class="navbar-link">{username}</a>
 				</p>
 				<ul class="nav">
-					<li><% add_link('/', {title: 'Home'}) %></li>
-					<li><% add_link('/admin', {title: 'Admin'}) %></li>
-					<li><% add_link('/clients', {title: 'Clients'}) %></li>
-					<li><% add_link('#', {title: 'Notifications', id: 'notifybutton'}) %></li>
-				  <!--
-					{@menu name="topbar" dest=dest /}-->
+					<li><% add_link('/', {title: 'Home', matchref: {class: 'active'}}) %></li>
+					<li><% add_link('/admin', {title: 'Admin', matchref: {class: 'active'}}) %></li>
+					<li><% add_link('/clients', {title: 'Clients', matchref: {class: 'active'}}) %></li>
+					<li><% add_link('#', {title: 'Notifications', id: 'notifybutton', matchref: {class: 'active'}}) %></li>
 				</ul>
 			</div><!--/.nav-collapse -->
 		</div>
