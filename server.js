@@ -121,6 +121,9 @@ elric.events.browsers = new elric.classes.ElricEvent('browsers');
 // Use IO's logger
 elric.log = elric.io.log;
 
+// Enable hawkejs debug
+hawkejs._debug = true;
+
 // Use hawkejs as our template engine, map it to the .ejs extension
 app.engine('ejs', hawkejs.__express);
 

@@ -41,14 +41,16 @@ module.exports = function Routes (elric) {
 	 * Admin routes
 	 */
 	elric.app.get('/admin', function (req, res) {
-		elric.render(req, res, 'admin/index', {username: req.session.username, admin: elric.adminArray});
+		// Because data has to be sent to the client, we can no longer just
+		// send the entire admin array.
+		elric.render(req, res, 'admin/index', {username: req.session.username/*, admin: elric.adminArray*/});
 	});
 	
 	/**
 	 * Home routes
 	 */
 	elric.app.get('/', function (req, res) {
-		elric.render(req, res, 'page/index', {username: req.session.username});
+		elric.render(req, res, 'page/index', {username: req.session.username, timestamp: new Date().getTime()});
 	});
 	
 	/**
