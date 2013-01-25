@@ -2,7 +2,7 @@
 
 <% start('admin-main') %>
 <div class="adminActionHead">
-  <span class="title" id="mainTitle">{title}: Index</span>
+  <span class="title" id="mainTitle"><%= modelName %>: Index</span>
   <div class="buttons">
     <button class="btn btn-primary" id="addNew" data-model="{modelName}">Add new</button>
   </div>
@@ -10,9 +10,9 @@
 </div>
 <table class="table table-striped table-bordered">
   <tr>
-    {#options.fields}
-    <th>{.}</th>
-    {/options.fields}
+     for (var i in fields) {
+    <th>i </th>
+     } 
     <th>Actions</th>
   </tr>
  {#items fields=options.fields}

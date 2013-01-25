@@ -5,7 +5,7 @@
 		<li><% add_link('/admin', {title: 'Dashboard', matchref: {class: 'active'}}) %></li>
 		<% for (var i in admin){ %>
 			<% var m = admin[i] %>
-			<li><% add_link('/admin/:modelname/index', {title: m.title, match: {class: 'active', parent: 'active'}, urlvars: {modelname: m.modelname}}) %></li>
+			<li><% add_link('/admin/:modelname/index', {title: m.title, match: {class: 'active', parent: {class: 'active'}}, urlvars: {modelname: m.modelname}}) %></li>
 		<% } %>
 	</ul>
 </div>

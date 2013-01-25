@@ -8,7 +8,7 @@ module.exports = function (elric) {
 		var modelname = req.params.modelname;
 		var model = elric.models[modelname];
 		
-		var baseOpt = {admin: elric.adminArray, modelName: model.name, title: model.title}
+		var baseOpt = {admin: elric.adminArray, modelName: model.name, titleName: model.title}
 		
 		model.model.find({}, function(err, items) {
 			elric.render(req, res, 'admin/modelIndex', $.extend({}, baseOpt, {items: items}));
@@ -22,7 +22,7 @@ module.exports = function (elric) {
 		this.name = options.name;
 		this.title = options.title ? options.title : this.name;
 		
-		var baseOpt = {admin: elric.adminArray, modelName: this.name, title: this.title, options: options, model: this.model}
+		var baseOpt = {admin: elric.adminArray, modelName: this.name, titleName: this.title, options: options, model: this.model}
 		
 		// Admin routes
 		elric.app.get('/admin/' + this.name + '/view/:id', function (req, res) {
