@@ -29,6 +29,10 @@
     "hawkejs": "0.0.x",
 		"mkdirp": "0.3.x"
   },
+	"devDependencies": {
+		"benchmark": "1.0.x",
+		"microtime": "0.3.x"
+	},
   "engines": {
     "node": ">=0.8"
   }

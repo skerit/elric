@@ -3,6 +3,18 @@ var async = require('async');
 
 module.exports = function (elric) {
 	
+	elric.app.get('/admin/:modelname/index', function (req, res) {
+		
+		var modelname = req.params.modelname;
+		var model = elric.models[modelname];
+		
+		var baseOpt = {admin: elric.adminArray, modelName: model.name, title: model.title}
+		
+		model.model.find({}, function(err, items) {
+			elric.render(req, res, 'admin/modelIndex', $.extend({}, baseOpt, {items: items}));
+		});
+	});
+	
 	elric.classes.Admin = function admin (model, options) {
 		var thisAdmin = this;
 		this.elric = elric;
@@ -19,11 +31,7 @@ module.exports = function (elric) {
 			});
 		});
 		
-		elric.app.get('/admin/' + this.name + '/index', function (req, res) {
-			model.model.find({}, function(err, items) {
-				elric.render(req, res, 'adminIndex', $.extend({}, baseOpt, {items: items}));
-			});
-		});
+		
 		
 		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
 			var serial = {}
