@@ -145,6 +145,7 @@ app.configure(function(){
 	app.use(express.session());
 	app.use('/storage', express.static(local.storage));
 	app.use('/img', express.static(path.join(bootstrapPath, 'img')));
+	app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
 	app.use('/hawkejs', express.static(path.join(__dirname, 'assets', 'hawkejs')));
 	app.use('/js/bootstrap', express.static(path.join(bootstrapPath, 'js')));
 	app.use(lessmw({src    : path.join(__dirname, 'assets', 'less'),

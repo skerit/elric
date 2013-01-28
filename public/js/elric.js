@@ -48,6 +48,13 @@ $('#ma-notifybutton').click(function(e){
 });
 
 /**
+ * Make the content div fill the body
+ */
+$(document).ready(function() {
+	$('#content').height(($('html').height() - $('#topbar').height()));
+});
+
+/**
  * Send data to the server,
  * store for later if no connection is available
  *

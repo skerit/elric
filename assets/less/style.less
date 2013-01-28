@@ -56,3 +56,140 @@
 		margin-right: 5px;
 	}
 }
+
+/**
+ * Main sidebar changes
+ */
+#sidebar {
+	display: block;
+	position: fixed;
+	width: 220px;
+	z-index: 16;
+	background-color: #191919;
+	height: 100%;
+	
+	a {
+		text-decoration: none;
+	}
+	
+	li a i {
+		vertical-align: top;
+		background-image: url('../img/glyphicons-halflings-white.png');
+		opacity: .5;
+		margin-top: 2px;
+	}
+	
+	ul {
+		display: block;
+	}
+	
+	> ul {
+		list-style: none;
+		margin: 10px 0 0;
+		padding: 0;
+		position: absolute;
+		width: 220px;
+		
+		border-top: 1px solid #0a0c0e;
+		border-bottom: 1px solid #212121;
+		
+		ul {
+			border-top: 1px solid #4E4E4E;
+			background-color: #2A2A2A;
+			
+			// Show on click
+			//display: none;
+			margin: 0;
+			padding: 0;
+			box-shadow: 0 0 3px rgba(0,0,0,0.5) inset;
+			
+			li {
+				
+				&:first-child a {
+					border-top: 0;
+				}
+				
+				a {
+					border-top: 1px solid #333333;
+					border-bottom: 1px solid #202020;
+					padding: 10px 0 10px 25px;
+					display: block;
+					color: #777777;
+				}
+				
+				a:hover {
+					background-color: #2F2F2F;
+				}
+			}
+			
+		}
+		
+		> li {
+			display: block;
+			position: relative;
+			
+			border-top: 1px solid #212121;
+			border-bottom: 1px solid #0a0c0e;
+			
+			> a {
+				padding: 10px 0 10px 15px;
+				display: block;
+				color: #AAAAAA;
+				
+				> .label {
+					background-color: #333333;
+					margin: 0 20px 0 0;
+					float: right;
+					padding: 3px 5px 2px;
+					box-shadow: 0 1px 2px rgba(0,0,0,0.5) inset, 0 1px 0 rgba(255,255,255,0.2);
+				}
+				
+				&:hover {
+					background-color: #2A2A2A;
+				}
+				
+				> i {
+					margin-right: 10px;
+				}
+			}
+		}
+		
+		> li.active {
+			background-color: #3a3a3a;
+			background-image: -webkit-gradient(linear, 0 0%, 0 100%, from(#333333), to(#3F3F3F));
+			background-image: -webkit-linear-gradient(top, #333333 0%, #3F3F3F 100%);
+			background-image: -moz-linear-gradient(top, #333333 0%, #3F3F3F 100%);
+			background-image: -ms-linear-gradient(top, #333333 0%, #3F3F3F 100%);
+			background-image: -o-linear-gradient(top, #333333 0%, #3F3F3F 100%);
+			background-image: linear-gradient(top, #333333 0%, #3F3F3F 100%);
+			
+			box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
+			
+			> a {
+				background: url("../img/menu-active.png") no-repeat scroll right center transparent !important;
+			}
+		}
+	}
+}
+
+#content {
+	box-shadow: inset 10px 10px 50px -24px #202020;
+	margin-left: 220px;
+	margin-right: 0;
+	position: relative;
+	min-height: 500px;
+	width: auto;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	background: url('/img/lghtmesh.png') repeat scroll 0 0 #eeeeee;
+	padding-top: 40px;
+}
+
+.sidebar-nav {
+  padding: 9px 0;
+}

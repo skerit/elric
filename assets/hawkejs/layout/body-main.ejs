@@ -1,7 +1,10 @@
 <% expands('layout/base') %>
 <% start('main') %>
 	<% implement('elements/topbar') %>
-	<div class="container-fluid">
-		<% assign('container-fluid') %>
+	<% implement('elements/sidebar') %>
+	<div id="content">
+		<div class="container-fluid">
+			<% assign('container-fluid') %>
+		</div>
 	</div>
 <% end('main') %>
