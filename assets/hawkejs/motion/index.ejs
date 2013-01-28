@@ -1,0 +1,59 @@
+<% expands('layout/base') %>
+
+<% start('main') %>
+	<% implement('elements/topbar') %>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="span7">
+				<div id="mainvideo">
+					
+				</div>
+				<div id="cameraselection">
+
+					<% for (var i in cameras) { %>
+						<% var c = cameras[i] %>
+						<div class="camerathumb" id="camerathumb-<%= c.id %>" data-cameraid="<%= c.id %>">
+							<img src="/motion/camera/<%= c.id %>" />
+						</div>
+					<% } %>
+					
+				</div>
+			</div>
+			<div class="span5">
+				<div id="cameraevents">
+				<% for (var i in events) { %>
+					<% var e = events[i] %>
+					<div class="eventthumb" id="eventthumb-<%= e._id %>" data-eventid="<%= e._id %>">
+						<img src="<%= e.picture %>" class="eventthumb" />
+					</div>
+				<% } %>
+				</div>
+			</div>
+		</div>
+	</div>
+	<style>
+		.camerathumb {
+			display: inline-block;
+			width: 156px;
+			margin-right: 5px;
+		}
+		
+		.eventthumb {
+			width: 156px;
+		}
+		
+		#mainvideo {
+			width: 640px;
+			height: 480px;
+			margin-bottom: 10px;
+		}
+	</style>
+	<script type="text/javascript">
+		var $mainvideo = $('#mainvideo');
+		
+		$('.camerathumb').click(function (e) {
+			var $this = $(this);
+			$mainvideo.html($this.html());
+		});
+	</script>
+<% end('main') %>

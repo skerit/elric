@@ -6,3 +6,5 @@ public/views
 public/js/hawkejs-client-side.js
 local.js
 *.log
+*.sublime-project
+*.sublime-workspace

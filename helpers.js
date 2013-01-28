@@ -721,7 +721,8 @@ module.exports = function (elric) {
 		if (res.locals.exposedObjects !== undefined) robj = res.locals.exposedObjects;
 		
 		var variables = $.extend(true,
-												{dest: req.originalUrl,
+												{ menus: elric.menus,
+													dest: req.originalUrl,
 												username: req.session.username,
 												notifications: res.locals.notifications,
 												iokey: iokey,
@@ -734,10 +735,14 @@ module.exports = function (elric) {
 	/**
 	 * Our wrapper function for setting a route
 	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.31
+	 * @version  2013.01.27
+	 *
 	 * @param   {string}   path       The url
 	 * @param   {array}    menus      To what menus we should add this route
 	 * @param   {object}   callback   The callback function
-	 * @param   {string}   methid     What method to use, default = get
+	 * @param   {string}   method     What method to use, default = get
 	 */
 	elric.addRoute = function addRoute (path, menus, title, callback, method) {
 		

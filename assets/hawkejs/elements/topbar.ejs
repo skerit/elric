@@ -13,23 +13,16 @@
 				</p>
 				<ul class="nav">
 					<% matchIns = {class: 'active', parent: {class: 'active'}} %>
-					
-					
-					
-					<li><% add_link('/', {title: 'Home', match:
-															    {
-																		class: 'active',
-																			parent: {
-																			class: 'active'
-																			}
-																	}
-																}
-												) %></li>
-					
-					
-					
+
+					<li><% add_link('/', {title: 'Home', match: matchIns}) %></li>
 					<li><% add_link('/admin', {title: 'Admin', match: matchIns, matchExtend: true}) %></li>
 					<li><% add_link('/clients', {title: 'Clients', match: matchIns}) %></li>
+					
+					<% for (var i in menus.topbar) { %>
+						<% var obj = menus.topbar[i] %>
+						<li><% add_link(obj.href, {title: obj.title, match: matchIns}) %></li>
+					<% } %>
+					
 					<li><% add_link('#', {title: 'Notifications', id: 'notifybutton', match: matchIns}) %></li>
 				</ul>
 			</div><!--/.nav-collapse -->

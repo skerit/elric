@@ -128,7 +128,7 @@ hawkejs._debug = true;
 app.engine('ejs', hawkejs.__express);
 
 // Add client side suport
-hawkejs.enableClientSide(path.join(__dirname, 'public', 'js'), '/js/');
+hawkejs.enableClientSide(path.join(__dirname, 'public', 'js'), 'js/');
 
 // Express configurations
 app.configure(function(){

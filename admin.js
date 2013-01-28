@@ -8,7 +8,7 @@ module.exports = function (elric) {
 		var modelname = req.params.modelname;
 		var model = elric.models[modelname];
 		
-		var baseOpt = {admin: elric.adminArray, modelName: model.name, titleName: model.title}
+		var baseOpt = {admin: elric.adminArray, modelName: model.name, titleName: model.admin.title, fields: model.admin.fields};
 		
 		model.model.find({}, function(err, items) {
 			elric.render(req, res, 'admin/modelIndex', $.extend({}, baseOpt, {items: items}));

@@ -360,12 +360,13 @@ var Motion = function Motion (elriclink) {
 				if (e.pictures.length > 0) {
 					e.picture = elric.getStorageUrl(e.pictures[1]);
 				}
-				
+				console.log('Found pictures: ')
+				console.log(e.picture);
 				newEvents.push(e);
 			}
 			
 			results.events = newEvents;
-			elric.render(req, res, 'motionIndex', results);
+			elric.render(req, res, 'motion/index', results);
 		});
 	});
 	
