@@ -588,6 +588,8 @@ module.exports = function (elric) {
 	
 	/**
 	 * Load a new element type
+	 * Element Types are definition of objects we put in the doek.
+	 * (Eg: closet, camera, computer, tv, ...)
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.31
