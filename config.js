@@ -6,6 +6,7 @@ module.exports = function Config (elric) {
 	require('./element_types/element_type')(elric);
 	require('./capabilities/capability')(elric);
 	require('./activities/activity')(elric);
+	require('./actions/action')(elric);
 	
 	// Copy over all core dust templates
 	elric.loadTemplates('assets/views/');
@@ -18,6 +19,11 @@ module.exports = function Config (elric) {
 	elric.loadModel('client');
 	elric.loadModel('clientCapability');
 	elric.loadModel('movementEvent');
+	elric.loadModel('flow');
+	elric.loadModel('scenario');
+	
+	// Load actions
+	elric.loadAction('consoleOutput');
 	
 	// Load plugins
 	elric.loadPlugin('motion');

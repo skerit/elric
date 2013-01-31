@@ -653,7 +653,42 @@ module.exports = function (elric) {
 	}
 	
 	/**
-	 * Load a new activity we can act upon
+	 * Load a new action class
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.31
+	 * @version  2013.01.31
+	 *
+	 * @returns    {elric.classes.Action}   An Action class
+	 */
+	elric.loadAction = function loadAction (actionName, pluginName) {
+	
+		var path = 'actions/' + actionName + 'Action';
+		var debugm = '';
+		
+		if (pluginName !== undefined) {
+			path = 'plugins/' + pluginName + '/' + path;
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		path = './' + path;
+		
+		elric.log.debug('Requiring Action Class "' + actionName + '"' + debugm);
+		
+		var constructor = require(path);
+		
+		var action = elric.extend(elric.classes.BaseAction,
+		                            elric.classes.BaseAction.prototype._preConstructor,
+		                            constructor);
+
+		// Store the new activity class
+		elric.activities[actionName] = action;
+		
+		return action;
+	}
+	
+	/**
+	 * Load a new activity class we can act upon
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.30
@@ -673,7 +708,7 @@ module.exports = function (elric) {
 		
 		path = './' + path;
 		
-		elric.log.debug('Initializing Activity "' + activityName + '"' + debugm);
+		elric.log.debug('Requiring Activity Class "' + activityName + '"' + debugm);
 		
 		var constructor = require(path);
 		
