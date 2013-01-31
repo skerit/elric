@@ -111,9 +111,9 @@ module.exports = function (elric) {
 		if (global && eventname != 'all') {
 			elric.getEventspace('all').emit.apply(this, newArguments);
 		}
-		
+
 		// Emit in our event
-		return this._baseEmitter.emit.apply(this, newArguments);
+		return this._baseEmitter.emit.apply(this._baseEmitter, newArguments);
 	}
 	
 	/**

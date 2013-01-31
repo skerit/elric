@@ -96,7 +96,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.15
-	 * @version  2013.01.15
+	 * @version  2013.01.31
 	 *
 	 * @param    {string}   name      The event name (save, init, ...)
 	 * @param    {callback} callback  The callback to make
@@ -114,6 +114,9 @@ module.exports = function (elric) {
 	 * @version  2013.01.15
 	 */
 	bp._init = function _init () {
+		
+		// Empty the cache (otherwise it's shared accross all models)
+		this.cache = {};
 
 		// Create the schema based on our blueprint
 		this.schema = this._createSchema(this.blueprint);
@@ -246,7 +249,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.14
-	 * @version  2013.01.15
+	 * @version  2013.01.31
 	 *
 	 * @param    {object}   model        The model
 	 * @param    {object}   storage      Store the findings in here,
@@ -254,11 +257,10 @@ module.exports = function (elric) {
 	 */
 	bp._cacheRecordset = function _cacheRecordset (model, storage) {
 		
+		var thisModel = this;
+		
 		if (storage === undefined) storage = false;
 		
-		// Create a shortlink to the temp object
-		var t = this.cache;
-
 		if (storage) t = storage;
 
 		// Find all records in this model
@@ -271,7 +273,7 @@ module.exports = function (elric) {
 				
 				// Store the item in the cache object
 				// under its _id
-				t[item._id] = item;
+				thisModel.cache[item._id] = item;
 			}
 		});
 	}

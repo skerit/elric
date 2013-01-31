@@ -11,6 +11,8 @@ var Motion = function Motion (elriclink) {
 	elric.loadElementType('camera', 'motion');
 	elric.loadCapability('motion', 'motion');
 	
+	this.Activity = elric.loadActivity('motion', 'motion');
+	
 	// The 'global' client event, all socket messages go here
 	var clients = elric.events.clients;
 	
@@ -24,10 +26,14 @@ var Motion = function Motion (elriclink) {
 	// We can store specific stuff in here, like active events
 	var storage = {};
 	this.storage = storage;
+	
+	// Store active activities in here
+	var activities = {};
+	this.activities = {};
 
 	// Load all the cameras
 	this.registerAllCameras();
-	
+
 	/**
 	 * Motion lets us know a new event has started by wgetting this route
 	 *
@@ -72,24 +78,54 @@ var Motion = function Motion (elriclink) {
 		// @todo: Make sure this exists!
 		if (storage[cameraid] === undefined) storage[cameraid] = {};
 		
-		// Create a new movementEvent record
-		var record = getMovementEvent(packet.eventnr,
-																	cameraid,
-																	packet.epoch,
-																	{x: packet.x, y: packet.y, pixels: packet.pixels, noise: packet.noise});
-
-		// Create a link to this camera's storage
-		var cs = storage[cameraid];
+		// Look for the roomElement of this camera, if it exists
+		elric.models.roomElement.model.findOne({type_external_id: cameraid}, function (err, item) {
+			
+			var roomId = undefined;
+			var roomElementId = undefined;
+			
+			if (item) {
+				roomId = item.room_id;
+				roomElementId = item._id;
+			}
+			
+			// Create a new movementEvent record
+			var record = getMovementEvent(packet.eventnr,
+			                              cameraid,
+			                              packet.epoch,
+			                              {x: packet.x, y: packet.y,
+                                     pixels: packet.pixels, noise: packet.noise},
+			                              roomId,
+			                              roomElementId);
+	
+			// Create a link to this camera's storage
+			var cs = storage[cameraid];
+			
+			// Set our current event as active
+			cs.eventid = record._id;
+			cs.eventnr = packet.eventnr;
+			cs.eventrecord = record;
+			cs.counter = 0;
+			
+			packet.eventid = record._id;
+			
+			// Also create the Activity we can use for scripting scenarios
+			var a = new elric.activities.motion();
+			
+			a.payload = packet;
+			a.origin.room = roomId;
+			a.origin.element = roomElementId;
+			
+			// Fire the activity
+			a.fire();
+			
+			// Store the ongoing activity in here
+			activities[cs.eventid] = a;
+			
+			console.log('Motion event detected on ' + req.params.cameraid);
+			
+		});
 		
-		// Set our current event as active
-		cs.eventid = record._id;
-		cs.eventnr = packet.eventnr;
-		cs.eventrecord = record;
-		cs.counter = 0;
-		
-		packet.eventid = record._id;
-		
-		console.log('Motion event detected on ' + req.params.cameraid);
 	});
 	
 	/**
@@ -375,16 +411,18 @@ var Motion = function Motion (elriclink) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.14
-	 * @version  2013.01.14
+	 * @version  2013.01.31
 	 *
 	 * @param    {integer}  eventnr         The number of the event according to motion
 	 * @param    {string}   cameraid        The id of the camera
 	 * @param    {integer}  epoch           The epoch begin of the event (Creation only)
 	 * @param    {object}   rawdata         Rawdata to add to the record (Creation only)
+	 * @param    {string}   roomId          In what room this camera was in at the time of the event
+	 * @param    {string}   roomElementId   The id of the camera in the room
 	 *
 	 * @returns  {object|string}   The (unsaved) movementEvent record or the id
 	 */
-	var getMovementEvent = function getMovementEvent (eventnr, cameraid, epoch, rawdata) {
+	var getMovementEvent = function getMovementEvent (eventnr, cameraid, epoch, rawdata, roomId, roomElementId) {
 		
 		// Get this camera's storage object
 		var cs = storage[cameraid];
@@ -404,8 +442,8 @@ var Motion = function Motion (elriclink) {
 				finished: false,
 				source_type: 'motion',
 				source_id: cameraid,
-				room_id: null,
-				room_element_id: null,
+				room_id: roomId,
+				room_element_id: roomElementId,
 				pictures: [],
 				movie: '',
 				rawdata: [rawdata]

@@ -22,6 +22,7 @@ var fs = require('fs');
 var mv = require('mv');
 var base64 = require('base64js');
 var mkdirp = require('mkdirp');
+var rfxcom = require('rfxcom');
 var hawkejs = require('./hawkejs');
 
 /**
@@ -75,6 +76,7 @@ elric.plugins = {};
 elric.models = {};
 elric.capabilities = {};
 elric.elementTypes = {};
+elric.activities = {};
 
 // Memobjects are like cakephp enums
 // A collection of records that can be used
@@ -82,6 +84,7 @@ elric.elementTypes = {};
 elric.memobjects = {};
 elric.memobjects.elementTypes = elric.elementTypes;
 elric.memobjects.capabilities = elric.capabilities;
+elric.memobjects.activities = elric.activities;
 
 // Temporary storage & object cache
 elric.temp = {};
@@ -117,6 +120,7 @@ elric.events = {};
 elric.events.all = new elric.classes.ElricEvent('all', elric);
 elric.events.clients = new elric.classes.ElricEvent('clients');
 elric.events.browsers = new elric.classes.ElricEvent('browsers');
+elric.events.activities = new elric.classes.ElricEvent('activities');
 
 // Use IO's logger
 elric.log = elric.io.log;

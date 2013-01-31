@@ -5,6 +5,7 @@ module.exports = function Config (elric) {
 	require('./plugins/plugin')(elric);
 	require('./element_types/element_type')(elric);
 	require('./capabilities/capability')(elric);
+	require('./activities/activity')(elric);
 	
 	// Copy over all core dust templates
 	elric.loadTemplates('assets/views/');

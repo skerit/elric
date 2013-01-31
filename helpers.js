@@ -11,7 +11,11 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.31
-	 * @version  2013.01.16
+	 * @version  2013.01.31
+	 *
+	 * @param   {object}    parent        The parent class
+	 * @param   {function}  constructor   A constructor
+	 * @param   {function}  constructor2  Another constructor ...
 	 */
 	elric.extend = function (parent, constructor) {
 
@@ -622,17 +626,19 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.06
-	 * @version  2013.01.06
+	 * @version  2013.01.30
 	 */
 	elric.loadCapability = function loadCapability (capabilityName, pluginName) {
 		
-		var path = './capabilities/' + capabilityName + 'Capability';
+		var path = 'capabilities/' + capabilityName + 'Capability';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
-			path = './plugins/' + pluginName + '/capabilities/' + capabilityName + 'Capability';
+			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
+		
+		path = './' + path;
 		
 		elric.log.debug('Initializing Capability "' + capabilityName + '"' + debugm);
 		
@@ -644,6 +650,41 @@ module.exports = function (elric) {
 		
 		// Store the new type
 		elric.capabilities[capabilityName] = capability;
+	}
+	
+	/**
+	 * Load a new activity we can act upon
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.01.30
+	 * @version  2013.01.30
+	 *
+	 * @returns    {elric.classes.Activity}   An Activity class
+	 */
+	elric.loadActivity = function loadActivity (activityName, pluginName) {
+	
+		var path = 'activities/' + activityName + 'Activity';
+		var debugm = '';
+		
+		if (pluginName !== undefined) {
+			path = 'plugins/' + pluginName + '/' + path;
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		path = './' + path;
+		
+		elric.log.debug('Initializing Activity "' + activityName + '"' + debugm);
+		
+		var constructor = require(path);
+		
+		var activity = elric.extend(elric.classes.BaseActivity,
+		                            elric.classes.BaseActivity.prototype._preConstructor,
+		                            constructor);
+
+		// Store the new activity class
+		elric.activities[activityName] = activity;
+		
+		return activity;
 	}
 	
 	/**
