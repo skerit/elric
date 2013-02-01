@@ -34,6 +34,7 @@
 		"benchmark": "1.0.x",
 		"microtime": "0.3.x"
 	},
+	"license": "GPLv3",
   "engines": {
     "node": ">=0.8"
   }
