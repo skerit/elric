@@ -55,7 +55,7 @@ module.exports = function Routes (elric) {
 	/**
 	 * Elric routes
 	 */
-	elric.addRoute('/doek', ['topbar'], 'Doek', function (req, res) {
+	elric.addRoute('/doek', [{menu: 'sidebar', icon: 'picture'}], 'Doek', function (req, res) {
 	
 		var room = elric.models.room;
 		var element = elric.models.roomElement;
@@ -81,6 +81,36 @@ module.exports = function Routes (elric) {
 			function(err, results) {
 				results.elementTypes = elric.memobjects.elementTypes;
 				elric.render(req, res, 'doek', results);
+			}
+		);
+	});
+	
+	elric.addRoute('/scenarios', [{menu: 'sidebar', icon: 'random'}], 'Flows & Scenarios', function (req, res) {
+	
+		var scenario = elric.models.scenario;
+		var flow = elric.models.flow;
+		var par = {};
+		
+		// Prepare function to find all rooms
+		par.scenarios = function(callback) {
+			scenario.model.find({}, function(err, items) {
+				callback(null, items);
+			});
+		}
+		
+		// Prepare function to find all roomElements
+		par.flows = function(callback) {
+			flow.model.find({}, function(err, items) {
+				callback(null, items);
+			});
+		};
+		
+		// Execute the find functions
+		async.parallel(
+			par,
+			function(err, results) {
+				results.elementTypes = elric.memobjects.elementTypes;
+				elric.render(req, res, 'page/scenario', results);
 			}
 		);
 	});

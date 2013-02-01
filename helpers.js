@@ -657,7 +657,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.31
-	 * @version  2013.01.31
+	 * @version  2013.02.01
 	 *
 	 * @returns    {elric.classes.Action}   An Action class
 	 */
@@ -682,7 +682,7 @@ module.exports = function (elric) {
 		                            constructor);
 
 		// Store the new activity class
-		elric.activities[actionName] = action;
+		elric.actions[actionName] = action;
 		
 		return action;
 	}
@@ -799,7 +799,7 @@ module.exports = function (elric) {
 		if (res.locals.exposedObjects !== undefined) robj = res.locals.exposedObjects;
 		
 		var variables = $.extend(true,
-												{ menus: elric.menus,
+												{ menus: elric.clone({}, elric.menus),
 													dest: req.originalUrl,
 												username: req.session.username,
 												notifications: res.locals.notifications,
@@ -815,7 +815,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.31
-	 * @version  2013.01.27
+	 * @version  2013.02.01
 	 *
 	 * @param   {string}   path       The url
 	 * @param   {array}    menus      To what menus we should add this route
@@ -829,8 +829,60 @@ module.exports = function (elric) {
 		elric.app[method](path, callback);
 		
 		for (var i in menus) {
-			if (elric.menus[menus[i]] === undefined) elric.menus[menus[i]] = []
-			elric.menus[menus[i]].push({href: path, title: title});
+			
+			var opt = menus[i];
+			
+			if (typeof opt == 'string') opt = {menu: opt};
+			
+			// Make sure the target menu exists
+			if (elric.menus[opt.menu] === undefined) elric.menus[opt.menu] = [];
+			
+			var linkOptions = {title: title};
+			
+			if (opt.icon) linkOptions.icon = opt.icon;
+			
+			// Push this entry
+			elric.menus[opt.menu].push({href: path, options: linkOptions});
 		}
 	}
+	
+	/**
+	 * Copyright Andrée Hansson, 2010
+   * Use it however you want, attribution would be nice though.
+   * Website:        http://andreehansson.se/
+	 * GMail/Twitter:  peolanha
+	 *
+	 * update 4: Leonardo Dutra, http://twitter.com/leodutra
+	 *
+	 * @author   Andrée Hansson
+	 * @since    2010
+	 *
+	 * @param   {object}   superObj
+	 * @param   {object}   extension
+	 *
+	 * @returns {object}   A deeply cloned version of the extension object
+	 */
+  elric.clone = function(superObj, extension) {
+		
+		if (superObj && extension) {
+			
+			var deep = function() {}; // prepare sword
+			
+			deep.prototype = superObj; // hold it
+			
+			superObj = new deep; // pull it
+			
+			return (deep = function(o, ext) { // concentrate
+				var k;
+				
+				for (k in ext) {
+					o[k] = typeof ext[k] === 'object' && ext[k] ? deep({}, ext[k]) : ext[k];
+				}
+				
+				return o;
+			})(superObj, extension); // push it deep, slicing
+		}
+		
+		return null;
+  }
 }

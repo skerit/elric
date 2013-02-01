@@ -51,7 +51,7 @@ $('#ma-notifybutton').click(function(e){
  * Make the content div fill the body
  */
 $(document).ready(function() {
-	$('#content').height(($('html').height() - $('#topbar').height()));
+	$('#content').css('min-height', ($('html').height() - $('#topbar').height()));
 });
 
 /**

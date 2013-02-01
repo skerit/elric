@@ -1,8 +1,6 @@
-<% expands('layout/base') %>
+<% expands('layout/body-main') %>
 
-<% start('main') %>
-	<% implement('elements/topbar') %>
-	<div class="container-fluid">
+<% start('container-fluid') %>
 		<div class="row">
 			<div class="span7">
 				<div id="mainvideo">
@@ -30,7 +28,6 @@
 				</div>
 			</div>
 		</div>
-	</div>
 	<style>
 		.camerathumb {
 			display: inline-block;
@@ -56,4 +53,4 @@
 			$mainvideo.html($this.html());
 		});
 	</script>
-<% end('main') %>
+<% end('container-fluid') %>

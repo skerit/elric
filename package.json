@@ -27,7 +27,8 @@
     "base64js": "1.0.x",
     "jsdom": "0.3.x",
     "hawkejs": "0.0.x",
-		"mkdirp": "0.3.x"
+		"mkdirp": "0.3.x",
+		"rfxcom": "0.5.x"
   },
 	"devDependencies": {
 		"benchmark": "1.0.x",

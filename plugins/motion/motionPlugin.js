@@ -375,7 +375,7 @@ var Motion = function Motion (elriclink) {
 	/**
 	 * Elric routes
 	 */
-	elric.addRoute('/motion/index', ['topbar'], 'Motion', function (req, res) {
+	elric.addRoute('/motion/index', [{menu: 'sidebar', icon: 'facetime-video'}], 'Motion', function (req, res) {
 	
 		var results = {};
 		results.cameras = [];
