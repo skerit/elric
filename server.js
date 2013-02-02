@@ -134,6 +134,9 @@ elric.log = elric.io.log;
 // Enable hawkejs debug
 hawkejs._debug = true;
 
+// Add our extra hawkejs helpers
+hawkejs.addHelpers(path.join(__dirname, 'hawkejs-helpers.js'));
+
 // Use hawkejs as our template engine, map it to the .ejs extension
 app.engine('ejs', hawkejs.__express);
 
@@ -143,7 +146,7 @@ hawkejs.enableClientSide(path.join(__dirname, 'public', 'js'), 'js/');
 // Express configurations
 app.configure(function(){
 
-	var bootstrapPath = path.join(__dirname, 'node_modules', 'bootstrap');
+	var bootstrapPath = path.join(__dirname, 'assets', 'bootstrap');
 	app.set('views', __dirname + '/assets/hawkejs');
 	app.set('view engine', 'ejs');
 	app.use(express.favicon());
@@ -154,12 +157,10 @@ app.configure(function(){
 	app.use(express.session({ secret: 'humanTransmutationIsANoNo', store: store }));
 	app.use(express.session());
 	app.use('/storage', express.static(local.storage));
-	app.use('/img', express.static(path.join(bootstrapPath, 'img')));
 	app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
 	app.use('/hawkejs', express.static(path.join(__dirname, 'assets', 'hawkejs')));
-	app.use('/js/bootstrap', express.static(path.join(bootstrapPath, 'js')));
 	app.use(lessmw({src    : path.join(__dirname, 'assets', 'less'),
-					paths  : [path.join(bootstrapPath, 'less')],
+					paths  : [bootstrapPath],
 					dest   : path.join(__dirname, 'public', 'stylesheets'),
 					prefix : '/stylesheets'
 					}));

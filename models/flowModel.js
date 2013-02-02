@@ -11,6 +11,8 @@ module.exports = function flow (elric) {
 	// Enable caching this model
 	this.enableCache = true;
 
+	this.icon = 'random';
+	
 	this.blueprint = {
 		// The user who created this flow
 		user_id: {

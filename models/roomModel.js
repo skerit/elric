@@ -9,6 +9,8 @@ var validate = require('mongoose-validator').validate;
  */
 module.exports = function room (elric) {
 	
+	this.icon = 'building';
+	
 	var nameValidator = [validate({message: "Room name should be between 3 and 50 characters"},
 																'len', 3, 50),
 											 validate('isAlphanumeric')];

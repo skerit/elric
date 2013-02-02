@@ -10,6 +10,8 @@ module.exports = function client (elric) {
 	// Enable caching this model
 	this.enableCache = true;
 	
+	this.icon = 'desktop';
+	
 	this.blueprint = {
 		name: {
 			type: String,

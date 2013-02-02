@@ -8,6 +8,8 @@
  */
 module.exports = function scenario (elric) {
 	
+	this.icon = 'cogs';
+	
 	// Enable caching this model
 	this.enableCache = true;
 

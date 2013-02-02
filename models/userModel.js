@@ -12,6 +12,8 @@ module.exports = function user (elric) {
 	
 	// Enable caching this model
 	this.enableCache = true;
+	
+	this.icon = 'user';
 
 	var nameValidator = [validate({message: "Username should be between 3 and 50 characters"},
 																'len', 3, 50),
@@ -41,7 +43,7 @@ module.exports = function user (elric) {
 	this.admin = {
 		title: 'Users',
 		fields: ['username', 'firstname', 'lastname', 'email']
-	}
+	};
 	
 	this.pre('save', function(next){
 		if (this.password) this.password = bcrypt.hashSync(this.password, 10);

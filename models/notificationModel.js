@@ -7,6 +7,8 @@
  */
 module.exports = function notification (elric) {
 	
+	this.icon = 'envelope-alt';
+	
 	this.blueprint = {
 		message: {
 			type: String,

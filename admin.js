@@ -3,35 +3,56 @@ var async = require('async');
 
 module.exports = function (elric) {
 	
-	elric.app.get('/admin/:modelname/index', function (req, res) {
-		
-		var modelname = req.params.modelname;
-		var model = elric.models[modelname];
-		
-		var baseOpt = {admin: elric.adminArray, modelName: model.name, titleName: model.admin.title, fields: model.admin.fields};
-		
-		model.model.find({}, function(err, items) {
-			elric.render(req, res, 'admin/modelIndex', $.extend({}, baseOpt, {items: items}));
-		});
-	});
-	
+	/**
+	 * The Admin class
+	 *
+	 * @constructor
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.31
+	 */
 	elric.classes.Admin = function admin (model, options) {
 		var thisAdmin = this;
 		this.elric = elric;
 		this.model = model;
 		this.name = options.name;
 		this.title = options.title ? options.title : this.name;
-		this.icon = options.icon ? options.icon : 'cog';
+		this.icon = model.icon ? model.icon : 'cog';
 		
-		var baseOpt = {admin: elric.adminArray, modelName: this.name, titleName: this.title, options: options, model: this.model}
+		// The basic parameters we send with each render
+		var baseOpt = {admin: elric.adminArray,
+		               modelName: model.name,
+		               titleName: model.admin.title,
+		               fields: model.admin.fields};
 		
-		// Admin routes
+		/**
+		 * The model view route
+		 */
 		elric.app.get('/admin/' + this.name + '/view/:id', function (req, res) {
+			
+			// Find the item
 			model.model.find({}, function(err, items) {
-				elric.render(req, res, 'adminView', $.extend({}, baseOpt, {items: items}));
+				
+				// Render the view layout
+				elric.render(req, res, 'admin/modelView',
+				             $.extend({}, baseOpt, {items: items}));
+				
+			});
+			
+		});
+		
+		/**
+		 * The model index route
+		 */
+		elric.app.get('/admin/' + this.name + '/index', function (req, res) {
+			model.model.find({}, function(err, items) {
+				elric.render(req, res, 'admin/modelIndex', $.extend({}, baseOpt, {items: items}));
 			});
 		});
 
+		/**
+		 * The model add route
+		 */
 		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
 			var serial = {}
 			var bp = thisAdmin.model.blueprint;
@@ -75,10 +96,13 @@ module.exports = function (elric) {
 					}
 				);
 			} else {
-				elric.render(req, res, 'adminAdd', $.extend({}, baseOpt, {selects: syncresults}));
+				elric.render(req, res, 'admin/modelAdd', $.extend({}, baseOpt, {selects: syncresults}));
 			}
 		});
 		
+		/**
+		 * The POST model add route, to actually store the new item
+		 */
 		elric.app.post('/admin/' + this.name + '/add', function(req, res){
 	
 			var newrecord = new model.model(req.body);
@@ -94,11 +118,14 @@ module.exports = function (elric) {
 			});
 		});
 		
+		/**
+		 * The model edit route
+		 */
 		elric.app.get('/admin/' + this.name + '/edit/:id', function (req, res) {
 			
-			var serial = {}
+			var serial = {};
 			var bp = thisAdmin.model.blueprint;
-			var syncresults = {}
+			var syncresults = {};
 			
 			for (var field in bp) {
 				if (bp[field]['fieldType'] == 'Select') {
@@ -145,8 +172,8 @@ module.exports = function (elric) {
 					delete results['_itemToEdit'];
 					
 					var finalSelects = $.extend({}, results, syncresults);
-					var finalReturn = $.extend({}, baseOpt, {selects: finalSelects, item: itemToEdit});
-					elric.render(req, res, 'adminEdit', finalReturn);
+					var finalReturn = $.extend({}, baseOpt, {selects: finalSelects, item: itemToEdit, blueprint: bp});
+					elric.render(req, res, 'admin/modelEdit', finalReturn);
 				}
 			);
 

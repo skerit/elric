@@ -1,0 +1,28 @@
+<% expands('layout/body-admin') %>
+
+<% start('admin-main') %>
+<div class="adminActionHead">
+  <span class="title" id="mainTitle"><%= titleName %>: Edit record</span>
+  <div class="clear"></div>
+</div>
+
+<div class="error"></div>
+
+<table class="table table-striped table-bordered">
+  <form id="saveRecord" data-model="<%= modelName %>">
+	<% for (var i in fields) { %>
+	<% var field = fields[i] %>
+  <!--{#options.fields item=item model=model}-->
+  <tr>
+    <td><%= field %></td>
+		<td><% adminField(field, {selects: selects, item: item, blueprint: blueprint}) %></td>
+    <!--<td>{@adminField name=. model=model selects=selects item=item field=. /}</td>-->
+  </tr>
+  <!--{/options.fields}-->
+	<% } %>
+  </form>
+</table>
+
+<button class="btn btn-primary" id="saveEdit" data-model="<%= modelName %>" data-id="<%= item._id %>">Save record</button>
+
+<% end('admin-main') %>

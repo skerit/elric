@@ -10,11 +10,12 @@ module.exports = function device (elric) {
 	// Enable caching this model
 	this.enableCache = true;
 	
+	this.icon = 'lightbulb';
+	
 	this.blueprint = {
 		name: {
 			type: String,
 			required: true,
-			validate: nameValidator,
 			fieldType: 'String'
 		},
 		device_type: {

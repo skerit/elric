@@ -7,6 +7,8 @@
  */
 module.exports = function movementEvent (elric) {
 	
+	this.icon = 'eye-open';
+	
 	this.blueprint = {
 		// When did this event begin?
 		// = First movement

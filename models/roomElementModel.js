@@ -15,6 +15,8 @@ module.exports = function roomElement (elric) {
 	// Enable caching this model
 	this.enableCache = true;
 	
+	this.icon = 'lightbulb';
+	
 	var nameValidator = [validate({message: "Room Element name should be between 3 and 50 characters"},
 																'len', 3, 50),
 											 validate('isAlphanumeric')];

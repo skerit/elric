@@ -13,6 +13,8 @@ module.exports = function motionCamera (elric) {
 	// Enable caching this model
 	this.enableCache = true;
 	
+	this.icon = 'camera';
+	
 	this.blueprint = {
 		identifier: {
 			type: String,
