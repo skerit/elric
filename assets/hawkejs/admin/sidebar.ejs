@@ -1,12 +1,9 @@
-<% start('admin-sidebar') %>
-<div class="well sidebar-nav">
-	<ul class="nav nav-list">
-		<li class="nav-header">Models</li>
-		<li><% add_link('/admin', {title: 'Dashboard', matchref: {class: 'active'}}) %></li>
-		<% for (var i in admin){ %>
-			<% var m = admin[i] %>
-			<li><% add_link('/admin/:modelname/index', {title: m.title, match: {fullHref: true, class: 'active', parent: {class: 'active'}}, urlvars: {modelname: m.modelname}}) %></li>
-		<% } %>
+
+<% matchIns = {class: 'active', parent: {class: 'active'}} -%>
+
+<div id="sidebar">
+	<ul>
+		<li><% add_link('/admin', {title: 'Dashboard', content: '<i class="icon icon-home"></i> <span>Dashboard</span>', match: {parent: {class: 'active'}}}) %></li>
+		<% print_element('elements/menulinks', {variables: {links: admin, match: matchIns}}) %>
 	</ul>
 </div>
-<% end('admin-sidebar') %>

@@ -21,6 +21,7 @@ module.exports = function (elric) {
 		this.model = model;
 		this.name = options.name;
 		this.title = options.title ? options.title : this.name;
+		this.icon = options.icon ? options.icon : 'cog';
 		
 		var baseOpt = {admin: elric.adminArray, modelName: this.name, titleName: this.title, options: options, model: this.model}
 		
@@ -30,9 +31,7 @@ module.exports = function (elric) {
 				elric.render(req, res, 'adminView', $.extend({}, baseOpt, {items: items}));
 			});
 		});
-		
-		
-		
+
 		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
 			var serial = {}
 			var bp = thisAdmin.model.blueprint;

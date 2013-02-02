@@ -78,6 +78,8 @@ elric.capabilities = {};
 elric.elementTypes = {};
 elric.activities = {};
 elric.actions = {};
+elric.deviceTypes = {};
+elric.interfaces = {};
 
 // Memobjects are like cakephp enums
 // A collection of records that can be used
@@ -87,6 +89,8 @@ elric.memobjects.elementTypes = elric.elementTypes;
 elric.memobjects.capabilities = elric.capabilities;
 elric.memobjects.activities = elric.activities;
 elric.memobjects.actions = elric.actions;
+elric.memobjects.deviceTypes = elric.deviceTypes;
+elric.memobjects.interfaces = elric.interfaces;
 
 // Temporary storage & object cache
 elric.temp = {};

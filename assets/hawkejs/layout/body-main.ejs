@@ -1,14 +1,5 @@
-<% expands('layout/base') %>
-<% start('main') %>
-	<% implement('elements/topbar') %>
-	<% implement('elements/sidebar') %>
-	<div id="content">
-		<div id="content-header">
-			<h1><% assign('title') %></h1>
-		</div>
+<% expands('layout/body-all') %>
 
-		<div class="container-fluid">
-			<% assign('container-fluid') %>
-		</div>
-	</div>
-<% end('main') %>
+<% start('sidebar') %>
+	<% implement('elements/sidebar') %>
+<% end('sidebar') %>

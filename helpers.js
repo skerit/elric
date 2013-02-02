@@ -11,7 +11,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.31
-	 * @version  2013.01.31
+	 * @version  2013.02.02
 	 *
 	 * @param   {object}    parent        The parent class
 	 * @param   {function}  constructor   A constructor
@@ -31,11 +31,16 @@ module.exports = function (elric) {
 		
 		// Add the constructors to that array
 		for (var i = 1; i < arguments.length; i++) {
-			intermediateConstructor.prototype._constructors.push(arguments[i]);
 			
-			// Add the prototypes of these constructors
-			for (var j in arguments[i].prototype) {
-				intermediateConstructor.prototype[j] = arguments[i].prototype[j];
+			// Make sure the argument is actually defined
+			if (arguments[i] !== undefined) {
+				
+				intermediateConstructor.prototype._constructors.push(arguments[i]);
+				
+				// Add the prototypes of these constructors
+				for (var j in arguments[i].prototype) {
+					intermediateConstructor.prototype[j] = arguments[i].prototype[j];
+				}
 			}
 		}
 		
@@ -584,9 +589,15 @@ module.exports = function (elric) {
 			
 			elric.admin[modelName] = nA;
 			
-			var m = {title: nA.title, modelname: modelName};
+			var m = {href: '/admin/' + modelName + '/index',
+			         options: {
+			          title: nA.title,
+			          icon: nA.icon,
+			          modelname: modelName
+			         }};
 			
 			elric.adminArray.push(m);
+			
 		}
 	}
 	
@@ -720,6 +731,76 @@ module.exports = function (elric) {
 		elric.activities[activityName] = activity;
 		
 		return activity;
+	}
+	
+	/**
+	 * Load a new device type class
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.02
+	 * @version  2013.02.02
+	 *
+	 * @returns    {elric.classes.DeviceType}   A DeviceType class
+	 */
+	elric.loadDeviceType = function loadDeviceType (deviceTypeName, pluginName) {
+	
+		var path = 'device_types/' + deviceTypeName + 'Device';
+		var debugm = '';
+		
+		if (pluginName !== undefined) {
+			path = 'plugins/' + pluginName + '/' + path;
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		path = './' + path;
+		
+		elric.log.debug('Requiring Device Type Class "' + deviceTypeName + '"' + debugm);
+		
+		var constructor = require(path);
+		
+		var device = elric.extend(elric.classes.BaseDeviceType,
+		                            elric.classes.BaseDeviceType.prototype._preConstructor,
+		                            constructor);
+
+		// Store the new device type class
+		elric.deviceTypes[deviceTypeName] = device;
+		
+		return device;
+	}
+	
+	/**
+	 * Load a new interface for controling devices
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.02
+	 * @version  2013.02.02
+	 *
+	 * @returns    {elric.classes.Interface}   An Interface object
+	 */
+	elric.loadInterface = function loadInterface (interfaceName, pluginName) {
+	
+		var path = 'interfaces/' + interfaceName + 'Interface';
+		var debugm = '';
+		
+		if (pluginName !== undefined) {
+			path = 'plugins/' + pluginName + '/' + path;
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		path = './' + path;
+		
+		elric.log.debug('Requiring Interface "' + interfaceName + '"' + debugm);
+		
+		var constructor = require(path);
+		
+		var interf = elric.extend(elric.classes.BaseInterface,
+		                            elric.classes.BaseInterface.prototype._preConstructor,
+		                            constructor);
+
+		// Store the new interface
+		elric.interfaces[interfaceName] = new interf(elric);
+		
+		return elric.interfaces[interfaceName];
 	}
 	
 	/**

@@ -1,4 +1,8 @@
-<% expands('layout/body-main') %>
+<% expands('layout/body-all') %>
+
+<% start('sidebar') %>
+	<% implement('admin/sidebar') %>
+<% end('sidebar') %>
 
 <% set_block('title', 'Admin') %>
 <% set_title('Admin') %>
@@ -7,12 +11,7 @@
 
 <div class="row-fluid">
 	
-	<div class="span2">
-		<% implement('admin/sidebar') %>
-		<% assign('admin-sidebar') %>
-	</div>
-	
-	<div class="span10">
+	<div class="span12">
 		<div id="error"></div>
 		<% assign('admin-main') %>
 	</div>

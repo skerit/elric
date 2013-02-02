@@ -7,6 +7,8 @@ module.exports = function Config (elric) {
 	require('./capabilities/capability')(elric);
 	require('./activities/activity')(elric);
 	require('./actions/action')(elric);
+	require('./device_types/device_type')(elric);
+	require('./interfaces/interface')(elric);
 	
 	// Copy over all core dust templates
 	elric.loadTemplates('assets/views/');
@@ -24,6 +26,12 @@ module.exports = function Config (elric) {
 	
 	// Load actions
 	elric.loadAction('consoleOutput');
+	
+	// Load interfaces
+	elric.loadInterface('rfxcom');
+	
+	// Load device types
+	elric.loadDeviceType('light');
 	
 	// Load plugins
 	elric.loadPlugin('motion');
