@@ -7,6 +7,57 @@ module.exports = function (elric) {
 	var ClientCapability = elric.models.clientCapability.model;
 	
 	/**
+	 * Convert the client results to a menu object
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.03
+	 * @version  2013.02.03
+	 *
+	 * @param    {array}   clients   The available clients
+	 * @returns  {array}   An array we can turn into a menu
+	 */
+	var getLinks = function getLinks (clients, capabilities) {
+		
+		// Prepare the capabilities
+		var caps = [];
+		
+		for (var i in capabilities) {
+			var cap = capabilities[i];
+
+			var m = {
+				href: '#capset' + i,
+				options: {
+					title: cap.name,
+					icon: 'cog'
+				}
+			};
+			
+			caps.push(m);
+			
+		}
+		
+		// Prepare the clients menu var
+		var links = [];
+		
+		for (var i in clients) {
+			var client = clients[i];
+			
+			var m = {
+				href: '/clients/' + client._id,
+				children: caps,
+				options: {
+					title: client.name,
+					icon: 'desktop'
+				}
+			};
+			
+			links.push(m);
+		}
+		
+		return links;
+	}
+	
+	/**
 	 * Get a Client Capability setting item,
 	 * autocreates one if it doesn't exist
 	 *
@@ -43,9 +94,13 @@ module.exports = function (elric) {
 	 * Client routes
 	 */
 	elric.app.get('/clients', function (req, res) {
-
+		
 		Client.find({}, function (err, clients) {
-			elric.render(req, res, 'clientDashboard', {username: req.session.username, clients: clients});
+			
+			// Render the client layout
+			elric.render(req, res, 'client/index',
+			            {username: req.session.username,
+			             clients: clients, links: getLinks(clients, elric.capabilities)});
 		});
 		
 	});
@@ -84,11 +139,13 @@ module.exports = function (elric) {
 				results.capabilities = elric.makeArray(elric.capabilities);
 				results.settings = elric.makeObject(results.capabilitySettings, 'capability');
 				
+				results.links = getLinks(results.clients, elric.capabilities);
+				
 				// Expose certain variables for this request only
 				elric.expose('workingclient', results.client._id, res);
 				elric.expose('capsettings', results.settings, res);
 				
-				elric.render(req, res, 'clientEdit', results);
+				elric.render(req, res, 'client/edit', results);
 			}
 		);
 	});

@@ -1,5 +1,0 @@
-{>adminLayout/}
-{<main}
-This is the dashboard
-{username}
-{/main}
