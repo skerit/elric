@@ -1,7 +1,7 @@
 <% if (links !== undefined) { %>
 	
 	<% for (var i in links) { %>
-		<% var link = links[i] %>
+		<% var link = clone({}, links[i]) %>
 		<% if (!link.options) link.options = {} %>
 		<% if (!link.options.match) link.options.match = match %>
 		<% if (!link.options.prepend) link.options.prepend = [] %>

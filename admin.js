@@ -30,12 +30,16 @@ module.exports = function (elric) {
 		 */
 		elric.app.get('/admin/' + this.name + '/view/:id', function (req, res) {
 			
+			var payload = {};
+			
 			// Find the item
 			model.model.find({}, function(err, items) {
 				
+				elric.inject(payload, baseOpt);
+				payload.items = items;
+				
 				// Render the view layout
-				elric.render(req, res, 'admin/modelView',
-				             $.extend({}, baseOpt, {items: items}));
+				elric.render(req, res, 'admin/modelView', payload);
 				
 			});
 			
