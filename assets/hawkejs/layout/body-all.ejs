@@ -1,5 +1,23 @@
 <% expands('layout/base') %>
 
+<% script('/socket.io/socket.io.js') -%>
+<% script('/js/pnotify/jquery.pnotify.min.js') -%>
+<% style('/js/pnotify/jquery.pnotify.default.css', {attributes: {media: 'all', rel: 'stylesheet'}}) -%>
+<% script('/js/doek/jquery.mousewheel.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.canvas.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.layer.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.object.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.node.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.node.line.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.node.rectangle.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.event.js', {destination: 'bottom'}) -%>
+<% script('/js/doek/doek.action.js', {destination: 'bottom'}) -%>
+<% script('/js/doek.nodes.js', {destination: 'bottom'}) -%>
+<% script('/js/mainDoek.js', {destination: 'bottom'}) -%>
+<% script('/js/doek.actions.js', {destination: 'bottom'}) -%>
+<% script('/js/elric.js', 'bottom') -%>
+
 <% start('main') %>
 	<% implement('elements/topbar') %>
 	<% assign('sidebar') %>

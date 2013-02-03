@@ -854,6 +854,10 @@ module.exports = function (elric) {
 	 * Our wrapper function for a template render,
 	 * adds some basic information
 	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2012.12.31
+	 * @version  2013.02.03
+	 *
 	 * @param   {object}   req
 	 * @param   {object}   res
 	 * @param   {object}   view
@@ -861,34 +865,54 @@ module.exports = function (elric) {
 	 */
 	elric.render = function render (req, res, view, options) {
 		
-		if (options === undefined) options = {}
+		if (options === undefined) options = {};
 		
+		// The websocket key
 		var iokey = false;
-		var objects = {};
-		var robj = {};
 		
-		if (elric.activeUsers[req.session.username] !== undefined) {
-			iokey = elric.activeUsers[req.session.username].key;
-			objects = elric.exposedObjects;
+		// Objects to expose to any client all the time
+		var exposeObjects = {};
+		
+		// Objects to expose to the client for this request
+		var exposeRequest = {};
+		
+		// Create the render payload
+		var payload = {};
+		
+		// Some things don't need to be sent when it's an ajax request
+		// because these variables shouldn't change
+		if (!req.xhr) {
 			
-			elric.expose('iokey', iokey, res);
-			elric.expose('username', req.session.username, res);
+			// If the user has an active session ...
+			if (elric.activeUsers[req.session.username] !== undefined) {
+				
+				iokey = elric.activeUsers[req.session.username].key;
+				exposeObjects = elric.exposedObjects;
+				
+				elric.expose('iokey', iokey, res);
+				elric.expose('username', req.session.username, res);
+			}
 		}
 		
 		elric.expose('notifications', res.locals.notifications, res);
 		
-		if (res.locals.exposedObjects !== undefined) robj = res.locals.exposedObjects;
+		// Get objects we have to expose for this request only
+		if (res.locals.exposedObjects !== undefined) {
+			exposeRequest = res.locals.exposedObjects;
+		}
 		
-		var variables = $.extend(true,
-												{ menus: elric.clone({}, elric.menus),
-													dest: req.originalUrl,
-												username: req.session.username,
-												notifications: res.locals.notifications,
-												iokey: iokey,
-												exposedObjects: $.extend({}, objects, robj)},
-												options);
+		payload.menus = elric.clone({}, elric.menus);
+		payload.iokey = iokey;
+		payload.notifications = res.locals.notifications;
+		payload.exposeObjects = elric.inject({}, exposeObjects, exposeRequest);
+		elric.inject(payload, options);
 		
-		res.render(view, variables);
+		if (!payload.username) {
+			payload.username = req.session.username ? req.session.username : 'NOT SET';
+		}
+		
+		// Render the wanted view
+		res.render(view, payload);
 	}
 	
 	/**
@@ -966,4 +990,34 @@ module.exports = function (elric) {
 		
 		return null;
   }
+	
+	/**
+	 * Inject the properties of one object into another target object
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.03
+	 * @version  2013.02.03
+	 *
+	 * @param   {object}   target     The object to inject the extension into
+	 * @param   {object}   extension  The object to inject
+	 *
+	 * @returns {object}   Returns the injected target (which it also modifies byref)
+	 */
+	elric.inject = function inject (target, first, second) {
+		
+		var length = arguments.length;
+		
+		// Go over every argument, other than the first
+		for (var i = 1; i <= length; i++) {
+			var extension = arguments[i];
+			
+			// Go over every property of the current object
+			for (var i in extension) {
+				target[i] = extension[i];
+			}
+		}
+		
+		return target;
+	}
+	
 }

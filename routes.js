@@ -7,7 +7,7 @@ module.exports = function Routes (elric) {
 	 * Login routes
 	 */
 	elric.app.get('/login', function (req, res) {
-		elric.render(req, res, 'login');
+		elric.render(req, res, 'page/login');
 	});
 	
 	elric.app.post('/login', function (req, res) {

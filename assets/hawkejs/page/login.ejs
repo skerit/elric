@@ -1,5 +1,6 @@
-{>layout/}
-{<content}
+<% expands('layout/base') %>
+
+<% start('main') %>
 <div class="container">
 	<form class="form-signin" id="loginform">
 		<h2 class="form-signin-heading">Login</h2>
@@ -60,4 +61,4 @@
 		});
 	});
 </script>
-{/content}
+<% end('main') %>

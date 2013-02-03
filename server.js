@@ -178,10 +178,6 @@ app.configure(function(){
 			return;
 		}
 
-		// Disabled login requirement for hawkejs dev
-		next();
-
-		/*
 		// See if the authentication cookies have been set
 		if (req.cookies.user && req.cookies.pass) {
 			
@@ -215,7 +211,7 @@ app.configure(function(){
 			} else {
 				if (!elric.redirectLogin(res, req)) next();
 			}
-		}*/ // Disabled login requirement for hawkejs dev
+		}
 		
 	});
 	

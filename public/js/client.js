@@ -41,7 +41,7 @@ Elric.cap.toggle = function (capname, enable, ajax) {
 }
 
 // Make the "enable" and "disable" buttons do what they're supposed to
-$('button[data-function="toggle"]').click(function (e) {
+$('#hawkejs-space-client-main').on('click', 'button[data-function="toggle"]', function (e) {
 	e.preventDefault();
 	var $this = $(this);
 	var toggle = $this.attr('data-toggle');
@@ -50,7 +50,7 @@ $('button[data-function="toggle"]').click(function (e) {
 	Elric.cap.toggle(capname, toggle, true);
 });
 
-$('button[data-function="save"]').click(function (e) {
+$('#hawkejs-space-client-main').on('click', 'button[data-function="save"]', function (e) {
 	e.preventDefault();
 	var $this = $(this);
 	var capname = $this.attr('data-capability');
