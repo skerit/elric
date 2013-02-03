@@ -9,7 +9,9 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 	 */
 	helpers.adminField = function (name, options) {
 		
-		var blueprint = options.blueprint;
+		var modelBlueprint = options.blueprint;
+		var blueprint = modelBlueprint[name];
+
 		var selects = options.selects;
 		
 		options.field = name;

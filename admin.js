@@ -54,11 +54,15 @@ module.exports = function (elric) {
 		 * The model add route
 		 */
 		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
-			var serial = {}
+			
+			var par = {};
 			var bp = thisAdmin.model.blueprint;
-			var syncresults = {}
+			
+			var syncresults = {};
+			var returnObject = {blueprint: bp};
 			
 			for (var field in bp) {
+				
 				if (bp[field]['fieldType'] == 'Select') {
 					
 					// Get the data from a model or an object?
@@ -70,7 +74,7 @@ module.exports = function (elric) {
 						var fm = elric.models[s.name];
 						
 						// Prepare the async functions for serial execution
-						serial[s.name] = function(elementName) {
+						par[s.name] = function(elementName) {
 							return function(callback) {
 								fm.model.find({}, function(err, items) {
 									callback(null, items);
@@ -81,22 +85,22 @@ module.exports = function (elric) {
 					} else if (s.type == 'memobject') {
 						syncresults[s.name] = elric.memobjects[s.name];
 					}
-					
 				}
+				
 			}
 			
-			if (!$.isEmptyObject(serial)) {
+			if (!$.isEmptyObject(par)) {
 				// Execute the find functions
 				async.parallel(
-					serial,
+					par,
 					function(err, results) {
 						var finalSelects = $.extend({}, results, syncresults);
-						var finalReturn = $.extend({}, baseOpt, {selects: finalSelects});
-						elric.render(req, res, 'adminAdd', finalReturn);
+						$.extend(returnObject, baseOpt, {selects: finalSelects});
+						elric.render(req, res, 'admin/modelAdd', returnObject);
 					}
 				);
 			} else {
-				elric.render(req, res, 'admin/modelAdd', $.extend({}, baseOpt, {selects: syncresults}));
+				elric.render(req, res, 'admin/modelAdd', $.extend(returnObject, baseOpt, {selects: syncresults}));
 			}
 		});
 		

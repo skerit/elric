@@ -1,10 +1,10 @@
-$('#addNew').click(function(e) {
+$('#hawkejs-space-admin-main').on('click', '#addNew', function(e) {
 	e.preventDefault();
 	var model = $(this).attr('data-model');
-	window.location = '/admin/' + model + '/add';
+	goToAjaxViewWithHistory('/admin/' + model + '/add');
 });
 
-$('#saveNew').click(function(e) {
+$('#hawkejs-space-admin-main').on('click', '#saveNew', function(e) {
 	e.preventDefault();
 	var model = $(this).attr('data-model');
 	
@@ -26,16 +26,19 @@ $('#saveNew').click(function(e) {
 				$('[name="' + input + '"]').parent().addClass('error');
 			}
 		} else if (data.redirect) {
-			window.location = data.redirect;
+			goToAjaxViewWithHistory(data.redirect);
 		}
 	});
 	
 });
 
-$('#saveEdit').click(function(e) {
+$('#hawkejs-space-admin-main').on('click', '#saveEdit', function(e) {
 	e.preventDefault();
-	var model = $(this).attr('data-model');
-	var id = $(this).attr('data-id');
+	
+	var $this = $(this);
+	var model = $this.attr('data-model');
+	var id = $this.attr('data-id');
+	
 	var saveRecord = $('#saveRecord').jsonify();
 	$('#error').html('');
 	$('.control-group').removeClass('error');
@@ -54,18 +57,19 @@ $('#saveEdit').click(function(e) {
 				$('[name="' + input + '"]').parent().addClass('error');
 			}
 		} else if (data.redirect) {
-			window.location = data.redirect;
+			goToAjaxViewWithHistory(data.redirect);
 		}
 	});
 	
 });
 
-$('.editButton').click(function(e) {
+$('#hawkejs-space-admin-main').on('click', '.editButton', function(e) {
 	e.preventDefault();
 	
-	var model = $(this).attr('data-model');
-	var id = $(this).attr('data-id');
+	var $this = $(this);
+	var model = $this.attr('data-model');
+	var id = $this.attr('data-id');
 	
-	window.location = '/admin/' + model + '/edit/' + id;
+	goToAjaxViewWithHistory('/admin/' + model + '/edit/' + id);
 	
 });

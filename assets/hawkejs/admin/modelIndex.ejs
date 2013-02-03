@@ -4,7 +4,7 @@
 <div class="adminActionHead">
   <span class="title" id="mainTitle"><%= modelName %>: Index</span>
   <div class="buttons">
-    <button class="btn btn-primary" id="addNew" data-model="{modelName}">Add new</button>
+    <% add_link('/admin/:modelname/add', {title: 'Add new', class: 'btn btn-primary', prepend: '<i class="icon-plus"></i> ', urlvars: {modelname: modelName}}) %>
   </div>
   <div class="clear"></div>
 </div>
@@ -15,14 +15,14 @@
     <% } %>
     <th>Actions</th>
   </tr>
- <% for (var i in items) { %><!-- fields=options.fields} -->
+ <% for (var i in items) { %>
   <% var item = items[i] %>
   <tr>
-    <% for (var f in fields) { %> <!-- {#fields item=.} -->
-    <td><%= item[fields[f]] %><!-- {@getitem item=item field=. /} --></td>
+    <% for (var f in fields) { %>
+    <td><%= item[fields[f]] %></td>
     <% } %>
-    <td><!-- actions -->
-      <% add_link('/admin/:modelname/edit/:id', {title: 'Edit', class: 'btn btn-small editButton', content: '<i class="icon-pencil">', urlvars: {modelname: modelName, id: item._id}}) %>
+    <td>
+      <% add_link('/admin/:modelname/edit/:id', {title: 'Edit', class: 'btn btn-small editButton', content: '<i class="icon-pencil"></i> ', urlvars: {modelname: modelName, id: item._id}}) %>
     </td>
   </tr>
   <% } %>
