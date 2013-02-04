@@ -409,6 +409,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.06
+	 * @param    2013.02.04
 	 *
 	 * @param    {string}   name    Variable name (inside browser's Elric namespace)
 	 * @param    {object}   object  The object to send to the browser
@@ -851,6 +852,38 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Add code to a response object the client browser needs to execute
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.04
+	 * @version  2013.02.04
+	 *
+	 * @param   {object}   res        The response object
+	 * @param   {object}   options    Containing id, path or code and destination
+	 */
+	elric.resCode = function resCode (res, options) {
+		
+		var path = false;
+		var code = false;
+		var destination = 'anywhere';
+		
+		if (options.code) {
+			code = options.code;
+		} else {
+			path = options.path;
+		}
+		
+		if (options.destination) destination = options.destination;
+
+		res.locals.hawkejs.clientcode[options.id] = {
+			type: 'script',
+			path: path,
+			code: code,
+			destination: destination
+		};
+	}
+	
+	/**
 	 * Our wrapper function for a template render,
 	 * adds some basic information
 	 *
@@ -866,7 +899,7 @@ module.exports = function (elric) {
 	elric.render = function render (req, res, view, options) {
 		
 		if (options === undefined) options = {};
-		
+
 		// The websocket key
 		var iokey = false;
 		
@@ -901,10 +934,17 @@ module.exports = function (elric) {
 			exposeRequest = res.locals.exposedObjects;
 		}
 		
+		// Tell hawkejs to expose these objects
+		var xo = elric.inject({}, exposeObjects, exposeRequest);
+		elric.resCode(res,
+			{id: 'scriptexpose',
+			 code: 'jQuery.extend(Elric.exposed, ' + JSON.stringify(xo) + ');'}
+		);
+		
 		payload.menus = elric.clone({}, elric.menus);
 		payload.iokey = iokey;
 		payload.notifications = res.locals.notifications;
-		payload.exposeObjects = elric.inject({}, exposeObjects, exposeRequest);
+		
 		elric.inject(payload, options);
 		
 		if (!payload.username) {
