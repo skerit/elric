@@ -9,7 +9,7 @@
 <div class="error"></div>
 
 <table class="table table-striped table-bordered">
-  <form id="newRecord" data-model="<%= modelName %>">
+  <form id="newRecord" <% print('data-model="' + modelName + '"') %>>
 	<% for (var i in fields) { %>
 	<% var field = fields[i] %>
   <tr>
@@ -19,7 +19,7 @@
 	<% } %>
   </form>
 </table>
-
-<button class="btn btn-primary" id="saveNew" data-model="<%= modelName %>">Save new record</button>
+--<% print(modelName) %>--
+<button class="btn btn-primary" id="saveNew" <% print('data-model="' + modelName + '"') %>>Save new record</button>
 
 <% end('admin-main') %>

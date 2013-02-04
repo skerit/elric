@@ -112,7 +112,7 @@ module.exports = function (elric) {
 		 * The POST model add route, to actually store the new item
 		 */
 		elric.app.post('/admin/' + this.name + '/add', function(req, res){
-	
+
 			var newrecord = new model.model(req.body);
 			
 			newrecord.save(function (err) {
