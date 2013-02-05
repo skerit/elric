@@ -570,7 +570,9 @@ module.exports = function (elric) {
 		var constructor = require(path);
 		
 		// Extend the base model with this constructor
-		var model = elric.extend(elric.classes.BaseModel, constructor);
+		var model = elric.extend(elric.classes.BaseModel,
+		                         elric.classes.BaseModel.prototype.preConstructor,
+		                         constructor);
 		
 		// Set the model name
 		model.prototype.name = modelName;
@@ -766,6 +768,8 @@ module.exports = function (elric) {
 		// Store the new device type class
 		elric.deviceTypes[deviceTypeName] = device;
 		
+		elric.memobjects.deviceTypes[deviceTypeName] = new device();
+		
 		return device;
 	}
 	
@@ -795,8 +799,8 @@ module.exports = function (elric) {
 		var constructor = require(path);
 		
 		var interf = elric.extend(elric.classes.BaseInterface,
-		                            elric.classes.BaseInterface.prototype._preConstructor,
-		                            constructor);
+		                          elric.classes.BaseInterface.prototype._preConstructor,
+		                          constructor);
 
 		// Store the new interface
 		elric.interfaces[interfaceName] = new interf(elric);

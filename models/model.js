@@ -22,6 +22,30 @@ module.exports = function (elric) {
 	var bp = bm.prototype;
 	
 	/**
+	 * The pre constructor
+	 * 
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.05
+	 * @version  2013.02.05
+	 */
+	bp.preConstructor = function preConstructor () {
+		
+		// Recreate these variables
+		// otherwise they're shared accross all models
+		
+		this.blueprint = {};
+		this.admin = {};
+		this.schema = {};
+		this.model = {};
+		this.cache = {};
+		
+		this._prepost = {
+			pre: [],
+			post: []
+		};
+	}
+	
+	/**
 	 * The name of this model
 	 */
 	bp.name = 'BaseModel';

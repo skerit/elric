@@ -28,12 +28,25 @@ module.exports = function device (elric) {
 			type: String,
 			required: true,
 			fieldType: 'String'
+		},
+		interface_type: {
+			type: String,
+			required: true,
+			fieldType: 'Select',
+			source: {type: 'memobject', name: 'interfaces'}
+		},
+		interfaces: {
+			type: this.mongoose.Schema.Types.ObjectId,
+			required: false,
+			array: true,
+			fieldType: 'Select',
+			source: {type: 'model', name: 'interface'}
 		}
 	};
 	
 	this.admin = {
 		title: 'Devices',
-		fields: ['name', 'device_type', 'address']
+		fields: ['name', 'device_type', 'address', 'interface_type', 'interfaces']
 	};
 	
 }

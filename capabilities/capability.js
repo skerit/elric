@@ -1,3 +1,14 @@
+/**
+ * A client capability class
+ *
+ * These define the options you can set per capability, per client.
+ * Every capability has a "client file", which you can store here:
+ *
+ * client_files/nameClientFile.js
+ *
+ * This client file will be sent to the client upon connection,
+ * and executed in its scope
+ */
 module.exports = function (elric) {
 	
 	/**

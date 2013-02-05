@@ -8,17 +8,17 @@
 
 <div class="error"></div>
 
-<table class="table table-striped table-bordered">
-  <form id="newRecord" data-model="<%= modelName %>">
-	<% for (var i in fields) { %>
-	<% var field = fields[i] %>
-  <tr>
-    <td><%= field %></td>
-		<td><% adminField(field, {selects: selects, blueprint: blueprint}) %></td>
-  </tr>
-	<% } %>
-  </form>
-</table>
+<form id="newRecord" data-model="<%= modelName %>">
+	<table class="table table-striped table-bordered">
+		<% for (var i in fields) { %>
+		<% var field = fields[i] %>
+		<tr>
+			<td><%= field %></td>
+			<td><% adminField(field, {selects: selects, blueprint: blueprint}) %></td>
+		</tr>
+		<% } %>
+	</table>
+</form>
 
 <button class="btn btn-primary" id="saveNew" data-model="<%= modelName %>">Save new record</button>
 

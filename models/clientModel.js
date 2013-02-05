@@ -32,11 +32,11 @@ module.exports = function client (elric) {
 			type: String,
 			required: true,
 			fieldType: 'String'
-		},
-	}
+		}
+	};
 	
 	this.admin = {
 		title: 'Clients',
 		fields: ['name', 'key', 'hostname', 'ip']
-	}
+	};
 }

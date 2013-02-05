@@ -35,8 +35,12 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 			options.item = options.items[options.ofItem];
 		}
 		
-		if (options.ofItem2) {
-			options.item = options.item[options.ofItem2];
+		if (options.item && options.ofItem2) {
+			if (options.item[options.ofItem2] !== undefined) {
+				options.item = options.item[options.ofItem2];
+			} else {
+				options.item = false;
+			}
 		}
 		
 		if (options.item && options.field) {
@@ -63,7 +67,17 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 						selected = '';
 						if (s[i]['_id'] == value) selected = 'selected';
 						
-						html += '<option value="' + s[i]['_id'] + '" ' + selected + '>' + s[i]['name'] + '</option>';
+						var oname = '';
+						
+						if (s[i]['title']) {
+							oname = s[i]['title'];
+						} else if (s[i]['name']) {
+							oname = s[i]['name'];
+						} else {
+							oname = 'Nameless: ' + s[i]['_id'];
+						}
+						
+						html += '<option value="' + s[i]['_id'] + '" ' + selected + '>' + oname + '</option>';
 					}
 				} else if (blueprint.source.type == 'memobject') {
 					for (var i in s) {

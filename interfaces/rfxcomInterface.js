@@ -1,10 +1,12 @@
-var rfxcominterface = require('rfxcom');
+//var rfxcominterface = require('rfxcom');
 
 module.exports = function rfxcom (elric) {
 
 	this.name = 'rfxcom';
 	this.title = 'rfxcom';
-	this.interface = new rfxcominterface.RfxCom("/dev/ttyUSB1", {debug: true});
+	//this.interface = new rfxcominterface.RfxCom("/dev/ttyUSB1", {debug: true});
+	
+	elric.loadCapability('rfxcom');
 	
 	/**
 	 * Turn a device on based on its address

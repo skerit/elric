@@ -88,7 +88,7 @@ elric.memobjects.elementTypes = elric.elementTypes;
 elric.memobjects.capabilities = elric.capabilities;
 elric.memobjects.activities = elric.activities;
 elric.memobjects.actions = elric.actions;
-elric.memobjects.deviceTypes = elric.deviceTypes;
+elric.memobjects.deviceTypes = {};
 elric.memobjects.interfaces = elric.interfaces;
 
 // Temporary storage & object cache

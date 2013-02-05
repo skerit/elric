@@ -78,7 +78,7 @@ module.exports = function (elric) {
 			// If the item doesn't exist yet, create it
 			// (but don't save it)
 			if (!item) {
-				item = new P({
+				item = new ClientCapability({
 					client_id: clientid,
 					capability: capabilityname,
 					settings: {}
