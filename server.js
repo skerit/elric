@@ -22,7 +22,6 @@ var fs = require('fs');
 var mv = require('mv');
 var base64 = require('base64js');
 var mkdirp = require('mkdirp');
-var rfxcom = require('rfxcom');
 var hawkejs = require('./hawkejs');
 
 /**
