@@ -418,10 +418,10 @@ module.exports = function (elric) {
 	elric.expose = function expose (name, object, res) {
 		
 		if (res === undefined) {
-			elric.exposedObjects[name] = {name: name, object: object};
+			elric.exposedObjects[name] = object;
 		} else {
 			if (res.locals.exposedObjects === undefined) res.locals.exposedObjects = {};
-			res.locals.exposedObjects[name] = {name: name, object: object};
+			res.locals.exposedObjects[name] = object;
 		}
 	}
 	

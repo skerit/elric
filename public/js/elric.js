@@ -1,6 +1,7 @@
 Elric.connected = false;
 Elric.ioqueue = []
 Elric.iokey = $.cookie('iokey');
+Elric.$notify = $('#notifybutton');
 
 // Disable the pnotify history button
 $.pnotify.defaults.history = false;
@@ -9,11 +10,11 @@ $.pnotify.defaults.history = false;
 Elric.storage = {};
 
 // Activate the popover
-$('#ma-notifybutton').popover({placement: 'bottom', content: 'No notifications found', html: true});
+Elric.$notify.popover({placement: 'bottom', content: 'No notifications found', html: true});
 
 // Store the notification popover in here
 Elric.notifications = {};
-Elric.notifications.popover = $('#ma-notifybutton').data('popover');
+Elric.notifications.popover = Elric.$notify.data('popover');
 Elric.notifications.messages = Elric.exposed.notifications;
 
 /**
@@ -42,9 +43,9 @@ $('div.btn-group[data-toggle-name]').each(function(){
 	});
 });
 
-$('#ma-notifybutton').click(function(e){
+Elric.$notify.click(function(e){
 	e.preventDefault();
-	$('#ma-notifybutton').popover({placement: 'bottom'});
+	Elric.$notify.popover({placement: 'bottom'});
 });
 
 /**
@@ -126,7 +127,7 @@ Elric.repopulateNotifications = function () {
 	
 	// If the popover is open at this time, also replace that data
 	$('.popover-inner .popover-content',
-		$('#ma-notifybutton').siblings('div.popover')).html(o.content);
+		Elric.$notify.siblings('div.popover')).html(o.content);
 }
 
 /**

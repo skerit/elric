@@ -63,14 +63,27 @@ $('#hawkejs-space-client-main').on('click', 'button[data-function="save"]', func
 	
 });
 
-// Set the initial states
-for (var capname in Elric.exposed.capsettings) {
-	
-	var $cap = $('[data-capability="' + capname + '"]');
-	var capset = Elric.exposed.capsettings[capname];
-	
-	// If this capability has been enabled ...
-	if (capset.enabled) {
-		Elric.cap.toggle(capname, true, false);
+/**
+ * Get client capability settings upon each render
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.04
+ * @version  2013.02.04
+ *
+ */
+Elric.viewClient = function viewClient (parameters) {
+	// Set the initial states
+	for (var capname in Elric.exposed.capsettings) {
+		
+		var $cap = $('[data-capability="' + capname + '"]');
+		var capset = Elric.exposed.capsettings[capname];
+		
+		// If this capability has been enabled ...
+		if (capset.enabled) {
+			Elric.cap.toggle(capname, true, false);
+		}
 	}
 }
+
+// Parse the client capabilities on block creation
+hawkejs.event.on('create-block-client-main', Elric.viewClient);
