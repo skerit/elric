@@ -1,14 +1,16 @@
 module.exports = function Config (elric) {
+	
+	var mainPath = process.cwd();
 
 	// Load base classes
-	require('./models/model')(elric);
-	require('./plugins/plugin')(elric);
-	require('./lib/element_types/element_type')(elric);
-	require('./lib/capabilities/capability')(elric);
-	require('./lib/activities/activity')(elric);
-	require('./lib/actions/action')(elric);
-	require('./lib/device_types/device_type')(elric);
-	require('./lib/interfaces/interface')(elric);
+	require(mainPath + '/models/model')(elric);
+	require(mainPath + '/plugins/plugin')(elric);
+	require(mainPath + '/lib/element_types/element_type')(elric);
+	require(mainPath + '/lib/capabilities/capability')(elric);
+	require(mainPath + '/lib/activities/activity')(elric);
+	require(mainPath + '/lib/actions/action')(elric);
+	require(mainPath + '/lib/device_types/device_type')(elric);
+	require(mainPath + '/lib/interfaces/interface')(elric);
 	
 	// Copy over all core dust templates
 	//elric.loadTemplates('assets/views/');

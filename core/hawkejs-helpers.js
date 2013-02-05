@@ -100,5 +100,80 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		this.scope.buf.push(html);
 	}
 	
+	// @todo: these helpers are still in the dust format!
+	helpers.dustselect = function (chunk, context, bodies, params) {
+		var elements = params.elements;
+		var valueName = params.valueName;
+		var displayName = params.displayName;
+		var name = params.name;
+		
+		var html = '<div class="control-group">';
+		html += '<select name="' + name + '">';
+		
+		if (params['null']) {
+			html += '<option value="">' + params['null'] + '</option>';
+		}
+		
+		for (var i in elements) {
+			html += '<option value="' + elements[i][valueName] + '">' + elements[i][displayName] + '</option>';
+		}
+		
+		html += '</select>';
+		html += '</div>';
+		
+		chunk.write(html);
+		return chunk;
+	}
 	
+	helpers.dustinput = function (chunk, context, bodies, params) {
+		
+		var name = params.name;
+		var placeholder = params.name;
+		var pendclass = '';
+		var prepend = '';
+		var append = '';
+		var type = 'text';
+		
+		if (params.prepend) {
+			prepend = '<span class="add-on prepend">' + params.prepend + '</span>';
+			pendclass = 'input-prepend ';
+		}
+		
+		if (params.append) {
+			append = '<span class="add-on append">' + params.append + '</span>';
+			pendclass += 'input-append';
+		}
+		
+		if (params.append || params.prepend) {
+			prepend = '<div class="' + pendclass + '">' + prepend;
+			append += '</div>';
+		}
+		
+		if (params.placeholder) placeholder = params.placeholder;
+		if (params.type) type = params.type;
+		
+		var html = '<div class="control-group">';
+		html += prepend;
+		html += '<input type="' + type + '" name="' + name + '" placeholder="' + placeholder + '" />';
+		html += append;
+		html += '</div>';
+		
+		chunk.write(html);
+		return chunk;
+	}
+	
+	helpers.dustdoekETMenu = function (chunk, context, bodies, params) {
+		
+		var html = '';
+		
+		for (var typename in elric.memobjects.elementTypes) {
+			var type = elric.memobjects.elementTypes[typename];
+			
+			html += '<li><a href="#" data-target="addElementType" data-elementType="' + typename + '">Add ' + type.title + '</a></li>';
+			
+		}
+		
+		chunk.write(html);
+		return chunk;
+	}
 }

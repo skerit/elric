@@ -24,7 +24,7 @@ var hawkejs = require('./hawkejs');
 /**
  * Our own modules
  */
-var Routes = require('./routes');
+var Routes = require('./core/routes');
 var local = require('./local');
 
 // Prepare the routes variable
@@ -115,7 +115,7 @@ elric.io = io.listen(elric.server);
 elric.websocket = {};
 
 // Load the Elric Event class
-require('./event')(elric);
+require('./core/event')(elric);
 
 // Prepare an object for storing event emitters
 elric.events = {};
@@ -131,7 +131,7 @@ elric.log = elric.io.log;
 hawkejs._debug = true;
 
 // Add our extra hawkejs helpers
-hawkejs.addHelpers(path.join(__dirname, 'hawkejs-helpers.js'));
+hawkejs.addHelpers(path.join(__dirname, 'core', 'hawkejs-helpers.js'));
 
 // Use hawkejs as our template engine, map it to the .ejs extension
 app.engine('ejs', hawkejs.__express);
@@ -231,16 +231,16 @@ app.configure(function(){
 });
 
 // Initiate admin
-require('./admin')(elric);
+require('./core/admin')(elric);
 
 // Load helper functions
-require('./helpers')(elric);
+require('./core/helpers')(elric);
 
 // Load plugins, models, ...
-require('./config')(elric);
+require('./core/core')(elric);
 
 // Initiate clients
-require('./client')(elric);
+require('./core/client')(elric);
 
 // Websocket handler stuff
 require('./websocket/handler')(elric);

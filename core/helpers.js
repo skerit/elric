@@ -3,6 +3,7 @@ var bcrypt = require('bcrypt');
 var async = require('async');
 var fs = require('fs');
 var dust = require('dustjs-linkedin');
+var mainDir = process.cwd();
 
 module.exports = function (elric) {
 	
@@ -514,7 +515,7 @@ module.exports = function (elric) {
 		
 		elric.log.debug('Initializing Plugin "' + pluginName + '"');
 		
-		var filepath = './plugins/' + pluginName + '/' + pluginName + 'Plugin';
+		var filepath = mainDir + '/plugins/' + pluginName + '/' + pluginName + 'Plugin';
 		
 		try {
 			// Get the constructor, the actual plugin file
@@ -562,7 +563,7 @@ module.exports = function (elric) {
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
-		path = './' + path;
+		path = mainDir + '/' + path;
 		
 		elric.log.debug('Initializing Model "' + modelName + '"' + debugm);
 		
@@ -615,11 +616,11 @@ module.exports = function (elric) {
 	 */
 	elric.loadElementType = function loadElementType (typeName, pluginName) {
 		
-		var path = './lib/element_types/' + typeName + 'Type';
+		var path = mainDir + '/lib/element_types/' + typeName + 'Type';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
-			path = './plugins/' + pluginName + '/lib/element_types/' + typeName + 'Type';
+			path = mainDir + '/plugins/' + pluginName + '/lib/element_types/' + typeName + 'Type';
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
@@ -652,7 +653,7 @@ module.exports = function (elric) {
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
-		path = './' + path;
+		path = mainDir + '/' + path;
 		
 		elric.log.debug('Initializing Capability "' + capabilityName + '"' + debugm);
 		
@@ -685,7 +686,7 @@ module.exports = function (elric) {
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
-		path = './' + path;
+		path = mainDir + '/' + path;
 		
 		elric.log.debug('Requiring Action Class "' + actionName + '"' + debugm);
 		
@@ -720,7 +721,7 @@ module.exports = function (elric) {
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
-		path = './' + path;
+		path = mainDir + '/' + path;
 		
 		elric.log.debug('Requiring Activity Class "' + activityName + '"' + debugm);
 		
@@ -755,7 +756,7 @@ module.exports = function (elric) {
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
-		path = './' + path;
+		path = mainDir + '/' + path;
 		
 		elric.log.debug('Requiring Device Type Class "' + deviceTypeName + '"' + debugm);
 		
@@ -792,7 +793,7 @@ module.exports = function (elric) {
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
-		path = './' + path;
+		path = mainDir + '/' + path;
 		
 		elric.log.debug('Requiring Interface "' + interfaceName + '"' + debugm);
 		
