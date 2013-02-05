@@ -97,10 +97,10 @@ module.exports = function (elric) {
 				
 				var cap = elric.capabilities[capname];
 				
-				var path = './client_files/' + capname + 'ClientFile.js';
+				var path = './lib/client_files/' + capname + 'ClientFile.js';
 				
 				if (cap.plugin) {
-					path = './plugins/' + cap.plugin + '/client_files/' + capname + 'ClientFile.js';
+					path = './plugins/' + cap.plugin + '/lib/client_files/' + capname + 'ClientFile.js';
 				}
 				
 				fs.readFile(path, 'utf-8', function (err, data) {

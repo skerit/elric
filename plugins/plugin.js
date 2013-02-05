@@ -36,7 +36,7 @@ module.exports = function (elric) {
 	 * @since    2013.01.16
 	 * @version  2013.01.16
 	 */
-	bp._preConstructor = function _preConstructor () {
+	bp.preConstructor = function preConstructor () {
 		var event = new elric.classes.ElricEvent(this.name, this);
 	}
 	

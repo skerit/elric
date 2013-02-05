@@ -522,7 +522,7 @@ module.exports = function (elric) {
 			
 			// Extend the base plugin with this constructor
 			var plugin = elric.extend(elric.classes.BasePlugin,
-																elric.classes.BasePlugin.prototype._preConstructor,
+																elric.classes.BasePlugin.prototype.preConstructor,
 																constructor);
 
 			plugin.prototype.name = pluginName;
@@ -615,11 +615,11 @@ module.exports = function (elric) {
 	 */
 	elric.loadElementType = function loadElementType (typeName, pluginName) {
 		
-		var path = './element_types/' + typeName + 'Type';
+		var path = './lib/element_types/' + typeName + 'Type';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
-			path = './plugins/' + pluginName + '/element_types/' + typeName + 'Type';
+			path = './plugins/' + pluginName + '/lib/element_types/' + typeName + 'Type';
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
 		
@@ -644,7 +644,7 @@ module.exports = function (elric) {
 	 */
 	elric.loadCapability = function loadCapability (capabilityName, pluginName) {
 		
-		var path = 'capabilities/' + capabilityName + 'Capability';
+		var path = 'lib/capabilities/' + capabilityName + 'Capability';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
@@ -677,7 +677,7 @@ module.exports = function (elric) {
 	 */
 	elric.loadAction = function loadAction (actionName, pluginName) {
 	
-		var path = 'actions/' + actionName + 'Action';
+		var path = 'lib/actions/' + actionName + 'Action';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
@@ -692,7 +692,7 @@ module.exports = function (elric) {
 		var constructor = require(path);
 		
 		var action = elric.extend(elric.classes.BaseAction,
-		                            elric.classes.BaseAction.prototype._preConstructor,
+		                            elric.classes.BaseAction.prototype.preConstructor,
 		                            constructor);
 
 		// Store the new activity class
@@ -712,7 +712,7 @@ module.exports = function (elric) {
 	 */
 	elric.loadActivity = function loadActivity (activityName, pluginName) {
 	
-		var path = 'activities/' + activityName + 'Activity';
+		var path = 'lib/activities/' + activityName + 'Activity';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
@@ -727,7 +727,7 @@ module.exports = function (elric) {
 		var constructor = require(path);
 		
 		var activity = elric.extend(elric.classes.BaseActivity,
-		                            elric.classes.BaseActivity.prototype._preConstructor,
+		                            elric.classes.BaseActivity.prototype.preConstructor,
 		                            constructor);
 
 		// Store the new activity class
@@ -747,7 +747,7 @@ module.exports = function (elric) {
 	 */
 	elric.loadDeviceType = function loadDeviceType (deviceTypeName, pluginName) {
 	
-		var path = 'device_types/' + deviceTypeName + 'Device';
+		var path = 'lib/device_types/' + deviceTypeName + 'Device';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
@@ -762,7 +762,7 @@ module.exports = function (elric) {
 		var constructor = require(path);
 		
 		var device = elric.extend(elric.classes.BaseDeviceType,
-		                            elric.classes.BaseDeviceType.prototype._preConstructor,
+		                            elric.classes.BaseDeviceType.prototype.preConstructor,
 		                            constructor);
 
 		// Store the new device type class
@@ -784,7 +784,7 @@ module.exports = function (elric) {
 	 */
 	elric.loadInterface = function loadInterface (interfaceName, pluginName) {
 	
-		var path = 'interfaces/' + interfaceName + 'Interface';
+		var path = 'lib/interfaces/' + interfaceName + 'Interface';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
@@ -799,7 +799,7 @@ module.exports = function (elric) {
 		var constructor = require(path);
 		
 		var interf = elric.extend(elric.classes.BaseInterface,
-		                          elric.classes.BaseInterface.prototype._preConstructor,
+		                          elric.classes.BaseInterface.prototype.preConstructor,
 		                          constructor);
 
 		// Store the new interface

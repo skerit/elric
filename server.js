@@ -6,9 +6,6 @@ var mongoose = require('mongoose');
 var http = require('http');
 var less = require('less');
 var lessmw = require('less-middleware')
-var dust = require('dustjs-linkedin');
-dust.helpers = require('dustjs-helpers');
-var cons = require('consolidate');
 var path = require('path');
 var store = new express.session.MemoryStore;
 var $ = require('jquery');
@@ -241,9 +238,6 @@ require('./helpers')(elric);
 
 // Load plugins, models, ...
 require('./config')(elric);
-
-// Load our own dust helpers
-require('./dust-helpers')(dust, elric);
 
 // Initiate clients
 require('./client')(elric);
