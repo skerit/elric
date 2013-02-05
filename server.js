@@ -233,6 +233,9 @@ app.configure(function(){
 // Initiate admin
 require('./core/admin')(elric);
 
+// Load the loader functions
+require('./core/loaders')(elric);
+
 // Load helper functions
 require('./core/helpers')(elric);
 
