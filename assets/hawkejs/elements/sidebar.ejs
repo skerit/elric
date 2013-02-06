@@ -1,8 +1,10 @@
 <% matchIns = {class: 'active', parent: {class: 'active'}} -%>
 
 <div id="sidebar">
-	<ul>
-		<li><% add_link('/', {title: 'Home', content: '<i class="icon icon-home"></i> <span>Home</span>', match: {parent: {class: 'active'}}}) %></li>
-		<% print_element('elements/menulinks', {variables: {links: menus.sidebar, match: matchIns}}) %>
-	</ul>
+	<div class="wrapper">
+		<ul>
+			<li><% add_link('/', {title: 'Home', content: '<i class="icon icon-home"></i> <span>Home</span>', match: {parent: {class: 'active'}}}) %></li>
+			<% print_element('elements/menulinks', {variables: {links: menus.sidebar, match: matchIns}}) %>
+		</ul>
+	</div>
 </div>

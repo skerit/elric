@@ -171,3 +171,32 @@ if (Elric.exposed.iokey) {
 }
 
 Elric.repopulateNotifications();
+
+var $sidebar = $('#sidebar .wrapper');
+var $window = $(window);
+
+/**
+ * Apply the jScrollPane plugin to every sidebar
+ */
+hawkejs.event.on('create-block-sidebar', function (blockname){
+	
+	// Recapture the new sidebar
+	$sidebar = $('#sidebar .wrapper');
+	
+	// Reload scrollpane
+	$sidebar.jScrollPane();
+	
+});
+
+$window.load(function () {
+	
+	var resize = false;
+		
+	$window.resize(function() {
+		// Reload when the window changes size
+		if (resize) {
+			clearTimeout(resize);
+		}
+		resize = setTimeout(function(){$sidebar.jScrollPane();}, 100);
+	});
+});
