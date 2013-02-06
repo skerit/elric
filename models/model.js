@@ -38,6 +38,7 @@ module.exports = function (elric) {
 		this.schema = {};
 		this.model = {};
 		this.cache = {};
+		this.special = {json: {}};
 		
 		this._prepost = {
 			pre: [],
@@ -97,6 +98,11 @@ module.exports = function (elric) {
 		pre: [],
 		post: []
 	};
+	
+	/**
+	 * Store special fields in here, fields we need to modify before saving
+	 */
+	bp.special = {};
 	
 	/**
 	 * Add pre schema callbacks
@@ -166,13 +172,15 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.05
-	 * @version  2013.01.15
+	 * @version  2013.02.06
 	 *
 	 * @param    {object}   blueprint   The schema blueprint
 	 * 
 	 * @returns  {object}   A mongoose schema
 	 */
 	bp._createSchema = function _createSchema (blueprint) {
+		
+		var thisModel = this;
 		
 		// Add the created & updated field
 		blueprint.created = {type: Date, default: Date.now, fieldType: 'Date'}
@@ -187,6 +195,11 @@ module.exports = function (elric) {
 		// See if any of the entries are arrays
 		for (var fieldname in blueprintClone) {
 			var e = blueprintClone[fieldname];
+			
+			// Store json fields under the special object
+			if (e.fieldType == 'json') {
+				this.special['json'][fieldname] = fieldname;
+			}
 			
 			if (e.array) {
 				
@@ -219,9 +232,19 @@ module.exports = function (elric) {
 		
 		var schema = elric.mongoose.Schema(blueprintClone);
 		
-		// Set the "updated" field to this timestamp before saving
+		// Do some things before saving this record
 		schema.pre('save', function(next){
+			
+			// Set the "updated" field to this timestamp before saving
 			this.updated = Date.now();
+			
+			// Convert json strings back to objects
+			for (var fieldname in thisModel.special.json) {
+				if (typeof this[fieldname] == 'String') {
+					this[fieldname] = JSON.parse(this[fieldname]);
+				}
+			}
+			
 			next();
 		});
 		

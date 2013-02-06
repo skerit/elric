@@ -56,9 +56,9 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		
 		var selected = '';
 		
-		switch (blueprint.fieldType) {
+		switch (blueprint.fieldType.toLowerCase()) {
 			
-			case 'Select':
+			case 'select':
 				html += '<select name="' + name + '">';
 				var s = selects[blueprint.source.name];
 
@@ -88,6 +88,10 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 					}
 				}
 				html += '</select>';
+				break;
+			
+			case 'json':
+				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value=' + JSON.stringify(value) + ' />';
 				break;
 			
 			default:

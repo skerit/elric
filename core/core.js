@@ -11,6 +11,7 @@ module.exports = function Config (elric) {
 	require(mainPath + '/lib/actions/action')(elric);
 	require(mainPath + '/lib/device_types/device_type')(elric);
 	require(mainPath + '/lib/interfaces/interface')(elric);
+	require(mainPath + '/lib/automation_protocols/automation_protocol')(elric);
 	
 	// Copy over all core dust templates
 	//elric.loadTemplates('assets/views/');
@@ -30,6 +31,9 @@ module.exports = function Config (elric) {
 	
 	// Load actions
 	elric.loadAction('consoleOutput');
+	
+	// Load automation protocol
+	elric.loadAutomationProtocol('arc');
 	
 	// Load interfaces
 	elric.loadInterface('rfxcom');

@@ -247,13 +247,13 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.02
-	 * @version  2013.02.02
+	 * @version  2013.02.06
 	 *
 	 * @returns    {elric.classes.DeviceType}   A DeviceType class
 	 */
 	elric.loadDeviceType = function loadDeviceType (deviceTypeName, pluginName) {
 	
-		var path = 'lib/device_types/' + deviceTypeName + 'Device';
+		var path = 'lib/device_types/' + deviceTypeName + 'DeviceType';
 		var debugm = '';
 		
 		if (pluginName !== undefined) {
@@ -312,6 +312,41 @@ module.exports = function (elric) {
 		elric.interfaces[interfaceName] = new interf(elric);
 		
 		return elric.interfaces[interfaceName];
+	}
+	
+	/**
+	 * Load a new automation protocol
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.06
+	 * @version  2013.02.06
+	 *
+	 * @returns  {elric.classes.AutomationProtocol}   An AutomationProtocol class
+	 */
+	elric.loadAutomationProtocol = function loadAutomationProtocol (protocolName, pluginName) {
+	
+		var path = 'lib/automation_protocols/' + protocolName + 'AutomationProtocol';
+		var debugm = '';
+		
+		if (pluginName !== undefined) {
+			path = 'plugins/' + pluginName + '/' + path;
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		path = mainDir + '/' + path;
+		
+		elric.log.debug('Requiring Automation Protocol "' + protocolName + '"' + debugm);
+		
+		var constructor = require(path);
+		
+		var protocol = elric.extend(elric.classes.BaseAutomationProtocol,
+		                          elric.classes.BaseAutomationProtocol.prototype.preConstructor,
+		                          constructor);
+
+		// Store the new protocol
+		elric.automationProtocols[protocolName] = new protocol(elric);
+		
+		return elric.automationProtocols[protocolName];
 	}
 
 }

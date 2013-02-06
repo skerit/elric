@@ -76,6 +76,7 @@ elric.activities = {};
 elric.actions = {};
 elric.deviceTypes = {};
 elric.interfaces = {};
+elric.automationProtocols = {};
 
 // Memobjects are like cakephp enums
 // A collection of records that can be used
@@ -87,6 +88,7 @@ elric.memobjects.activities = elric.activities;
 elric.memobjects.actions = elric.actions;
 elric.memobjects.deviceTypes = {};
 elric.memobjects.interfaces = elric.interfaces;
+elric.memobjects.automationProtocols = elric.automationProtocols;
 
 // Temporary storage & object cache
 elric.temp = {};

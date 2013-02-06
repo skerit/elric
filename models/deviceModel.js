@@ -24,10 +24,16 @@ module.exports = function device (elric) {
 			fieldType: 'Select',
 			source: {type: 'memobject', name: 'deviceTypes'}
 		},
-		address: {
+		automation_protocol: {
 			type: String,
 			required: true,
-			fieldType: 'String'
+			fieldType: 'Select',
+			source: {type: 'memobject', name: 'automationProtocols'}
+		},
+		address: {
+			type: {},
+			required: true,
+			fieldType: 'json'
 		},
 		interface_type: {
 			type: String,
@@ -46,7 +52,7 @@ module.exports = function device (elric) {
 	
 	this.admin = {
 		title: 'Devices',
-		fields: ['name', 'device_type', 'address', 'interface_type', 'interfaces']
+		fields: ['name', 'device_type', 'automation_protocol', 'address', 'interface_type', 'interfaces']
 	};
 	
 }
