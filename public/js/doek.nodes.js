@@ -112,15 +112,15 @@ Doek.Wall = Doek.extend(Doek.Line, function(instructions, parentObject, roomElem
 	var thisWall = this;
 	
 	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = elementTypes[this.elricType].colourOri;
+	style.properties.strokeStyle = Elric.exposed.elementTypes[this.elricType].colourOri;
 	style.weight = 100;
 	
 	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = elementTypes[this.elricType].colourHover;
+	hoverStyle.properties.strokeStyle = Elric.exposed.elementTypes[this.elricType].colourHover;
 	hoverStyle.weight = 1000;
 	
 	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = elementTypes[this.elricType].colourSelect;
+	selectStyle.properties.strokeStyle = Elric.exposed.elementTypes[this.elricType].colourSelect;
 	selectStyle.weight = 10000;
 	
 	this.addStyle(style);
@@ -178,15 +178,15 @@ Doek.Camera = Doek.extend(Doek.Rectangle, function(instructions, parentObject, r
 	var thisWall = this;
 	
 	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = elementTypes.camera.colourOri;
+	style.properties.strokeStyle = Elric.exposed.elementTypes.camera.colourOri;
 	style.weight = 100;
 	
 	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = elementTypes.camera.colourHover;
+	hoverStyle.properties.strokeStyle = Elric.exposed.elementTypes.camera.colourHover;
 	hoverStyle.weight = 1000;
 	
 	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = elementTypes.camera.colourSelect;
+	selectStyle.properties.strokeStyle = Elric.exposed.elementTypes.camera.colourSelect;
 	selectStyle.weight = 10000;
 	
 	this.addStyle(style);

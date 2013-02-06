@@ -79,8 +79,15 @@ module.exports = function Routes (elric) {
 		async.parallel(
 			par,
 			function(err, results) {
+				
 				results.elementTypes = elric.memobjects.elementTypes;
-				elric.render(req, res, 'doek', results);
+				
+				// Expose the records we just searched for
+				elric.expose('rooms', results.rooms, res);
+				elric.expose('elements', results.elements, res);
+				elric.expose('elementTypes', results.elementTypes, res);
+				
+				elric.render(req, res, 'doek/index', results);
 			}
 		);
 	});

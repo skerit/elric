@@ -104,80 +104,237 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		this.scope.buf.push(html);
 	}
 	
-	// @todo: these helpers are still in the dust format!
-	helpers.dustselect = function (chunk, context, bodies, params) {
-		var elements = params.elements;
-		var valueName = params.valueName;
-		var displayName = params.displayName;
-		var name = params.name;
+	/**
+	 * Create a select field
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.06
+	 * @version  2013.02.06
+	 *
+	 * @param    {string}    name     The name of the field
+	 * @param    {object}    options  The options
+	 */
+	helpers.fieldSelect = function fieldSelect (name, options) {
 		
-		var html = '<div class="control-group">';
-		html += '<select name="' + name + '">';
+		var html = '';
+		var title = false;
+		var selected = '';
+		var option = false;
+		var opttitle = false;
 		
-		if (params['null']) {
-			html += '<option value="">' + params['null'] + '</option>';
+		// Do nothing if the options isn't defined
+		if (typeof options == 'undefined') return;
+		
+		// There is no select without elements
+		if (typeof options.elements == 'undefined') return;
+		
+		// Add control group wrappers by default
+		if (typeof options.wrapper == 'undefined') options.wrapper = true;
+		
+		// Do not return, but print out by default
+		if (typeof options.return == 'undefined') options.return = false;
+		
+		// Enable a null parameter by default
+		if (typeof options.null == 'undefined') options.null = true;
+		
+		// Check for value to select
+		if (typeof options.value == 'undefined') options.value = false;
+		
+		// Don't add a label by default
+		if (typeof options.label == 'undefined') options.label = false;
+		
+		// Enable a title by default
+		if (typeof options.title == 'undefined') options.title = true;
+		
+		// Set the _id as default value field
+		if (typeof options.valueField == 'undefined') options.valueField = '_id';
+		
+		// Set the name as default name field
+		if (typeof options.titleField == 'undefined') options.titleField = 'title';
+		
+		// See what title to add
+		if (options.title) {
+			if (options.title !== true) {
+				title = options.title;
+			} else {
+				title = name;
+			}
 		}
 		
-		for (var i in elements) {
-			html += '<option value="' + elements[i][valueName] + '">' + elements[i][displayName] + '</option>';
+		// Start creating the select
+		html = '<select name="' + name + '">\n';
+		
+		if (options.null) {
+			
+			if (options.null == true) {
+				html += '<option value=""></option>';
+			} else {
+				html += '<option value="">' + options.null + '</option>';
+			}
+			
 		}
 		
-		html += '</select>';
-		html += '</div>';
+		// Add the options
+		for (var i in options.elements) {
+			
+			option = options.elements[i];
+			
+			// Reset the selected attribute
+			selected = '';
+			
+			// Check given value?
+			if (options.value !== false) {
+				if (option[options.valueField] == options.value) selected = 'selected';
+			}
+			
+			opttitle = '';
+			
+			if (typeof option[options.titleField] != 'undefined') {
+				opttitle = option[options.titleField];
+			} else if (typeof option['name'] != 'undefined') {
+				opttitle = option['name'];
+			} else if (typeof option['title'] != 'undefined') {
+				opttitle = option['title'];
+			} else {
+				opttitle = option[options.valueField];
+			}
+			
+			html += '<option value="'
+				+ option[options.valueField]
+				+ '" ' + selected + '>'
+				+ opttitle + '</option>\n';
+		}
 		
-		chunk.write(html);
-		return chunk;
+		html += '</select>\n';
+		
+		if (options.label) {
+			html = '<label class="control-label" for="' + name + '">' + title + '</label>\n' + html;
+		}
+		
+		// If a wrapper is wanted, add it
+		if (options.wrapper) html = '<div class="control-group">\n' + html + '\n</div>\n';
+		
+		// Return the html if wanted
+		if (options.return) return html;
+		
+		// If not, push it to the buffer
+		this.scope.buf.push(html);
 	}
 	
-	helpers.dustinput = function (chunk, context, bodies, params) {
+	/**
+	 * Create an input field
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.06
+	 * @version  2013.02.06
+	 *
+	 * @param    {string}    name     The name of the field
+	 * @param    {object}    options  The options
+	 */
+	helpers.fieldInput = function fieldInput (name, options) {
 		
-		var name = params.name;
-		var placeholder = params.name;
+		var html = '';
 		var pendclass = '';
 		var prepend = '';
 		var append = '';
-		var type = 'text';
+		var ghost = '';
+		var title = false;
 		
-		if (params.prepend) {
-			prepend = '<span class="add-on prepend">' + params.prepend + '</span>';
+		// Do nothing if the options isn't defined
+		if (typeof options == 'undefined') return;
+		
+		// Add control group wrappers by default
+		if (typeof options.wrapper == 'undefined') options.wrapper = true;
+		
+		// Do not return, but print out by default
+		if (typeof options.return == 'undefined') options.return = false;
+		
+		// Enable a null parameter by default
+		if (typeof options.ghost == 'undefined') options.ghost = true;
+		
+		// Don't add a label by default
+		if (typeof options.label == 'undefined') options.label = false;
+		
+		// Enable a title by default
+		if (typeof options.title == 'undefined') options.title = true;
+		
+		// Default type is text
+		if (typeof options.type == 'undefined') options.type = 'text';
+		
+		// Is there a starting value?
+		if (typeof options.value == 'undefined') options.value = '';
+		
+		// See what title to add
+		if (options.title) {
+			if (options.title !== true) {
+				title = options.title;
+			} else {
+				title = name;
+			}
+		}
+		
+		if (options.prepend) {
+			prepend = '<span class="add-on prepend">' + options.prepend + '</span>';
 			pendclass = 'input-prepend ';
 		}
 		
-		if (params.append) {
-			append = '<span class="add-on append">' + params.append + '</span>';
+		if (options.append) {
+			append = '<span class="add-on append">' + options.append + '</span>';
 			pendclass += 'input-append';
 		}
 		
-		if (params.append || params.prepend) {
+		if (options.append || options.prepend) {
 			prepend = '<div class="' + pendclass + '">' + prepend;
 			append += '</div>';
 		}
 		
-		if (params.placeholder) placeholder = params.placeholder;
-		if (params.type) type = params.type;
-		
-		var html = '<div class="control-group">';
-		html += prepend;
-		html += '<input type="' + type + '" name="' + name + '" placeholder="' + placeholder + '" />';
-		html += append;
-		html += '</div>';
-		
-		chunk.write(html);
-		return chunk;
-	}
-	
-	helpers.dustdoekETMenu = function (chunk, context, bodies, params) {
-		
-		var html = '';
-		
-		for (var typename in elric.memobjects.elementTypes) {
-			var type = elric.memobjects.elementTypes[typename];
-			
-			html += '<li><a href="#" data-target="addElementType" data-elementType="' + typename + '">Add ' + type.title + '</a></li>';
-			
+		if (options.ghost) {
+			if (options.ghost === true) {
+				ghost = name;
+			} else {
+				ghost = options.ghost;
+			}
 		}
 		
-		chunk.write(html);
-		return chunk;
+		html = prepend;
+		html += '<input type="' + options.type + '" '
+			+ 'name="' + name + '" placeholder="' + ghost + '" '
+			+ 'value="' + options.value + '" />';
+		html += append;
+		
+		if (options.label) {
+			html = '<label class="control-label" for="' + name + '">' + title + '</label>\n' + html;
+		}
+		
+		// If a wrapper is wanted, add it
+		if (options.wrapper) html = '<div class="control-group">\n' + html + '\n</div>\n';
+		
+		// Return the html if wanted
+		if (options.return) return html;
+		
+		// If not, push it to the buffer
+		this.scope.buf.push(html);
 	}
+	
+	/**
+	 * Create dropdown field for creating doek elements
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.06
+	 * @version  2013.02.06
+	 *
+	 * @param    {object}    elementTypes    All the available element types
+	 */
+	helpers.doekETMenu = function (elementTypes) {
+		var html = '';
+		
+		for (var typename in elementTypes) {
+			var type = elementTypes[typename];
+			
+			html += '<li><a href="#" data-target="addElementType" data-elementType="' + typename + '">Add ' + type.title + '</a></li>';
+		}
+		
+		this.scope.buf.push(html);
+	}
+
 }

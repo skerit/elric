@@ -76,16 +76,16 @@ changeSize.on('mouseup', function (caller, payload) {
 });
 
 /**
- * If e is defined (which is our canvas view from
- * our Elric wrapper class) do some things...
+ * Add these new actions to a doek
  *
  * @author   Jelle De Loecker <jelle@kipdola.be>
  * @since    2012.12.28
+ * @version  2013.02.06
  */
-if (e) {
+function registerNewActions(newdoek) {
 	
 	// Register our newly made actions
-	e.d.registerAction(changeSize);
+	newdoek.d.registerAction(changeSize);
 	
 	Elric.saveElements = function (elements) {
 		$.post('/roomelement/updates', elements, function(data){
