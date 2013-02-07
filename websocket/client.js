@@ -88,7 +88,7 @@ module.exports = function (elric) {
 		 * 
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.07
-		 * @version  2013.01.09
+		 * @version  2013.02.07
 		 */
 		this.on('readyForTransfer', function (data) {
 			
@@ -103,13 +103,15 @@ module.exports = function (elric) {
 					path = './plugins/' + cap.plugin + '/lib/client_files/' + capname + 'ClientFile.js';
 				}
 				
-				fs.readFile(path, 'utf-8', function (err, data) {
-					thisClient.submit('file', {
-							name: capname,
-							data: data,
-							type: 'clientfile'
-						});
-				});
+				(function (path, capname) {
+					fs.readFile(path, 'utf-8', function (err, data) {
+						thisClient.submit('file', {
+								name: capname,
+								data: data,
+								type: 'clientfile'
+							});
+					});
+				})(path, capname);
 			}
 			
 			thisClient.submit('allFilesSent');

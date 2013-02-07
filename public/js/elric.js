@@ -176,6 +176,26 @@ var $sidebar = $('#sidebar .wrapper');
 var $window = $(window);
 
 /**
+ * Enable device buttons
+ * @todo: This is a proof of concept, this code needs to be reworked
+ */
+hawkejs.event.on('create-block-device-hack', function (blockname){
+	
+	$('[data-function="lightswitch"]').click(function(e) {
+		
+		var $button = $(this);
+		
+		var deviceid = $button.attr('data-deviceid');
+		var switchState = ($button.attr('data-toggle') == 'on') ? true : false;
+		
+		$.post('/devices/switch/' + deviceid, {state: switchState}, function(data) {
+			// Do something with the return data
+		});
+	});
+	
+});
+
+/**
  * Apply the jScrollPane plugin to every sidebar
  */
 hawkejs.event.on('create-block-sidebar', function (blockname){

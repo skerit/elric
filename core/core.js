@@ -40,6 +40,7 @@ module.exports = function Config (elric) {
 	
 	// Load device types
 	elric.loadDeviceType('light');
+	elric.loadDeviceType('any');
 	
 	// Load plugins
 	elric.loadPlugin('motion');

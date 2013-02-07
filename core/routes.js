@@ -92,6 +92,56 @@ module.exports = function Routes (elric) {
 		);
 	});
 	
+	/**
+	 * Device routes
+	 */
+	elric.addRoute('/devices', [{menu: 'sidebar', icon: 'lightbulb'}], 'Devices', function (req, res) {
+	
+		var device = elric.models.device;
+		
+		var results = {
+			devices: device.cache
+		};
+
+		elric.render(req, res, 'page/devices', results);
+	});
+	
+	// Save client capability settings
+	elric.app.post('/devices/switch/:id', function(req, res){
+		
+		res.end('Command received');
+		
+		try {
+			var deviceid = req.params.id;
+			var switchState = (req.body.state == 'true') ? 1 : 0;
+			
+			// Get the device record from the cache
+			var device = elric.models.device.cache[deviceid];
+			var address = device.address;
+			
+			// Get the interface that controls this
+			var interfaceid = device['interfaces'][0];
+			var iface = elric.models.interface.cache[interfaceid];
+			
+			// Get the client id from the interface
+			var clientid = iface.client_id;
+			var client = elric.clients[clientid];
+	
+			console.log('We were told to switch device ' + deviceid + ' to state ' + switchState);
+			
+			client.submit('switch_device', {deviceid: deviceid, address: address, state: switchState});
+			
+		} catch (err) {
+			console.log('Error in switching device >>>');
+			console.log(err);
+			console.log('<<<');
+		}
+		
+	});
+	
+	/**
+	 * Scenario routes
+	 */
 	elric.addRoute('/scenarios', [{menu: 'sidebar', icon: 'random'}], 'Flows & Scenarios', function (req, res) {
 	
 		var scenario = elric.models.scenario;

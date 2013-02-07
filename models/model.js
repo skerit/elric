@@ -172,7 +172,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.05
-	 * @version  2013.02.06
+	 * @version  2013.02.07
 	 *
 	 * @param    {object}   blueprint   The schema blueprint
 	 * 
@@ -240,8 +240,12 @@ module.exports = function (elric) {
 			
 			// Convert json strings back to objects
 			for (var fieldname in thisModel.special.json) {
-				if (typeof this[fieldname] == 'String') {
-					this[fieldname] = JSON.parse(this[fieldname]);
+				if (typeof this[fieldname] == 'string') {
+					try {
+						this[fieldname] = JSON.parse(this[fieldname]);
+					} catch (err) {
+						this[fieldname] = JSON.stringify(this[fieldname]);
+					}
 				}
 			}
 			
