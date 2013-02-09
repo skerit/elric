@@ -208,6 +208,13 @@ hawkejs.event.on('create-block-sidebar', function (blockname){
 	
 });
 
+/**
+ * Apply timeago to new elements in the fluid container
+ */
+hawkejs.event.on('create-block-container-fluid', function (blockname){
+	$("#content .container-fluid .timeago").timeago();
+});
+
 $window.load(function () {
 	
 	var resize = false;

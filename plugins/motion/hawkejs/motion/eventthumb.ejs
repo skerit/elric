@@ -1,0 +1,8 @@
+<div class="eventthumb row-fluid" id="eventthumb-<%= event._id %>" data-eventid="<%= event._id %>">
+	<div class="span4">
+		<img src="<%= event.picture %>" class="eventthumb" />
+	</div>
+	<div class="span8">
+		<time class="timeago" datetime="<%= event.created.toISOString() %>"></time>
+	</div>
+</div>

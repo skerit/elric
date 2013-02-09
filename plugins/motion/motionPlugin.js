@@ -399,7 +399,7 @@ var Motion = function Motion (elriclink) {
 			results.cameras.push(p);
 		}
 
-		ME.find({}).sort('-created').limit(10).execFind(function (err, events) {
+		ME.find({pictures: {$not: {$size: 0}}}).sort('-created').limit(10).execFind(function (err, events) {
 			
 			var newEvents = [];
 			

@@ -33,12 +33,13 @@
 				
 			</div>
 			<div class="span5 box">
-				<div id="cameraevents">
+				<div class="box-header">
+					<h2>Events</h2>
+				</div>
+				<div id="cameraevents" class="box-content">
 				<% for (var i in events) { %>
 					<% var e = events[i] %>
-					<div class="eventthumb" id="eventthumb-<%= e._id %>" data-eventid="<%= e._id %>">
-						<img src="<%= e.picture %>" class="eventthumb" />
-					</div>
+					<% print_element('motion/eventthumb', {variables: {event: e}}) %>
 				<% } %>
 				</div>
 			</div>
@@ -50,8 +51,12 @@
 			margin-right: 5px;
 		}
 		
-		.eventthumb {
-			width: 156px;
+		.eventthumb img {
+			max-width: 100%;
+		}
+		
+		#cameraevents {
+			
 		}
 		
 		#mainvideo {
