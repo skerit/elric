@@ -380,8 +380,23 @@ var Motion = function Motion (elriclink) {
 		var results = {};
 		results.cameras = [];
 		
-		for (var i in storage) {
-			results.cameras.push(storage[i]);
+		// Add the cameras to the resultset for generating the view
+		for (var cameraid in storage) {
+			var c = storage[cameraid];
+			
+			// Normalize the camera entrance:
+			// we can't pass the client info (and socket functions)
+			var p = {
+				id: c.id,
+				port: c.port,
+				eventid: c.eventid,
+				eventnr: c.eventnr,
+				history: c.history,
+				counter: c.counter,
+				name: c.name
+			};
+			
+			results.cameras.push(p);
 		}
 
 		ME.find({}).sort('-created').limit(10).execFind(function (err, events) {
