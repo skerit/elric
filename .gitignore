@@ -4,6 +4,7 @@ public/bootstrap
 public/stylesheets
 public/views
 public/js/hawkejs-client-side.js
+public/hawkejs
 local.js
 *.log
 *.sublime-project

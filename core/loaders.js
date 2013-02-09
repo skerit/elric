@@ -8,19 +8,35 @@ var mainDir = process.cwd();
  * It does this by requiring the needed files.
  */
 module.exports = function (elric) {
+	
+	/**
+	 * Read in a hawkejs template directory, and copy them into
+	 * the temporary path, where all directories are merged and
+	 * the browser client can access the files, too
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.09
+	 * @version  2013.02.09
+	 * 
+	 * @param    {string|array}    path    The source to copy from
+	 */
+	elric.loadTemplates = function loadTemplates (path) {
+		elric.tools.hawkejs.registerPath(path);
+	}
 
 	/**
 	 * Load a new plugin
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.27
-	 * @version  2013.01.09
+	 * @version  2013.02.09
 	 */
 	elric.loadPlugin = function loadPlugin (pluginName) {
 		
 		elric.log.debug('Initializing Plugin "' + pluginName + '"');
 		
-		var filepath = mainDir + '/plugins/' + pluginName + '/' + pluginName + 'Plugin';
+		var plugindir =  mainDir + '/plugins/' + pluginName + '/';
+		var filepath = plugindir + pluginName + 'Plugin';
 		
 		try {
 			// Get the constructor, the actual plugin file
@@ -42,8 +58,8 @@ module.exports = function (elric) {
 			// Create the new plugin
 			elric.plugins[pluginName] = new plugin(elric);
 			
-			// Copy over dust templates, if they exist
-			elric.loadTemplates('plugins/' + pluginName + '/views/');
+			// Copy over hawkejs templates, if they exist
+			elric.loadTemplates(plugindir + 'hawkejs/');
 			
 		} catch (err) {
 			elric.log.error('Error initializing plugin "' + pluginName + '": ' + err.message);

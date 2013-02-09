@@ -60,6 +60,7 @@ elric.tools.fs = fs;
 elric.tools.mv = mv;
 elric.tools.base64 = base64;
 elric.tools.mkdirp = mkdirp;
+elric.tools.hawkejs = hawkejs;
 
 // Create a link to the local settings
 elric.local = local;
@@ -139,13 +140,12 @@ hawkejs.addHelpers(path.join(__dirname, 'core', 'hawkejs-helpers.js'));
 app.engine('ejs', hawkejs.__express);
 
 // Add client side suport
-hawkejs.enableClientSide(path.join(__dirname, 'public', 'js'), 'js/');
+hawkejs.enableClientSide(app, express, __dirname + '/assets/hawkejs', path.join(__dirname, 'public', 'hawkejs'));
 
 // Express configurations
 app.configure(function(){
 
 	var bootstrapPath = path.join(__dirname, 'assets', 'bootstrap');
-	app.set('views', __dirname + '/assets/hawkejs');
 	app.set('view engine', 'ejs');
 	app.use(express.favicon());
 	app.use(express.logger('dev'));
@@ -156,7 +156,6 @@ app.configure(function(){
 	app.use(express.session());
 	app.use('/storage', express.static(local.storage));
 	app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
-	app.use('/hawkejs', express.static(path.join(__dirname, 'assets', 'hawkejs')));
 	app.use(lessmw({src    : path.join(__dirname, 'assets', 'less'),
 					paths  : [bootstrapPath],
 					dest   : path.join(__dirname, 'public', 'stylesheets'),
