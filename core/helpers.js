@@ -142,7 +142,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.13
-	 * @version  2013.01.13
+	 * @version  2013.02.09
 	 *
 	 * @param    {object}   source        The source object
 	 * @param    {object}   destination   The destination object
@@ -194,6 +194,7 @@ module.exports = function (elric) {
 				// Store the callback in a temporary variable
 				if (destination.id === undefined && callback) {
 					destination.id = elric.randomstring();
+					destination.callbackid = destination.id;
 					elric.movecallbacks[destination.id] = callback;
 				}
 				

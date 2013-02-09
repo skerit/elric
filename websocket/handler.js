@@ -189,6 +189,27 @@ var handler = function handler (elric) {
 		});
 		
 		/**
+		 * Indicates a file has been moved by another method than base64-ing
+		 * it over the websocket
+		 *
+		 * @author   Jelle De Loecker   <jelle@kipdola.be>
+		 * @since    2013.02.09
+		 * @version  2013.02.09
+		 */
+		socket.on('moveFileFinished', function (destination, err) {
+			
+			var callbackid = destination.callbackid;
+			
+			elric.log.debug('Received file "' + destination.path + '" via ' + destination.method);
+			
+			if (elric.movecallbacks[callbackid] !== undefined) {
+				elric.movecallbacks[callbackid](err);
+				delete elric.movecallbacks[callbackid];
+			}
+			
+		});
+		
+		/**
 		 * Delegate client data
 		 *
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
