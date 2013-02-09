@@ -1,37 +1,49 @@
 <% expands('layout/body-client') %>
 
 <% start('client-main') %>
-
-<div class="hero-unit">
-	<h1><%= client.name %></h1>
-	<p>
-		<b>Created:</b> <%= client.created %><br/>
-		<b>Updated:</b> <%= client.updated %><br/>
-		<b>Hostname:</b> <%= client.hostname %><br/>
-		<b>IP:</b> <%= client.ip %><br/>
-		<b>Key:</b> <%= client.key %>
-	</p>
+<div class="row-fluid">
+	<div class="box">
+		<div class="box-header">
+			<h1><%= client.name %></h1>
+		</div>
+		<div class="box-content">
+			<p>
+				<b>Created:</b> <%= client.created %><br/>
+				<b>Updated:</b> <%= client.updated %><br/>
+				<b>Hostname:</b> <%= client.hostname %><br/>
+				<b>IP:</b> <%= client.ip %><br/>
+				<b>Key:</b> <%= client.key %>
+			</p>
+		</div>
+	</div>
 </div>
-
+<br/>
 <% for (var i in capabilities) { %>
 <% var cap = capabilities[i] %>
-	<section id="capset<%= cap.name %>" data-capability="<%= cap.name %>">
-		<div class="page-header">
-			<h1>
-				<%= cap.title %>
-				<button type="button" data-capability="<%= cap.name %>" data-function="toggle" data-toggle="enable" class="btn btn-success">Enable</button>
-				<button type="button" data-capability="<%= cap.name %>" data-function="toggle" data-toggle="disable" class="btn btn-danger" style="display:none;">Disable</button>
-			</h1>
+	<div class="row-fluid">
+		<div id="capset<%= cap.name %>" data-capability="<%= cap.name %>" class="box span12 capability">
+			<div class="box-header">
+				<h2><%= cap.title %></h2>
+				<div class="pull-right buttons">
+					<button type="button" data-capability="<%= cap.name %>" data-function="toggle" data-toggle="enable" class="btn btn-success">Enable</button>
+					<button type="button" data-capability="<%= cap.name %>" data-function="toggle" data-toggle="disable" class="btn btn-danger" style="display:none;">Disable</button>
+				</div>
+			</div>
+			<div class="box-content" data-capability="<%= cap.name %>">
+				<div class="edit-settings">
+					<form class="form-horizontal" id="capform-<%= cap.name %>">
+						<% for (var f in cap.fields) { %>
+							<% var fname = cap.fields[f] %>
+							<% adminField(fname, {selects: {}, items: settings, ofItem: cap.name, ofItem2: "settings", label: 1, name: fname, field: fname, blueprint: cap.settingBlueprint}) %>
+						<% } %>
+						
+						<div class="control-group"><label class="control-label" for=""></label><div class="controls"><button class="btn btn-success" data-function="save" data-capability="<%= cap.name %>" ><i class="icon-hdd"></i> Save</button></div></div>
+						
+					</form>
+				</div>
+			</div>
 		</div>
-		<div class="edit-settings">
-			<form class="form-horizontal" id="capform-<%= cap.name %>">
-			<% for (var f in cap.fields) { %>
-				<% var fname = cap.fields[f] %>
-				<% adminField(fname, {selects: {}, items: settings, ofItem: cap.name, ofItem2: "settings", label: 1, name: fname, field: fname, blueprint: cap.settingBlueprint}) %>
-			<% } %>
-			<button class="btn btn-success" data-function="save" data-capability="<%= cap.name %>" ><i class="icon-hdd"></i> Save</button>
-			</form>
-		</div>
-	</section>
+	</div>
 <% } %>
+
 <% end('client-main') %>

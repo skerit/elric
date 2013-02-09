@@ -3,6 +3,7 @@ var bcrypt = require('bcrypt');
 var async = require('async');
 var fs = require('fs');
 var mainDir = process.cwd();
+var scp = require('scp');
 
 module.exports = function (elric) {
 	

@@ -17,7 +17,7 @@ Elric.cap.toggle = function (capname, enable, ajax) {
 	if (enable == 'disable') enable = false;
 	if (ajax === undefined) ajax = true;
 	
-	var $cap = $('[data-capability="' + capname + '"]');
+	var $cap = $('.box[data-capability="' + capname + '"]');
 	var capset = Elric.exposed.capsettings[capname];
 	
 	if (enable) {

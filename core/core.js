@@ -29,6 +29,9 @@ module.exports = function Config (elric) {
 	elric.loadModel('interface');
 	elric.loadModel('device');
 	
+	// Load capabilities
+	elric.loadCapability('scp');
+	
 	// Load actions
 	elric.loadAction('consoleOutput');
 	
