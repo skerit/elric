@@ -22,8 +22,16 @@
 			<td><%= device.automation_protocol %></td>
 			<td><%= device.address %></td>
 			<td>
-				<button type="button" data-deviceid="<%= device._id %>" data-function="lightswitch" data-toggle="on" class="btn btn-success">Switch on</button>
-				<button type="button" data-deviceid="<%= device._id %>" data-function="lightswitch" data-toggle="off" class="btn btn-danger">Switch off</button>
+				<% for (var cmdname in device.interface.commands) { %>
+					<% var cmd = device.interface.commands[cmdname] %>
+					<button type="button"
+						data-deviceid="<%= device._id %>"
+						data-command="<%= cmd.name %>"
+						title="<%= cmd.description %>"
+						class="devicecommand btn <%= cmd.class %>">
+							<%= cmd.title %>
+					</button>
+				<% } %>
 			</td>
 		</tr>
 	<% } %>

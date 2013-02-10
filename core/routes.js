@@ -99,44 +99,61 @@ module.exports = function Routes (elric) {
 	
 		var device = elric.models.device;
 		
+		var interfaces = {};
+		
+		// Add a clean copy of the interfaces
+		for (var i in elric.interfaces) {
+			var iface = elric.interfaces[i];
+			interfaces[i] = {
+				name: iface.name,
+				title: iface.title,
+				commands: iface.commands
+			};
+		}
+		
+		var devices = {};
+		
+		// Add a clean copy of the devices
+		for (var i in device.cache) {
+			
+			var d = device.cache[i];
+			
+			var td = {
+				_id: d._id,
+				address: d.address,
+				automation_protocol: d.automation_protocol,
+				device_type: d.device_type,
+				interface_type: d.interface_type,
+				name: d.name,
+				interfaces: d.interfaces
+			};
+			
+			// Add the main interface type
+			td.interface = interfaces[d.interface_type];
+			
+			devices[i] = td;
+		}
+		
 		var results = {
-			devices: device.cache
+			devices: devices,
+			interfaces: interfaces
 		};
 
 		elric.render(req, res, 'page/devices', results);
 	});
 	
 	// Save client capability settings
-	elric.app.post('/devices/switch/:id', function(req, res){
+	elric.app.post('/devices/command/:id', function(req, res){
 		
 		res.end('Command received');
 		
-		try {
-			var deviceid = req.params.id;
-			var switchState = (req.body.state == 'true') ? 1 : 0;
-			
-			// Get the device record from the cache
-			var device = elric.models.device.cache[deviceid];
-			var address = device.address;
-			
-			// Get the interface that controls this
-			var interfaceid = device['interfaces'][0];
-			var iface = elric.models.interface.cache[interfaceid];
-			
-			// Get the client id from the interface
-			var clientid = iface.client_id;
-			var client = elric.clients[clientid];
-	
-			console.log('We were told to switch device ' + deviceid + ' to state ' + switchState);
-			
-			client.submit('switch_device', {deviceid: deviceid, address: address, state: switchState});
-			
-		} catch (err) {
-			console.log('Error in switching device >>>');
-			console.log(err);
-			console.log('<<<');
-		}
+		var deviceid = req.params.id;
+		var command = req.body.command;
 		
+		elric.log.debug('Sending command "' + command + '" to device "' + deviceid + '" through the director');
+		
+		// Send the command to the director, which will propagate it
+		elric.director.sendCommand(deviceid, {command: command});
 	});
 	
 	/**

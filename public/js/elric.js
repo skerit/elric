@@ -181,14 +181,14 @@ var $window = $(window);
  */
 hawkejs.event.on('create-block-device-hack', function (blockname){
 	
-	$('[data-function="lightswitch"]').click(function(e) {
+	$('.devicecommand').click(function(e) {
 		
 		var $button = $(this);
 		
 		var deviceid = $button.attr('data-deviceid');
-		var switchState = ($button.attr('data-toggle') == 'on') ? true : false;
+		var command = $button.attr('data-command');
 		
-		$.post('/devices/switch/' + deviceid, {state: switchState}, function(data) {
+		$.post('/devices/command/' + deviceid, {command: command}, function(data) {
 			// Do something with the return data
 		});
 	});

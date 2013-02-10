@@ -28,6 +28,7 @@ module.exports = function Config (elric) {
 	elric.loadModel('scenario');
 	elric.loadModel('interface');
 	elric.loadModel('device');
+	elric.loadModel('commandHistory');
 	
 	// Load capabilities
 	elric.loadCapability('scp');
