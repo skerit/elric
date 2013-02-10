@@ -52,7 +52,7 @@ module.exports = function Config (elric) {
 	elric.loadElementType('wall');
 	elric.loadElementType('client');
 	elric.loadElementType('closet');
-	
+
 	// Prepare all the clients
 	elric.prepareForClients();
 }

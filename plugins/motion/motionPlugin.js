@@ -30,10 +30,12 @@ var Motion = function Motion (elriclink) {
 	// Store active activities in here
 	var activities = {};
 	this.activities = {};
-
-	// Load all the cameras
-	this.registerAllCameras();
-
+	
+	// Load all the cameras when the clients have been prepared
+	elric.events.all.on('clientsprepared', function() {
+		thisMotion.registerAllCameras();
+	})
+	
 	/**
 	 * Motion lets us know a new event has started by wgetting this route
 	 *

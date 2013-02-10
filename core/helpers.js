@@ -211,7 +211,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.15
-	 * @version  2013.01.15
+	 * @version  2013.02.10
 	 */
 	elric.prepareForClients = function prepareForClients () {
 		
@@ -241,6 +241,10 @@ module.exports = function (elric) {
 					
 				}
 			}
+			
+			// Tell event listeners the clients have been prepared
+			elric.events.all.emit('clientsprepared');
+			
 		});
 	}
 	
