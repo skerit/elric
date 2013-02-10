@@ -2,7 +2,7 @@ module.exports = function FirstRun (elric) {
 	
 	// Catch any GET request
 	elric.app.get('*', function(req, res) {
-		res.render('firstrun');
+		res.render('page/firstrun');
 	});
 	
 	// Catch the create POST

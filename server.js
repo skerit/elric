@@ -278,7 +278,7 @@ db.once('open', function callback () {
 	elric.models.user.model.findOne({username: /.*/i}, function(err, user) {
 		if (user === null) { // No users found
 			// Initialize the first run, create temporary routes
-			var FirstRun = require('./firstrun');
+			var FirstRun = require('./core/firstrun');
 			var firstRun = new FirstRun(elric);
 		} else {
 			app.initializeRoutes();
