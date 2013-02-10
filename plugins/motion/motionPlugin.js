@@ -404,19 +404,33 @@ var Motion = function Motion (elriclink) {
 			var newEvents = [];
 			
 			for (var i in events) {
-				var e = events[i];
 				
-				e.picture = false;
+				var olde = events[i];
 				
-				if (e.pictures.length > 0) {
-					e.picture = elric.getStorageUrl(e.pictures[1]);
+				// Create a new object, since it seems impossible to edit the original
+				var e = {};
+				
+				// Copy over the id
+				e._id = olde._id;
+				
+				// Turn the creation date into a string
+				e.created = olde.created.toISOString();
+				
+				e.picture = '';
+				
+				if (olde.pictures.length > 0) {
+					try {
+						e.picture = elric.getStorageUrl(olde.pictures[1]);
+					} catch (err) {
+						
+					}
 				}
-				console.log('Found pictures: ')
-				console.log(e.picture);
+
 				newEvents.push(e);
 			}
 			
 			results.events = newEvents;
+			
 			elric.render(req, res, 'motion/index', results);
 		});
 	});
@@ -561,25 +575,33 @@ var Motion = function Motion (elriclink) {
 		
 		elric.log.debug('Serving camera MJPEG stream ' + cameraid);
 	
+		// Create a request, and add the callback
 		var creq = elric.http.request(options, function(cres) {
 	
+			// When we receive a response from the request, send this to our proxy client
 			res.setHeader('Content-Type', 'multipart/x-mixed-replace;boundary="' + boundary + '"');
 			res.setHeader('Connection', 'close');
 			res.setHeader('Pragma', 'no-cache');
 			res.setHeader('Cache-Control', 'no-cache, private');
 			res.setHeader('Expires', 0);
 			res.setHeader('Max-Age', 0);
-	
-			// wait for data
+			
+			// Push the data we receive from the camera to the client
 			cres.on('data', function(chunk){
 				res.write(chunk);
 			});
-	
+			
+			// Close the connection if the camera stream is destroyed
 			cres.on('close', function(){
-				// closed, let's end client request as well 
-				res.writeHead(cres.statusCode);
 				res.end();
 			});
+			
+			// Listen to the original browser request
+			// If it's closed, destroy the camera response stream
+			// Which will in turn close the connection
+			req.on('close', function() {
+				cres.destroy();
+			})
 	
 		}).on('error', function(e) {
 			// we got an error, return 500 error to client and log error
@@ -587,10 +609,11 @@ var Motion = function Motion (elriclink) {
 			console.log(e.message);
 			res.writeHead(500);
 			res.end();
+			cres.destroy();
 		});
 	
+		// Send the request, and actually start to receive the response
 		creq.end();
-	
 	});
 
 }
