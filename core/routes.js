@@ -157,9 +157,9 @@ module.exports = function Routes (elric) {
 	});
 	
 	/**
-	 * Scenario routes
+	 * Flow & Scenario routes
 	 */
-	elric.addRoute('/scenarios', [{menu: 'sidebar', icon: 'random'}], 'Flows & Scenarios', function (req, res) {
+	elric.addRoute('/flows', [{menu: 'sidebar', icon: 'random'}], 'Flows & Scenarios', function (req, res) {
 	
 		var scenario = elric.models.scenario;
 		var flow = elric.models.flow;
@@ -184,9 +184,44 @@ module.exports = function Routes (elric) {
 			par,
 			function(err, results) {
 				results.elementTypes = elric.memobjects.elementTypes;
-				elric.render(req, res, 'page/scenario', results);
+				elric.render(req, res, 'flows/index', results);
 			}
 		);
+	});
+	
+	elric.app.get('/flow/add', function (req, res) {
+		
+		var activities = {};
+		var actions = {};
+		
+		// Normalize the activities
+		for (var i in elric.memobjects.activities) {
+			var a = elric.memobjects.activities[i];
+			
+			activities[i] = {
+				name: a.name,
+				title: a.title,
+				ongoing: a.ongoing,
+				new: a.new,
+				payload: a.payload,
+				blueprint: a.blueprint,
+				origin: a.origin
+			};
+		}
+		
+		// Normalize the actions
+		for (var i in elric.memobjects.actions) {
+			var a = elric.memobjects.actions[i];
+			
+			actions[i] = {
+				name: a.name,
+				title: a.title,
+				description: a.description,
+				activity_trigger: a.activity_trigger
+			};
+		}
+
+		elric.render(req, res, 'flows/add', {activities: activities, actions: actions});
 	});
 	
 }

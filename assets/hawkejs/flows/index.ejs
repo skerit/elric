@@ -1,0 +1,29 @@
+<% expands('layout/body-main') %>
+
+<% set_block('title', 'Flows') %>
+<% set_title('Flows') %>
+
+<% start('container-fluid') %>
+
+<table class="table table-bordered table-striped">
+	<tr>
+		<th>Name</th>
+		<th>Action</th>
+	</tr>
+	<% for (var i in flows) { %>
+		<% var flow = flow[i] %>
+		<tr>
+			<td><%= flow.name %></td>
+			<td>
+					<button type="button"	data-flowid="<%= flow._id %>"
+						title="Edit flow" class="btn btn-success">
+							<i class="icon-edit"></i> Edit
+					</button>
+			</td>
+		</tr>
+	<% } %>
+</table>
+
+<% add_link('/flow/add', {title: 'Add new', class: 'btn btn-primary', prepend: '<i class="icon-plus"></i> '}) %>
+
+<% end('container-fluid') %>

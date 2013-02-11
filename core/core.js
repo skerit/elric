@@ -9,7 +9,7 @@ module.exports = function Config (elric) {
 	require(mainPath + '/lib/capabilities/capability')(elric);
 	require(mainPath + '/lib/activities/activity')(elric);
 	require(mainPath + '/lib/actions/action')(elric);
-	require(mainPath + '/lib/device_types/device_type')(elric);
+	require(mainPath + '/lib/device_categories/device_category')(elric);
 	require(mainPath + '/lib/interfaces/interface')(elric);
 	require(mainPath + '/lib/automation_protocols/automation_protocol')(elric);
 	
@@ -43,8 +43,8 @@ module.exports = function Config (elric) {
 	elric.loadInterface('rfxcom');
 	
 	// Load device types
-	elric.loadDeviceType('light');
-	elric.loadDeviceType('any');
+	elric.loadDeviceCategory('light');
+	elric.loadDeviceCategory('any');
 	
 	// Load plugins
 	elric.loadPlugin('motion');
