@@ -72,6 +72,7 @@ elric.templates.compiled = {};
 elric.plugins = {};
 elric.models = {};
 elric.capabilities = {};
+elric.client_files = {};
 elric.elementTypes = {};
 elric.activities = {};
 elric.actions = {};

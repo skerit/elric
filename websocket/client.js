@@ -88,30 +88,24 @@ module.exports = function (elric) {
 		 * 
 		 * @author   Jelle De Loecker   <jelle@kipdola.be>
 		 * @since    2013.01.07
-		 * @version  2013.02.07
+		 * @version  2013.02.11
 		 */
 		this.on('readyForTransfer', function (data) {
 			
-			// Send files to the client
-			for (var capname in elric.capabilities) {
+			// Send the client files to the client
+			for (var clientFileName in elric.client_files) {
 				
-				var cap = elric.capabilities[capname];
+				var cf = elric.client_files[clientFileName];
 				
-				var path = './lib/client_files/' + capname + 'ClientFile.js';
-				
-				if (cap.plugin) {
-					path = './plugins/' + cap.plugin + '/lib/client_files/' + capname + 'ClientFile.js';
-				}
-				
-				(function (path, capname) {
+				(function (path, name) {
 					fs.readFile(path, 'utf-8', function (err, data) {
 						thisClient.submit('file', {
-								name: capname,
+								name: name,
 								data: data,
 								type: 'clientfile'
 							});
 					});
-				})(path, capname);
+				})(cf.path, cf.name);
 			}
 			
 			thisClient.submit('allFilesSent');

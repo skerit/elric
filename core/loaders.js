@@ -72,14 +72,14 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.27
-	 * @version  2013.01.24
+	 * @version  2013.02.12
 	 */
 	elric.loadModel = function loadModel (modelName, pluginName) {
 		
 		var path = 'models/' + modelName + 'Model';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
@@ -133,14 +133,14 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2012.12.31
-	 * @version  2013.01.05
+	 * @version  2013.02.12
 	 */
 	elric.loadElementType = function loadElementType (typeName, pluginName) {
 		
 		var path = mainDir + '/lib/element_types/' + typeName + 'Type';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = mainDir + '/plugins/' + pluginName + '/lib/element_types/' + typeName + 'Type';
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
@@ -169,7 +169,7 @@ module.exports = function (elric) {
 		var path = 'lib/capabilities/' + capabilityName + 'Capability';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
@@ -180,7 +180,14 @@ module.exports = function (elric) {
 		
 		var constructor = require(path);
 		
-		var capability = elric.extend(elric.classes.BaseCapability, constructor);
+		var capability = elric.extend(elric.classes.BaseCapability,
+		                              elric.classes.BaseCapability.prototype.preConstructor,
+		                              constructor,
+																	elric.classes.BaseCapability.prototype.postConstructor);
+		
+		if (pluginName) {
+			capability.prototype.plugin = pluginName;
+		}
 		
 		capability = new capability(elric);
 		
@@ -189,11 +196,36 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Load a client file
+	 * 
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.11
+	 * @version  2013.02.11
+	 */
+	elric.loadClientFile = function loadClientFile (clientFileName, pluginName) {
+		
+		var path = 'lib/client_files/' + clientFileName + 'ClientFile.js';
+		var debugm = '';
+		
+		if (pluginName) {
+			path = 'plugins/' + pluginName + '/' + path;
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		path = mainDir + '/' + path;
+		
+		elric.log.debug('Adding Client File "' + clientFileName + '"' + debugm);
+		
+		// Store the new client file location
+		elric.client_files[clientFileName] = {name: clientFileName, path: path};
+	}
+	
+	/**
 	 * Load a new action class
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.31
-	 * @version  2013.02.01
+	 * @version  2013.02.12
 	 *
 	 * @returns    {elric.classes.Action}   An Action class
 	 */
@@ -202,7 +234,7 @@ module.exports = function (elric) {
 		var path = 'lib/actions/' + actionName + 'Action';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
@@ -228,7 +260,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.30
-	 * @version  2013.01.30
+	 * @version  2013.02.12
 	 *
 	 * @returns    {elric.classes.Activity}   An Activity class
 	 */
@@ -237,7 +269,7 @@ module.exports = function (elric) {
 		var path = 'lib/activities/' + activityName + 'Activity';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
@@ -263,16 +295,16 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.02
-	 * @version  2013.02.10
+	 * @version  2013.02.12
 	 *
 	 * @returns    {elric.classes.DeviceCategory}
 	 */
 	elric.loadDeviceCategory = function loadDeviceCategory (deviceCategoryName, pluginName) {
 	
-		var path = 'lib/device_types/' + deviceCategoryName + 'DeviceType';
+		var path = 'lib/device_categories/' + deviceCategoryName + 'DeviceCategory';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
@@ -300,7 +332,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.02
-	 * @version  2013.02.02
+	 * @version  2013.02.12
 	 *
 	 * @returns    {elric.classes.Interface}   An Interface object
 	 */
@@ -309,7 +341,7 @@ module.exports = function (elric) {
 		var path = 'lib/interfaces/' + interfaceName + 'Interface';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
@@ -335,7 +367,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.06
-	 * @version  2013.02.06
+	 * @version  2013.02.12
 	 *
 	 * @returns  {elric.classes.AutomationProtocol}   An AutomationProtocol class
 	 */
@@ -344,7 +376,7 @@ module.exports = function (elric) {
 		var path = 'lib/automation_protocols/' + protocolName + 'AutomationProtocol';
 		var debugm = '';
 		
-		if (pluginName !== undefined) {
+		if (pluginName) {
 			path = 'plugins/' + pluginName + '/' + path;
 			debugm = ' from Plugin "' + pluginName + '"';
 		}
