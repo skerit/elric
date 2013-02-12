@@ -6,6 +6,13 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 	
 	/**
 	 * Generate an admin field
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.06
+	 * @version  2013.02.13
+	 *
+	 * @param    {string}    name     The name of the field
+	 * @param    {object}    options  The options
 	 */
 	helpers.adminField = function (name, options) {
 		
@@ -77,6 +84,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 
 				if (blueprint.source.type == 'model') {
 					for (var i in s) {
+						
 						selected = '';
 						if (s[i]['_id'] == value) selected = 'selected';
 						
@@ -90,25 +98,28 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 							oname = 'Nameless: ' + s[i]['_id'];
 						}
 						
-						html += '<option value="' + s[i]['_id'] + '" ' + selected + '>' + oname + '</option>';
+						html += '<option value="' + s[i]['_id'] + '" ' + selected + '>' + helpers.encode(oname) + '</option>';
 					}
 				} else if (blueprint.source.type == 'memobject') {
 					for (var i in s) {
-						selected = '';
-						if (s[i]['_id'] == value) selected = 'selected';
 						
-						html += '<option value="' + s[i]['name'] + '"' + selected + '>' + s[i]['title'] + '</option>';
+						selected = '';
+						if (s[i]['name'] == value) selected = 'selected';
+						
+						var iopt = '<option value="' + s[i]['name'] + '" ' + selected + '>' + s[i]['title'] + '</option>';
+
+						html += iopt;
 					}
 				}
 				html += '</select>';
 				break;
 			
 			case 'json':
-				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value=' + JSON.stringify(value) + ' ' + linked_value_attributes + ' />';
+				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value="' + helpers.encode(JSON.stringify(value)) + '" ' + linked_value_attributes + ' />';
 				break;
 			
 			default:
-				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value="' + value + '" '  + linked_value_attributes + ' />';
+				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value="' + helpers.encode(value) + '" '  + linked_value_attributes + ' />';
 				break;
 		}
 		
