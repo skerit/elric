@@ -53,17 +53,17 @@ module.exports = function (elric) {
 				elric.render(req, res, 'admin/modelIndex', $.extend({}, baseOpt, {items: items}));
 			});
 		});
-
+		
 		/**
-		 * The model add route
+		 * Prepare admin fields that depend on other data
+		 * 
+		 * @author   Jelle De Loecker   <jelle@kipdola.be>
+		 * @since    2013.02.12
+		 * @version  2013.02.12
 		 */
-		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
+		var prepareFields = function prepareFields (res, par, blueprint, syncresults) {
 			
-			var par = {};
-			var bp = thisAdmin.model.blueprint;
-			
-			var syncresults = {};
-			var returnObject = {blueprint: bp};
+			var bp = blueprint;
 			
 			for (var field in bp) {
 				
@@ -91,7 +91,56 @@ module.exports = function (elric) {
 					}
 				}
 				
+				// See if this field gets it value from somewhere else
+				if (typeof bp[field]['value'] != 'undefined') {
+					
+					// Make sure the path is defined
+					if (typeof bp[field]['value']['path'] != 'undefined') {
+						var temp_path = bp[field]['value']['path'];
+						
+						// The first entry must be an object
+						if (typeof temp_path[0] == 'object') {
+							
+							var s = temp_path[0];
+							
+							// Do the same kind of lookup as above
+							if (s.type == 'model') {
+								// Get the source model
+								var fm = elric.models[s.name];
+								
+								// Prepare the async functions for serial execution
+								par[s.name] = function(elementName) {
+									return function(callback) {
+										fm.model.find({}, function(err, items) {
+											elric.expose('admin-' + s.name, items, res);
+											callback(null, items);
+										});
+									}
+								}(s.name); // Closure! Because the s.name var changes over time
+								
+							} else if (s.type == 'memobject') {
+								elric.expose('admin-' + s.name, elric.memobjects[s.name], res);
+								syncresults[s.name] = elric.memobjects[s.name];
+							}
+							
+						}
+					}
+				}
 			}
+		}
+
+		/**
+		 * The model add route
+		 */
+		elric.app.get('/admin/' + this.name + '/add', function (req, res) {
+			
+			var par = {};
+			var bp = thisAdmin.model.blueprint;
+			
+			var syncresults = {};
+			var returnObject = {blueprint: bp};
+			
+			prepareFields(res, par, bp, syncresults);
 			
 			if (!$.isEmptyObject(par)) {
 				// Execute the find functions
@@ -131,38 +180,13 @@ module.exports = function (elric) {
 		 */
 		elric.app.get('/admin/' + this.name + '/edit/:id', function (req, res) {
 			
-			var serial = {};
+			var par = {};
 			var bp = thisAdmin.model.blueprint;
 			var syncresults = {};
 			
-			for (var field in bp) {
-				if (bp[field]['fieldType'] == 'Select') {
-					
-					// Get the data from a model or an object?
-					var s = bp[field]['source'];
-					
-					if (s.type == 'model') {
-						
-						// Get the source model
-						var fm = elric.models[s.name];
-						
-						// Prepare the async functions for serial execution
-						serial[s.name] = function(elementName) {
-							return function(callback) {
-								fm.model.find({}, function(err, items) {
-									callback(null, items);
-								});
-							}
-						}(s.name); // Closure! Because the s.name var changes over time
-						
-					} else if (s.type == 'memobject') {
-						syncresults[s.name] = elric.memobjects[s.name];
-					}
-					
-				}
-			}
+			prepareFields(res, par, bp, syncresults);
 			
-			serial['_itemToEdit'] = function (callback) {
+			par['_itemToEdit'] = function (callback) {
 				model.model.findOne({_id: req.params.id}, function(err, item) {
 					callback(null, item);
 				});
@@ -170,7 +194,7 @@ module.exports = function (elric) {
 			
 			// Execute the find functions
 			async.parallel(
-				serial,
+				par,
 				function(err, results) {
 					
 					// Get the element we need to edit

@@ -73,3 +73,78 @@ $('#hawkejs-space-admin-main').on('click', '.editButton', function(e) {
 	goToAjaxViewWithHistory('/admin/' + model + '/edit/' + id);
 	
 });
+
+hawkejs.event.on('create-block-admin-main', function() {
+	
+	// Add listeners for linked fields
+	$('[data-linked-value-change-type]').each(function(){
+		var $this = $(this);
+		
+		var on_type = $this.attr('data-linked-value-change-type');
+		var on_name = $this.attr('data-linked-value-change-name');
+		var on_path = $this.attr('data-linked-value-path');
+		
+		var path = JSON.parse(unescape(on_path));
+		
+		var on_source = {};
+		
+		try {
+			on_source = Elric.exposed['admin-' + path[0].name];
+		} catch (err) {
+			console.error('Problem finding data');
+		}
+		
+		// For now, only field is supported
+		if (on_type == 'field') {
+			
+			var $on_field = $('form[data-model] [name="' + on_name + '"]');
+			
+			$on_field.change(function() {
+				var $on_this = $(this);
+				var on_value = $on_this.val();
+				
+				// Set the begin source
+				var temp_source = on_source;
+				
+				if (typeof on_value != 'undefined') {
+					
+					var final_value = on_value;
+					
+					var i = 1;
+					
+					for (i = 1; i < path.length; i++) {
+						var ps = path[i];
+						
+						if (typeof ps == 'object') {
+							if (ps.type == 'field') {
+								// Get the value of this field
+								if (ps.name == on_name) {
+									var temp_value = on_value;
+								} else {
+									// Look for the other field value
+									console.error('Not yet implemented!');
+								}
+								temp_source = temp_source[temp_value];
+							}
+						} else {
+							temp_source = temp_source[ps];
+						}
+						
+						final_value = temp_source;
+						
+					}
+					
+				}
+				
+				$this.val(final_value);
+				
+			});
+			
+			// Trigger a first change
+			$on_field.change();
+			
+		}
+		
+	});
+	
+});

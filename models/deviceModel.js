@@ -26,9 +26,13 @@ module.exports = function device (elric) {
 		},
 		automation_protocol: {
 			type: String,
-			required: true,
+			required: false,
 			fieldType: 'Select',
-			source: {type: 'memobject', name: 'automationProtocols'}
+			source: {type: 'memobject', name: 'automationProtocols'},
+			value: {
+				on: {type: 'field', name: 'device_type'},
+				path: [{type: 'memobject', name: 'deviceTypes'}, {type: 'field', name: 'device_type'}, 'protocol']
+			}
 		},
 		address: {
 			type: {},

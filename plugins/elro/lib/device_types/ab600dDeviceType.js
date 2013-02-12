@@ -1,7 +1,7 @@
-module.exports = function arc (elric) {
+module.exports = function ab600d (elric) {
 
-	this.name = 'ab600l';
-	this.title = 'AB600L';
+	this.name = 'ab600d';
+	this.title = 'AB600D';
 	
 	this.protocol = 'arc';
 	this.category = 'light';

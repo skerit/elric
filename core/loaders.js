@@ -319,12 +319,43 @@ module.exports = function (elric) {
 		                            elric.classes.BaseDeviceCategory.prototype.preConstructor,
 		                            constructor);
 
-		// Store the new device type class
-		elric.deviceTypes[deviceCategoryName] = deviceCategory;
-		
-		elric.memobjects.deviceTypes[deviceCategoryName] = new deviceCategory();
+		elric.deviceCategories[deviceCategoryName] = new deviceCategory();
 		
 		return deviceCategory;
+	}
+	
+	/**
+	 * Load a new device type class
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.12
+	 * @version  2013.02.12
+	 *
+	 * @returns    {elric.classes.DeviceType}
+	 */
+	elric.loadDeviceType = function loadDeviceType (deviceTypeName, pluginName) {
+	
+		var path = 'lib/device_types/' + deviceTypeName + 'DeviceType';
+		var debugm = '';
+		
+		if (pluginName) {
+			path = 'plugins/' + pluginName + '/' + path;
+			debugm = ' from Plugin "' + pluginName + '"';
+		}
+		
+		path = mainDir + '/' + path;
+		
+		elric.log.debug('Requiring Device Type Class "' + deviceTypeName + '"' + debugm);
+		
+		var constructor = require(path);
+		
+		var deviceType = elric.extend(elric.classes.BaseDeviceType,
+		                            elric.classes.BaseDeviceType.prototype.preConstructor,
+		                            constructor);
+
+		elric.deviceTypes[deviceTypeName] = new deviceType();
+		
+		return deviceType;
 	}
 	
 	/**

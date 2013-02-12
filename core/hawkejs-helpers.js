@@ -24,6 +24,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		
 		var value = '';
 		var html = '<div class="control-group">';
+		var linked_value_attributes = '';
 		
 		if (options.label == 1) {
 			html += '<label class="control-label" for="' + name + '">' + title + '</label>';
@@ -54,13 +55,25 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 			}
 		}
 		
+		// Do we need to get the value from somewhere?
+		if (typeof blueprint.value != 'undefined') {
+			linked_value_attributes += 'data-linked-value-change-type="' + blueprint.value.on.type + '" ';
+			linked_value_attributes += 'data-linked-value-change-name="' + blueprint.value.on.name + '" ';
+			linked_value_attributes += 'data-linked-value-path="' + escape(JSON.stringify(blueprint.value.path)) + '" ';
+		}
+		
 		var selected = '';
 		
 		switch (blueprint.fieldType.toLowerCase()) {
 			
 			case 'select':
-				html += '<select name="' + name + '">';
+				html += '<select name="' + name + '" ' + linked_value_attributes + '>';
 				var s = selects[blueprint.source.name];
+				
+				// Add an empty value if the field is not required
+				if (!blueprint.required) {
+					html += '<option value=""></option>';
+				}
 
 				if (blueprint.source.type == 'model') {
 					for (var i in s) {
@@ -91,11 +104,11 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 				break;
 			
 			case 'json':
-				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value=' + JSON.stringify(value) + ' />';
+				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value=' + JSON.stringify(value) + ' ' + linked_value_attributes + ' />';
 				break;
 			
 			default:
-				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value="' + value + '" />';
+				html += '<input type="text" name="' + name + '" placeholder="' + title + '" value="' + value + '" '  + linked_value_attributes + ' />';
 				break;
 		}
 		
