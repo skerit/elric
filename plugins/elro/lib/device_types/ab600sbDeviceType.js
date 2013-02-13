@@ -6,9 +6,4 @@ module.exports = function ab600sb (elric) {
 	this.protocol = 'arc';
 	this.category = 'any';
 	
-	this.commands = {
-		on: true,
-		off: true,
-	};
-	
 }

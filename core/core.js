@@ -14,9 +14,6 @@ module.exports = function Config (elric) {
 	require(mainPath + '/lib/interfaces/interface')(elric);
 	require(mainPath + '/lib/automation_protocols/automation_protocol')(elric);
 	
-	// Copy over all core dust templates
-	//elric.loadTemplates('assets/views/');
-
 	// Load models
 	elric.loadModel('user');
 	elric.loadModel('room');
@@ -29,6 +26,7 @@ module.exports = function Config (elric) {
 	elric.loadModel('scenario');
 	elric.loadModel('interface');
 	elric.loadModel('device');
+	elric.loadModel('deviceState');
 	elric.loadModel('commandHistory');
 	
 	// Load capabilities

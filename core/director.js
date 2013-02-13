@@ -3,6 +3,10 @@ var elric = {};
 var Director = function Director (elricMaster) {
 	elric = elricMaster;
 	this.elric = elricMaster;
+	
+	this.DS = elric.models.deviceState;
+	this.DH = elric.models.commandHistory;
+	this.D = elric.models.device;
 }
 
 var bp = Director.prototype;
@@ -12,7 +16,7 @@ var bp = Director.prototype;
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.10
- * @version  2013.02.10
+ * @version  2013.02.13
  *
  * @param   {string}   device      The device object, or the id in the database
  *
@@ -33,6 +37,15 @@ bp.getDevice = function _getDevice (device) {
 			return false;
 		}
 	}
+	
+	// Now get the state of the device
+	try {
+		device.state = this.elric.models.deviceState.index.device_id.cache[device._id];
+	} catch (err) {
+		device.state = false;
+	}
+	
+	if (typeof device.state == 'undefined') device.state = false;
 	
 	// Make sure there is an address set
 	if (!device.address) return false;
@@ -82,17 +95,34 @@ bp.getInterface = function getInterface (device) {
 }
 
 /**
+ * Get the device type
+ * 
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.13
+ * @version  2013.02.13
+ *
+ * @param   {object}   device      The device object
+ *
+ * @returns {object}   The device_type object
+ */
+bp.getDeviceType = function getDeviceType (device) {
+	return elric.deviceTypes[device.device_type];
+}
+
+/**
  * Send a command to the correct interface
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.05
- * @version  2013.02.10
+ * @version  2013.02.13
  * 
  * @param   {object|string}   device      The device object
  * @param   {object}          options     An object of options
  * @param   {function}        callback    The function to call back
  */
 bp.sendCommand = function sendCommand (device, options, callback) {
+	
+	var thisDirector = this;
 	
 	device = this.getDevice(device);
 	
@@ -102,6 +132,9 @@ bp.sendCommand = function sendCommand (device, options, callback) {
 		if (callback) callback(err);
 		return;
 	}
+	
+	// Get the device type
+	var device_type = this.getDeviceType(device);
 	
 	// Get the interface
 	var iface_data = this.getInterface(device, options);
@@ -113,13 +146,113 @@ bp.sendCommand = function sendCommand (device, options, callback) {
 		options.interface_type = iface_data.interface_type.name;
 		options.address = device.address;
 		
-		// Finally: send the command to the correct interface
-		iface_data.interface_type.sendCommand(device, iface_data, options, callback);
+		// Log this command in the history
+		var history = new this.DH.model({
+			device_id: device._id,
+			interface_id: iface_data.interface_id,
+			room_id: null, // @todo: implement room
+			command: options.command,
+			origin: null // @todo: implement origin
+		});
+		
+		history.save();
+		
+		var cmd = options.command;
+		var type = options.command_type;
+		var new_state_value = false;
+		
+		var new_options = elric.inject({}, options);
+		
+		// Is it a protocol command?
+		if (type == 'protocol') {
+			try {
+				new_state_value = device_type.protocol_meaning[cmd].state;
+			} catch (err) {
+				// No state was given
+				new_state_value = false;
+			}
+			
+			iface_data.interface_type.sendCommand(device, iface_data, new_options, callback);
+			this.setDeviceState(device, new_state_value);
+			
+		} else if (type == 'device') {
+			
+			if (typeof device_type.commands[cmd] != 'undefined') {
+				var d_cmd = device_type.commands[cmd];
+				
+				// If this is just an alias for a protocol command ...
+				if (d_cmd.protocol_command){
+					new_options.command_type = 'protocol';
+					new_options.command = d_cmd.protocol_command;
+					
+					iface_data.interface_type.sendCommand(device, iface_data, new_options, callback);
+
+					this.setDeviceState(device, d_cmd.state);
+					
+				} else if (d_cmd.handler) {
+					
+					var current_state = false;
+					
+					try {
+						current_state = device.state.state;
+					} catch (err) {
+						current_state = false;
+					}
+					
+					d_cmd.handler(device, current_state, function (protocol_commands, new_state) {
+						
+						// @todo: We're not sure the command was actually sent ...
+						thisDirector.setDeviceState(device, new_state);
+						
+						new_options.command_type = 'protocol';
+						
+						var length = protocol_commands.length;
+						
+						for (var i = 0; i < length; i++) {
+							
+							var do_callback = false;
+							
+							if ((i+1) == length) do_callback = callback;
+							
+							var p_cmd = protocol_commands[i];
+							new_options.command = p_cmd;
+							iface_data.interface_type.sendCommand(device, iface_data, new_options, do_callback);
+						}
+						
+					});
+					
+				}
+			}
+		}
 		
 	} else {
 		if (callback) callback('no interface found');
 	}
 }
 
+/**
+ * Set the new device state
+ * 
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.13
+ * @version  2013.02.13
+ *
+ */
+bp.setDeviceState = function setDeviceState (device, new_state_value) {
+	
+	var thisDirector = this;
+	
+	if (new_state_value === false) return;
+	
+	this.DS.model.findOneAndUpdate({device_id: device._id},
+		{state: new_state_value},
+		{upsert: true}, function (err, item) {
+		
+		// Because findOneAndUpdate is yet another save-method mongoose does not
+		// fire 'save' events for, we'll have to do it ourselves
+		thisDirector.elric.models.deviceState.index.device_id.cache[device._id] = item;
+		
+	})
+}
 
 module.exports = Director;

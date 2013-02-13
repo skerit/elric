@@ -6,9 +6,11 @@ module.exports = function ab600d (elric) {
 	this.protocol = 'arc';
 	this.category = 'light';
 	
+	// These instructions need to be changed
+	this.instructions.enable = false;
+	this.instructions.disable = false;
+	
 	this.commands = {
-		on: false,
-		off: false,
 		toggle: {
 			name: 'toggle',
 			title: 'Toggle',

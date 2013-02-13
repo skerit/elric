@@ -22,16 +22,34 @@
 			<td><%= device.automation_protocol %></td>
 			<td><%= device.address %></td>
 			<td>
-				<% for (var cmdname in device.interface.commands) { %>
-					<% var cmd = device.interface.commands[cmdname] %>
-					<button type="button"
-						data-deviceid="<%= device._id %>"
-						data-command="<%= cmd.name %>"
-						title="<%= cmd.description %>"
-						class="devicecommand btn <%= cmd.class %>">
-							<%= cmd.title %>
-					</button>
-				<% } %>
+				<div class="btn-group device-commands">
+					<% for (var cmdname in device.device_type.commands) { %>
+						<% var cmd = device.device_type.commands[cmdname] %>
+						<button type="button"
+							data-deviceid="<%= device._id %>"
+							data-command-type="device"
+							data-command="<%= cmd.name %>"
+							title="<%= cmd.description %>"
+							class="devicecommand btn <%= cmd.class %>">
+								<%= cmd.title %>
+						</button>
+					<% } %>
+				</div>
+
+				<!-- Protocol commands -->
+				<div class="btn-group protocol-commands">
+					<% for (var cmdname in device.protocol.commands) { %>
+						<% var cmd = device.protocol.commands[cmdname] %>
+						<button type="button"
+							data-deviceid="<%= device._id %>"
+							data-command-type="protocol"
+							data-command="<%= cmd.name %>"
+							title="<%= cmd.description %>"
+							class="devicecommand btn <%= cmd.class %>">
+								<%= cmd.title %>
+						</button>
+					<% } %>
+				</div>
 			</td>
 		</tr>
 	<% } %>

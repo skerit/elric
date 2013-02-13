@@ -171,7 +171,8 @@ app.configure(function(){
 	
 	// middleware
 	app.use(function(req, res, next){
-		
+		next();
+		return;
 		// Skip authentication if it's a noauth link
 		if (req.originalUrl.substring(0, 8) == "/noauth/") {
 			next();

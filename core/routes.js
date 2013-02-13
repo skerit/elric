@@ -111,6 +111,37 @@ module.exports = function Routes (elric) {
 			};
 		}
 		
+		var protocols = {};
+		
+		// Add a clean copy of the protocols
+		for (var i in elric.automationProtocols) {
+			
+			var ap = elric.automationProtocols[i];
+			
+			protocols[i] = {
+				name: ap.name,
+				title: ap.title,
+				description: ap.description,
+				addressBlueprint: ap.addressBlueprint,
+				commands: ap.commands
+			};
+		}
+		
+		var device_types = {};
+		
+		// Add a clean copy of the device types
+		for (var i in elric.deviceTypes) {
+			var dt = elric.deviceTypes[i];
+			
+			device_types[i] = {
+				name: dt.name,
+				title: dt.title,
+				protocol: dt.protocol,
+				category: dt.category,
+				commands: dt.commands
+			};
+		}
+		
 		var devices = {};
 		
 		// Add a clean copy of the devices
@@ -122,7 +153,7 @@ module.exports = function Routes (elric) {
 				_id: d._id,
 				address: d.address,
 				automation_protocol: d.automation_protocol,
-				device_type: d.device_type,
+				device_type_id: d.device_type,
 				interface_type: d.interface_type,
 				name: d.name,
 				interfaces: d.interfaces
@@ -131,6 +162,12 @@ module.exports = function Routes (elric) {
 			// Add the main interface type
 			td.interface = interfaces[d.interface_type];
 			
+			// Add the protocol
+			td.protocol = protocols[d.automation_protocol];
+			
+			// Add the device_type
+			td.device_type = device_types[d.device_type];
+
 			devices[i] = td;
 		}
 		
@@ -142,18 +179,25 @@ module.exports = function Routes (elric) {
 		elric.render(req, res, 'page/devices', results);
 	});
 	
-	// Save client capability settings
+	/**
+	 * Sending a command to a device over http
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.07
+	 * @version  2013.02.13
+	 */
 	elric.app.post('/devices/command/:id', function(req, res){
 		
-		res.end('Command received');
+		res.end('{"message": "ok", "error": false}');
 		
 		var deviceid = req.params.id;
 		var command = req.body.command;
+		var command_type = req.body.command_type;
 		
 		elric.log.debug('Sending command "' + command + '" to device "' + deviceid + '" through the director');
 		
 		// Send the command to the director, which will propagate it
-		elric.director.sendCommand(deviceid, {command: command});
+		elric.director.sendCommand(deviceid, {command_type: command_type, command: command});
 	});
 	
 	/**

@@ -187,8 +187,9 @@ hawkejs.event.on('create-block-device-hack', function (blockname){
 		
 		var deviceid = $button.attr('data-deviceid');
 		var command = $button.attr('data-command');
+		var command_type = $button.attr('data-command-type');
 		
-		$.post('/devices/command/' + deviceid, {command: command}, function(data) {
+		$.post('/devices/command/' + deviceid, {command_type: command_type, command: command}, function(data) {
 			// Do something with the return data
 		});
 	});

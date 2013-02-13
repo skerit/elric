@@ -38,6 +38,7 @@ module.exports = function (elric) {
 		this.schema = {};
 		this.model = {};
 		this.cache = {};
+		this.index = {};
 		this.special = {json: {}};
 		
 		this._prepost = {
@@ -201,6 +202,11 @@ module.exports = function (elric) {
 				this.special['json'][fieldname] = fieldname;
 			}
 			
+			// If it's unique, store it under this identifier aswell
+			if (e.unique == true) {
+				this.index[fieldname] = {cache: {}};
+			}
+			
 			if (e.array) {
 				
 				// If it's an empty object,
@@ -300,7 +306,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.14
-	 * @version  2013.01.31
+	 * @version  2013.02.13
 	 *
 	 * @param    {object}   model        The model
 	 * @param    {object}   storage      Store the findings in here,
@@ -313,7 +319,7 @@ module.exports = function (elric) {
 		if (storage === undefined) storage = false;
 		
 		if (storage) t = storage;
-
+		
 		// Find all records in this model
 		model.find({}, function (err, items) {
 			
@@ -325,6 +331,12 @@ module.exports = function (elric) {
 				// Store the item in the cache object
 				// under its _id
 				thisModel.cache[item._id] = item;
+				
+				// Also store it in other index caches
+				for (var index_name in thisModel.index) {
+					thisModel.index[index_name].cache[item[index_name]] = item;
+				}
+				
 			}
 		});
 	}
