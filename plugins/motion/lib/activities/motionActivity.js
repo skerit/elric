@@ -1,8 +1,16 @@
-module.exports = function (elric) {
+module.exports = function (options) {
+
+	var elric = this.elric;
 
 	this.name = 'motion';
 	this.title = 'Motion';
 	this.plugin = 'motion';
+	
+	this.payload = options.payload;
+	
+	this.categories = ['Movement', 'Motion'];
+	
+	this.elric.inject(this.origin, options.origin);
 	
 	// This event has a beginning & end, so it's not instantaneous
 	this.ongoing = true;

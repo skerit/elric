@@ -598,6 +598,27 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Fire an activity
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.14
+	 * @version  2013.02.14
+	 *
+	 * @param   {string}   activity   The activity name
+	 */
+	elric.fireActivity = function fireActivity (activity, options) {
+		
+		// Do nothing if the activity doesn't exist
+		if (typeof elric.activities[activity] == 'undefined') return false;
+		
+		var new_activity = new elric.activities[activity](options);
+		
+		new_activity.fire();
+		
+		return new_activty;
+	}
+	
+	/**
 	 * Copyright Andrée Hansson, 2010
    * Use it however you want, attribution would be nice though.
    * Website:        http://andreehansson.se/

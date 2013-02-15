@@ -260,7 +260,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.30
-	 * @version  2013.02.12
+	 * @version  2013.02.14
 	 *
 	 * @returns    {elric.classes.Activity}   An Activity class
 	 */
@@ -283,6 +283,8 @@ module.exports = function (elric) {
 		var activity = elric.extend(elric.classes.BaseActivity,
 		                            elric.classes.BaseActivity.prototype.preConstructor,
 		                            constructor);
+		
+		activity.elric = elric;
 
 		// Store the new activity class
 		elric.activities[activityName] = activity;

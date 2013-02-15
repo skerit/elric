@@ -41,7 +41,7 @@ var Motion = function Motion (elriclink) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.11
-	 * @version  2013.01.14
+	 * @version  2013.02.14
 	 */
 	elric.app.post('/noauth/motion/begin/:cameraid', function (req, res) {
 		
@@ -112,17 +112,11 @@ var Motion = function Motion (elriclink) {
 			packet.eventid = record._id;
 			
 			// Also create the Activity we can use for scripting scenarios
-			var a = new elric.activities.motion();
-			
-			a.payload = packet;
-			a.origin.room = roomId;
-			a.origin.element = roomElementId;
-			
-			// Fire the activity
-			a.fire();
+			var origin = {room: roomId, element: roomElementId};
+			var a = elric.fireActivity('motion', {payload: packet, origin: origin});
 			
 			// Store the ongoing activity in here
-			activities[cs.eventid] = a;
+			if (a) activities[cs.eventid] = a;
 			
 			console.log('Motion event detected on ' + req.params.cameraid);
 			
