@@ -26,7 +26,7 @@ module.exports = function (elric) {
 			default: 'password',
 			title: 'Password'
 		}
-	}
+	};
 	
 	this.fields = ['host', 'port', 'login', 'password'];
 

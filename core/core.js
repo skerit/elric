@@ -48,6 +48,7 @@ module.exports = function Config (elric) {
 	// Load plugins
 	elric.loadPlugin('motion');
 	elric.loadPlugin('elro');
+	elric.loadPlugin('sphinx');
 	
 	// Load element types
 	elric.loadElementType('wall');

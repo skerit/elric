@@ -10,3 +10,6 @@
 [submodule "hawkejs"]
 	path = hawkejs
 	url = git@github.com:skerit/hawkejs.git
+[submodule "plugins/sphinx"]
+	path = plugins/sphinx
+	url = git@github.com:skerit/elric-sphinx.git

@@ -615,7 +615,7 @@ module.exports = function (elric) {
 		
 		new_activity.fire();
 		
-		return new_activty;
+		return new_activity;
 	}
 	
 	/**

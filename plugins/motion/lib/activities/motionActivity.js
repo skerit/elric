@@ -10,7 +10,11 @@ module.exports = function (options) {
 	
 	this.categories = ['Movement', 'Motion'];
 	
-	this.elric.inject(this.origin, options.origin);
+	if (typeof this.origin == 'undefined') this.origin = {};
+	
+	if (typeof options.origin != 'undefined') {
+		this.elric.inject(this.origin, options.origin);
+	}
 	
 	// This event has a beginning & end, so it's not instantaneous
 	this.ongoing = true;
