@@ -1,0 +1,37 @@
+<% expands('layout/body-flows') %>
+
+<% set_block('title', 'Flows') %>
+<% set_title('Flows') %>
+<% set_block('flow-add-hack', '<!-- This is just a hack to fire the event -->') %>
+
+<% start('flow-main') %>
+
+<div id="flowview">
+	<div class="window" id="window1"><strong>1</strong><br/><br/></div>
+	<div class="window" id="window2"><strong>2</strong><br/><br/></div>
+	<div class="window" id="window3"><strong>3</strong><br/><br/></div>
+	<div class="window" id="window4"><strong>4</strong><br/><br/></div>
+</div>
+
+<div id="flowbuttons">
+	<div class="btn-nongroup">
+		<div class="btn-group">
+			<button class="btn btn-primary" data-target="addElementType" data-elementType="wall"><i class="icon-plus-sign"></i> Add block</button>
+			<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="#" data-target="addFlowBlock" data-flow-block="entrance">Add flow entrance</a></li>
+				<li><a href="#" data-target="addFlowBlock" data-flow-block="conditional">Add conditional</a></li>
+				<li><a href="#" data-target="addFlowBlock" data-flow-block="scenario">Add scenario</a></li>
+			</ul>
+		</div>
+		
+		<button class="btn btn-success" id="saveflow" ><i class="icon-hdd"></i> Save</button>
+	</div>
+	<input type="hidden" name="doek_mode" value="0" />
+	<div class="clear"></div>
+</div>
+
+<% assign('flow-add-hack') %>
+<% end('flow-main') %>

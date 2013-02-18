@@ -1,9 +1,9 @@
-<% expands('layout/body-main') %>
+<% expands('layout/body-flows') %>
 
 <% set_block('title', 'Flows') %>
 <% set_title('Flows') %>
 
-<% start('container-fluid') %>
+<% start('flow-main') %>
 
 <table class="table table-bordered table-striped">
 	<tr>
@@ -26,4 +26,4 @@
 
 <% add_link('/flow/add', {title: 'Add new', class: 'btn btn-primary', prepend: '<i class="icon-plus"></i> '}) %>
 
-<% end('container-fluid') %>
+<% end('flow-main') %>

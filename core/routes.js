@@ -227,7 +227,11 @@ module.exports = function Routes (elric) {
 		async.parallel(
 			par,
 			function(err, results) {
+				
 				results.elementTypes = elric.memobjects.elementTypes;
+				
+				elric.expose('flow-results', results, res);
+				
 				elric.render(req, res, 'flows/index', results);
 			}
 		);
@@ -238,13 +242,16 @@ module.exports = function Routes (elric) {
 		var activities = {};
 		var actions = {};
 		
+	
 		// Normalize the activities
-		for (var i in elric.memobjects.activities) {
-			var a = elric.memobjects.activities[i];
+		for (var activity_name in elric.activities) {
+			var a = elric.memobjects.activities[activity_name];
 			
-			activities[i] = {
+			activities[activity_name] = {
 				name: a.name,
 				title: a.title,
+				plugin: a.plugin,
+				categories: a.categories,
 				ongoing: a.ongoing,
 				new: a.new,
 				payload: a.payload,
@@ -254,10 +261,10 @@ module.exports = function Routes (elric) {
 		}
 		
 		// Normalize the actions
-		for (var i in elric.memobjects.actions) {
-			var a = elric.memobjects.actions[i];
+		for (var action_name in elric.actions) {
+			var a = elric.memobjects.actions[action_name];
 			
-			actions[i] = {
+			actions[action_name] = {
 				name: a.name,
 				title: a.title,
 				description: a.description,
