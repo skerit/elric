@@ -46,6 +46,7 @@ Elric.plumb.endpoints = {};
 // The entrance endpoint
 // Each object has this, except the starting object
 Elric.plumb.endpoints.entrance = {
+	anchor: "TopCenter",
 	endpoint: "Dot",					
 	paintStyle: {fillStyle: "#275D51", radius: 11},
 	hoverPaintStyle: Elric.plumb.styles.hover,
@@ -58,6 +59,7 @@ Elric.plumb.endpoints.entrance = {
 };
 
 Elric.plumb.endpoints.out_true = {
+	anchor: "BottomLeft",
 	endpoint: "Dot",
 	paintStyle: {fillStyle: "#74A039", radius: 7},
 	isSource: true,
@@ -76,6 +78,7 @@ Elric.plumb.endpoints.out_true = {
 };
 
 Elric.plumb.endpoints.out_false = {
+	anchor: "BottomRight",
 	endpoint: "Dot",
 	paintStyle: {fillStyle: "#E22607", radius: 7},
 	isSource: true,
@@ -93,6 +96,128 @@ Elric.plumb.endpoints.out_false = {
 	]
 };
 
+/**
+ * A new connection between 2 endpoints has been made
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.18
+ * @version  2013.02.18
+ *
+ * @param    {Object}    connection
+ */
+Elric.plumb.init_connection = function init_connection (connInfo) {
+	
+	// Create by reference objects
+	var objects = Elric.plumb.state.objects;
+	var connection = connInfo.connection;
+	
+	// Get the connection type
+	var type = connInfo.sourceEndpoint.getOverlay().getLabel().toLowerCase();
+	
+	// Make a new entry for this connection we can store later on
+	objects[connInfo.sourceId].to_connections[type] = connInfo.targetId;
+	
+	// Add a label to the connection
+	connection.getOverlay("label").setLabel(connection.sourceId.substring(6) + "-" + connection.targetId.substring(6));
+}
+
+/**
+ * A connection between 2 endpoints has been removed
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.18
+ * @version  2013.02.18
+ *
+ * @param    {Object}    connection
+ */
+Elric.plumb.delete_connection = function init_connection (connInfo) {
+	
+	// Create by reference objects
+	var objects = Elric.plumb.state.objects;
+	
+	// Get the connection type
+	var type = connInfo.sourceEndpoint.getOverlay().getLabel().toLowerCase();
+	
+	// Delete this entry
+	delete objects[connInfo.sourceId].to_connections[type];
+	
+}
+
+/**
+ * Alias function to add multiple anchors to an element
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.18
+ * @version  2013.02.18
+ *
+ * @param    {String}    toId
+ * @param    {Array}     anchors
+ */
+Elric.plumb.add_anchor_types = function add_anchor_types (toId, anchor_types) {
+	for (var i in anchor_types) Elric.plumb.add_anchor_type(toId, anchor_types[i]);
+}
+
+/**
+ * Add a single anchor to an element
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.18
+ * @version  2013.02.18
+ *
+ * @param    {String}    toId
+ * @param    {String}    anchor
+ */
+Elric.plumb.add_anchor_type = function add_anchor_type (toId, anchor) {
+	
+	anchor = anchor.toLowerCase();
+	
+	var objects = Elric.plumb.state.objects;
+	
+	// This object still needs initialization
+	if (typeof objects[toId] == 'undefined') {
+		
+		// Create an entry for later storage
+		objects[toId] = {id: toId, to_connections: {}};
+		
+		// Make it draggable
+		jsPlumb.draggable($('#' + toId));
+	}
+	
+	var new_endpoint;
+	var endpoint_style = {};
+	var uuid = toId + '-' + anchor;
+	var options = {uuid: uuid};
+	
+	// Find the correct endpoint style
+	switch (anchor) {
+		
+		case 'in':
+		case 'entrance':
+			endpoint_style = Elric.plumb.endpoints.entrance;
+			break;
+		
+		case 'true':
+		case 'out_true':
+			endpoint_style = Elric.plumb.endpoints.out_true;
+			break;
+		
+		case 'false':
+		case 'out_false':
+			endpoint_style = Elric.plumb.endpoints.out_false;
+			break;
+	}
+	
+	// Create the new endpoint
+	new_endpoint = jsPlumb.addEndpoint(toId, endpoint_style, options);
+	
+	// store the new endpoint in here
+	Elric.plumb.state.source_endpoints.push(new_endpoint);
+}
+
+Elric.plumb.save = function save () {
+	
+}
+
 Elric.plumb.create_object = function (options) {
 	
 	var html = '<div class="window" id="window1"><strong>1</strong><br/><br/></div>';
@@ -103,51 +228,32 @@ Elric.plumb.create_object = function (options) {
 Elric.plumb.state = {};
 Elric.plumb.state.source_endpoints = [];
 Elric.plumb.state.target_endpoints = [];
+Elric.plumb.state.objects = {};
 
 // Create the flow
 Elric.plumb.makeFlow = function makeFlow () {
 	
 	Elric.plumb.state.source_endpoints = [];
 	Elric.plumb.state.target_endpoints = [];
+	Elric.plumb.state.objects = {};
 
-	var init = function(connection) {
-		connection.getOverlay("label").setLabel(connection.sourceId.substring(6) + "-" + connection.targetId.substring(6));
-	};			
+	Elric.plumb.add_anchor_types("window1", ['in', 'true', 'false']);
+	Elric.plumb.add_anchor_types("window2", ['in', 'true', 'false']);
+	Elric.plumb.add_anchor_types("window3", ['in', 'true', 'false']);
+	Elric.plumb.add_anchor_types("window4", ['in', 'true', 'false']);
 	
-	_addEndpoints = function(toId, sourceAnchors, targetAnchors) {
-		for (var i = 0; i < sourceAnchors.length; i++) {
-			var sourceUUID = toId + sourceAnchors[i];
-			Elric.plumb.state.source_endpoints.push(jsPlumb.addEndpoint(toId, Elric.plumb.endpoints.out_true, { anchor:sourceAnchors[i], uuid:sourceUUID }));						
-		}
-		for (var j = 0; j < targetAnchors.length; j++) {
-			var targetUUID = toId + targetAnchors[j];
-			Elric.plumb.state.target_endpoints.push(jsPlumb.addEndpoint(toId, Elric.plumb.endpoints.entrance, { anchor:targetAnchors[j], uuid:targetUUID }));						
-		}
-	};
-
-	_addEndpoints("window4", ["BottomLeft", "BottomRight"], ["TopCenter"]);
-	_addEndpoints("window2", ["BottomLeft", "BottomRight"], ["TopCenter"]);
-	_addEndpoints("window3", ["BottomLeft", "BottomRight"], ["TopCenter"]);
-	_addEndpoints("window1", ["BottomLeft", "BottomRight"], ["TopCenter"]);
-				
-	// listen for new connections; initialise them the same way we initialise the connections at startup.
-	jsPlumb.bind("jsPlumbConnection", function(connInfo, originalEvent) { 
-		init(connInfo.connection);
-	});			
-				
-	// make all the window divs draggable						
-	//jsPlumb.draggable(jsPlumb.getSelector(".window"), { grid: [20, 20] });
-	// THIS DEMO ONLY USES getSelector FOR CONVENIENCE. Use your library's appropriate selector method!
-	jsPlumb.draggable(jsPlumb.getSelector(".window"));
-
+	// Listen for new connections
+	jsPlumb.bind("jsPlumbConnection", function(connInfo, originalEvent) {
+		Elric.plumb.init_connection(connInfo);
+	});
+	
+	// Listen for deletec connections
+	jsPlumb.bind("jsPlumbConnectionDetached", function(connInfo, originalEvent) { 
+		Elric.plumb.delete_connection(connInfo);
+	});
+	
 	//* connect a few up
-	jsPlumb.connect({uuids:["window2BottomCenter", "window3TopCenter"]});
-	jsPlumb.connect({uuids:["window2LeftMiddle", "window4LeftMiddle"]});
-	jsPlumb.connect({uuids:["window4TopCenter", "window4RightMiddle"]});
-	jsPlumb.connect({uuids:["window3RightMiddle", "window2RightMiddle"]});
-	jsPlumb.connect({uuids:["window4BottomCenter", "window1TopCenter"]});
-	jsPlumb.connect({uuids:["window3BottomCenter", "window1BottomCenter"]});
-	
+	jsPlumb.connect({uuids:["window2-true", "window1-in"]});
 	
 }
 
