@@ -229,6 +229,52 @@ Elric.plumb.add_new_block = function add_new_block (block_type, options) {
 	Elric.plumb.create_block(options);
 }
 
+Elric.plumb.edit_block = function edit_block (object, block_type) {
+	
+	var body = '';
+	var selected = '';
+	var $m = Elric.plumb.state.modal;
+	var $b = $('#flow-modal-body', $m);
+	
+	console.log(object);
+	
+	if (block_type == 'conditional') {
+		
+		if (typeof object.settings.scope == 'undefined') object.settings.scope = '';
+		
+		var options = {
+			activity: 'Activity',
+			variable: 'Variable'
+		};
+		
+		body += '<select id="flow-block-conditional-scope">';
+		body += '<option value="">Select the scope of this condition</option>';
+		
+		for (var value in options) {
+			
+			selected = '';
+			if (object.settings.scope == value) selected = 'selected';
+			
+			body += '<option value="' + value + '" ' + selected + '>' + options[value] + '</option>';
+			
+		}
+		
+		body += '</select><br/>';
+		
+		// Set the modal body
+		$b.html(body);
+		
+		$('#flow-block-conditional-scope', $b).change(function(e){
+			$this = $(this);
+			var activity_name = $this.val();
+			
+		});
+	}
+	
+	// Finally: show the modal
+	$m.modal();
+}
+
 /**
  * Create a block html
  *
@@ -247,26 +293,50 @@ Elric.plumb.create_block = function (options) {
 	if (typeof options.top == 'undefined') options.top = 60;
 	if (typeof options.left == 'undefined') options.left = 100;
 	
+	var edit_button = '';
+	
+	switch (options.block_type) {
+		
+		case 'conditional':
+		case 'scenario':
+			edit_button = '<button class="btn btn-mini btn-inverse" data-block-type="' + options.block_type + '" data-block-id="' + options.id + '" data-block-edit="button" type="button">Edit</button>';
+			break;
+	}
+	
 	var objects = Elric.plumb.state.objects;
 	
 	// This object still needs initialization
 	if (typeof objects[options.id] == 'undefined') {
 		
 		// Create an entry for later storage
-		objects[options.id] = {id: options.id, to_connections: {}, type: options.block_type};
+		objects[options.id] = {
+			id: options.id,
+			to_connections: {},
+			type: options.block_type,
+			settings: {}
+		};
 	}
 	
 	var html = '<div id="' + options.id + '" class="flowblock ' + options.class + '" ';
 	html += 'data-block-type="' + options.block_type + '" ';
 	html += 'style="top:' + options.top + 'px;left:' + options.left + 'px" >'
-	html += '<strong>' + options.block_type + '</strong><br/><br/>';
+	html += '<strong>' + options.block_type + '</strong><br/>' + edit_button + '<br/>';
 	html += '</div>';
 	
 	// Add the block to the flow
 	Elric.plumb.state.element.append(html);
 	
+	var $element = $('#' + options.id);
+	
+	$('[data-block-edit="button"]', $element).click(function() {
+		var $this = $(this);
+		
+		Elric.plumb.edit_block(objects[options.id], options.block_type);
+		
+	});
+	
 	// Make it draggable
-	jsPlumb.draggable($('#' + options.id));
+	jsPlumb.draggable($element);
 	
 	var anchors = [];
 	
@@ -341,6 +411,7 @@ Elric.plumb.state.source_endpoints = [];
 Elric.plumb.state.target_endpoints = [];
 Elric.plumb.state.objects = {};
 Elric.plumb.state.element = false;
+Elric.plumb.state.modal = false;
 
 // Create the flow
 Elric.plumb.makeFlow = function makeFlow () {
@@ -348,6 +419,7 @@ Elric.plumb.makeFlow = function makeFlow () {
 	Elric.plumb.state.source_endpoints = [];
 	Elric.plumb.state.target_endpoints = [];
 	Elric.plumb.state.objects = {};
+	Elric.plumb.state.modal = $('#flow-modal');
 	Elric.plumb.state.element = $('#flowview');
 	
 	// Listen for new connections

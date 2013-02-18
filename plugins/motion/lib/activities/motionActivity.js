@@ -1,20 +1,10 @@
-module.exports = function (options) {
-
-	var elric = this.elric;
+module.exports = function (elric) {
 
 	this.name = 'motion';
 	this.title = 'Motion';
 	this.plugin = 'motion';
 	
-	this.payload = options.payload;
-	
 	this.categories = ['Movement', 'Motion'];
-	
-	if (typeof this.origin == 'undefined') this.origin = {};
-	
-	if (typeof options.origin != 'undefined') {
-		this.elric.inject(this.origin, options.origin);
-	}
 	
 	// This event has a beginning & end, so it's not instantaneous
 	this.ongoing = true;
@@ -56,5 +46,13 @@ module.exports = function (options) {
 			description: 'The event number according to Motion'
 		}
 	};
+	
+	this.create = function create (options) {
+		
+		var payload = options.payload;	
+		if (typeof payload.origin == 'undefined') payload.origin = {};
+
+		return payload;
+	}
 	
 }

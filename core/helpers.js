@@ -661,18 +661,20 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.14
-	 * @version  2013.02.14
+	 * @version  2013.02.18
 	 *
-	 * @param   {string}   activity   The activity name
+	 * @param   {string}   activity_name   The activity name
 	 */
-	elric.fireActivity = function fireActivity (activity, options) {
+	elric.fireActivity = function fireActivity (activity_name, options) {
 		
 		// Do nothing if the activity doesn't exist
-		if (typeof elric.activities[activity] == 'undefined') return false;
+		if (typeof elric.activities[activity_name] == 'undefined') return false;
 		
-		var new_activity = new elric.activities[activity](options);
+		var activity = elric.activities[activity_name];
 		
-		new_activity.fire();
+		var new_activity = activity.create(options);
+		
+		activity.fire(new_activity);
 		
 		return new_activity;
 	}

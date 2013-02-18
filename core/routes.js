@@ -318,8 +318,8 @@ module.exports = function Routes (elric) {
 
 		// Normalize the activities
 		for (var activity_name in elric.activities) {
-			var a = elric.memobjects.activities[activity_name];
-			
+			var a = elric.activities[activity_name];
+
 			activities[activity_name] = {
 				name: a.name,
 				title: a.title,
@@ -344,7 +344,7 @@ module.exports = function Routes (elric) {
 				activity_trigger: a.activity_trigger
 			};
 		}
-		
+
 		elric.expose('flow_activities', activities, res);
 		elric.expose('flow_actions', actions, res);
 		elric.expose('flow_flow', flow, res);

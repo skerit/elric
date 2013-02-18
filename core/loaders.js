@@ -256,11 +256,11 @@ module.exports = function (elric) {
 	}
 	
 	/**
-	 * Load a new activity class we can act upon
+	 * Load a new activity we can act upon
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.30
-	 * @version  2013.02.14
+	 * @version  2013.02.18
 	 *
 	 * @returns    {elric.classes.Activity}   An Activity class
 	 */
@@ -284,10 +284,8 @@ module.exports = function (elric) {
 		                            elric.classes.BaseActivity.prototype.preConstructor,
 		                            constructor);
 		
-		activity.elric = elric;
-
 		// Store the new activity class
-		elric.activities[activityName] = activity;
+		elric.activities[activityName] = new activity(elric);
 		
 		return activity;
 	}
