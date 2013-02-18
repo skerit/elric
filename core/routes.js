@@ -237,12 +237,18 @@ module.exports = function Routes (elric) {
 		);
 	});
 	
+	/**
+	 * Add a new flow
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.11
+	 * @version  2013.02.11
+	 */
 	elric.app.get('/flow/add', function (req, res) {
 		
 		var activities = {};
 		var actions = {};
-		
-	
+
 		// Normalize the activities
 		for (var activity_name in elric.activities) {
 			var a = elric.memobjects.activities[activity_name];
@@ -271,8 +277,80 @@ module.exports = function Routes (elric) {
 				activity_trigger: a.activity_trigger
 			};
 		}
+		
+		elric.expose('flow_flow', false, res);
+		elric.expose('flow_blocks', false, res);
 
 		elric.render(req, res, 'flows/add', {activities: activities, actions: actions});
+	});
+	
+	/**
+	 * Edit an existing
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.18
+	 * @version  2013.02.18
+	 */
+	elric.app.get('/flow/edit/:flowid', function (req, res) {
+		
+		var activities = {};
+		var actions = {};
+		var flow = {};
+		var flowid = req.params.flowid;
+		
+		if (typeof elric.models.flow.cache[flowid] == 'undefined') {
+			res.end('No flow found');
+			return;
+		}
+		
+		flow = elric.models.flow.cache[flowid];
+		
+		var flow_blocks = {};
+		
+		// Get all the flow blocks
+		for (var i in elric.models.flowBlock.cache) {
+			var fb = elric.models.flowBlock.cache[i];
+			
+			if (fb.flow_id == flowid) {
+				flow_blocks[fb._id] = fb;
+			}
+		}
+
+		// Normalize the activities
+		for (var activity_name in elric.activities) {
+			var a = elric.memobjects.activities[activity_name];
+			
+			activities[activity_name] = {
+				name: a.name,
+				title: a.title,
+				plugin: a.plugin,
+				categories: a.categories,
+				ongoing: a.ongoing,
+				new: a.new,
+				payload: a.payload,
+				blueprint: a.blueprint,
+				origin: a.origin
+			};
+		}
+		
+		// Normalize the actions
+		for (var action_name in elric.actions) {
+			var a = elric.memobjects.actions[action_name];
+			
+			actions[action_name] = {
+				name: a.name,
+				title: a.title,
+				description: a.description,
+				activity_trigger: a.activity_trigger
+			};
+		}
+		
+		elric.expose('flow_activities', activities, res);
+		elric.expose('flow_actions', actions, res);
+		elric.expose('flow_flow', flow, res);
+		elric.expose('flow_blocks', flow_blocks, res);
+
+		elric.render(req, res, 'flows/edit', {activities: activities, actions: actions});
 	});
 	
 }

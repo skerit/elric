@@ -28,21 +28,16 @@ module.exports = function flow (elric) {
 			fieldType: 'String'
 		},
 		// What triggers this flow
-		// This is evaluated from the conditions
+		// This is evaluated from the flow blocks
 		triggers: {
 			type: {},
 			array: true
 		},
-		// The flows of conditions
-		conditions: {
-			type: {},
-			array: true
-		}
 	};
 	
 	this.admin = {
 		title: 'Flows',
-		fields: ['user_id', 'name', 'triggers', 'conditions']
+		fields: ['user_id', 'name', 'triggers']
 	};
 	
 }

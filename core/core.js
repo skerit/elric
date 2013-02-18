@@ -23,6 +23,7 @@ module.exports = function Config (elric) {
 	elric.loadModel('clientCapability');
 	elric.loadModel('movementEvent');
 	elric.loadModel('flow');
+	elric.loadModel('flowBlock');
 	elric.loadModel('scenario');
 	elric.loadModel('interface');
 	elric.loadModel('device');
