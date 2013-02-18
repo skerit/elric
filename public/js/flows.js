@@ -229,52 +229,6 @@ Elric.plumb.add_new_block = function add_new_block (block_type, options) {
 	Elric.plumb.create_block(options);
 }
 
-Elric.plumb.edit_block = function edit_block (object, block_type) {
-	
-	var body = '';
-	var selected = '';
-	var $m = Elric.plumb.state.modal;
-	var $b = $('#flow-modal-body', $m);
-	
-	console.log(object);
-	
-	if (block_type == 'conditional') {
-		
-		if (typeof object.settings.scope == 'undefined') object.settings.scope = '';
-		
-		var options = {
-			activity: 'Activity',
-			variable: 'Variable'
-		};
-		
-		body += '<select id="flow-block-conditional-scope">';
-		body += '<option value="">Select the scope of this condition</option>';
-		
-		for (var value in options) {
-			
-			selected = '';
-			if (object.settings.scope == value) selected = 'selected';
-			
-			body += '<option value="' + value + '" ' + selected + '>' + options[value] + '</option>';
-			
-		}
-		
-		body += '</select><br/>';
-		
-		// Set the modal body
-		$b.html(body);
-		
-		$('#flow-block-conditional-scope', $b).change(function(e){
-			$this = $(this);
-			var activity_name = $this.val();
-			
-		});
-	}
-	
-	// Finally: show the modal
-	$m.modal();
-}
-
 /**
  * Create a block html
  *
@@ -331,7 +285,9 @@ Elric.plumb.create_block = function (options) {
 	$('[data-block-edit="button"]', $element).click(function() {
 		var $this = $(this);
 		
-		Elric.plumb.edit_block(objects[options.id], options.block_type);
+		goToAjaxView('/flow/block/edit/' + options.id, function() {
+			Elric.plumb.state.modal.modal();
+		});
 		
 	});
 	

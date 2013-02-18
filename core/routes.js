@@ -354,6 +354,24 @@ module.exports = function Routes (elric) {
 	});
 	
 	/**
+	 * Edit a flow block
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.19
+	 * @version  2013.02.19
+	 */
+	elric.app.get('/flow/block/edit/:id', function (req, res) {
+		
+		var block_id = req.params.id;
+		var block = elric.models.flowBlock.cache[block_id];
+		
+		elric.expose('flow_block', block, res);
+		
+		elric.render(req, res, 'flows/block_edit', {block: block});
+		
+	});
+	
+	/**
 	 * Save an existing flow
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
