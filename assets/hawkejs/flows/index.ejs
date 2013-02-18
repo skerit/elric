@@ -11,14 +11,11 @@
 		<th>Action</th>
 	</tr>
 	<% for (var i in flows) { %>
-		<% var flow = flow[i] %>
+		<% var flow = flows[i] %>
 		<tr>
 			<td><%= flow.name %></td>
 			<td>
-					<button type="button"	data-flowid="<%= flow._id %>"
-						title="Edit flow" class="btn btn-success">
-							<i class="icon-edit"></i> Edit
-					</button>
+				<% add_link('/flow/edit/' + flow._id, {title: 'Edit', class: 'btn btn-success', prepend: '<i class="icon-pencil"></i> '}) %>
 			</td>
 		</tr>
 	<% } %>

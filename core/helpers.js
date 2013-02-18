@@ -598,6 +598,65 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Save a (new) flow block
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.18
+	 * @version  2013.02.18
+	 *
+	 */
+	elric.saveFlow = function saveFlow (name, flow, blocks, user_id, req) {
+		
+		var block_records = {};
+		
+		// Create a new record for every block, so we got an id
+		for (var i in blocks) {
+			var block = blocks[i];
+			
+			if (typeof elric.models.flowBlock.cache[i] == 'undefined') {
+				var nr = new elric.models.flowBlock.model({
+					user_id: user_id,
+					flow_id: flow._id,
+					block_type: block.type,
+					top: block.top,
+					left: block.left,
+					out_on_true: [],
+					out_on_false: []
+				});
+			} else {
+				var nr = elric.models.flowBlock.cache[i];
+			}
+			
+			nr.top = block.top;
+			nr.left = block.left;
+			nr.out_on_true = [];
+			nr.out_on_false = [];
+			
+			block_records[i] = nr;
+		}
+		
+		// Now modify all the links with this new id
+		for (var i in blocks) {
+			var block = blocks[i];
+			var record = block_records[i];
+			
+			for (var connection_type in block.to_connections) {
+				var connections = block.to_connections[connection_type];
+				
+				for (var to_id in connections) {
+					var new_id = block_records[to_id]._id;
+					record['out_on_' + connection_type].push(new_id);
+				}
+			}
+			
+			record.save();
+		}
+		
+		flow.save();
+		
+	}
+	
+	/**
 	 * Fire an activity
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>

@@ -350,7 +350,52 @@ module.exports = function Routes (elric) {
 		elric.expose('flow_flow', flow, res);
 		elric.expose('flow_blocks', flow_blocks, res);
 
-		elric.render(req, res, 'flows/edit', {activities: activities, actions: actions});
+		elric.render(req, res, 'flows/add', {activities: activities, actions: actions});
+	});
+	
+	/**
+	 * Save an existing flow
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.18
+	 * @version  2013.02.18
+	 */
+	elric.app.post('/flow/save/:id', function (req, res) {
+		
+		res.end('{"message": "ok", "error": false}');
+		
+		var name = req.body.name;
+		var user_id = req.session.user._id;
+		var blocks = req.body.blocks;
+		
+		var flow = elric.models.flow.cache[req.params.id];
+		
+		elric.saveFlow(name, flow, blocks, user_id, req);
+		
+	});
+	
+	/**
+	 * Add a new flow
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.18
+	 * @version  2013.02.18
+	 */
+	elric.app.post('/flow/add', function (req, res) {
+		
+		res.end('{"message": "ok", "error": false}');
+		
+		var name = req.body.name;
+		var user_id = req.session.user._id;
+		var blocks = req.body.blocks;
+		
+		var flow = new elric.models.flow.model({
+			name: name,
+			user_id: user_id
+		});
+		
+		elric.saveFlow(name, flow, blocks, user_id, req);
+		
 	});
 	
 }
