@@ -238,63 +238,33 @@ module.exports = function Routes (elric) {
 	});
 	
 	/**
-	 * Add a new flow
+	 * Add a new flow and edit it
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.11
-	 * @version  2013.02.11
+	 * @version  2013.02.19
 	 */
 	elric.app.get('/flow/add', function (req, res) {
 		
-		var activities = {};
-		var actions = {};
-
-		// Normalize the activities
-		for (var activity_name in elric.activities) {
-			var a = elric.memobjects.activities[activity_name];
-			
-			activities[activity_name] = {
-				name: a.name,
-				title: a.title,
-				plugin: a.plugin,
-				categories: a.categories,
-				ongoing: a.ongoing,
-				new: a.new,
-				payload: a.payload,
-				blueprint: a.blueprint,
-				origin: a.origin
-			};
-		}
+		// Create a new flow
+		var flow = new elric.models.flow.model({name: 'unnamed', user_id: req.session.user._id});
 		
-		// Normalize the actions
-		for (var action_name in elric.actions) {
-			var a = elric.memobjects.actions[action_name];
-			
-			actions[action_name] = {
-				name: a.name,
-				title: a.title,
-				description: a.description,
-				activity_trigger: a.activity_trigger
-			};
-		}
+		// Already send this flow to the client for editing
+		elric.editFlow(req, res, flow);
 		
-		elric.expose('flow_flow', false, res);
-		elric.expose('flow_blocks', false, res);
-
-		elric.render(req, res, 'flows/add', {activities: activities, actions: actions});
+		// And save it
+		flow.save();
 	});
 	
 	/**
-	 * Edit an existing
+	 * Edit an existing flow
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.18
-	 * @version  2013.02.18
+	 * @version  2013.02.19
 	 */
 	elric.app.get('/flow/edit/:flowid', function (req, res) {
 		
-		var activities = {};
-		var actions = {};
 		var flow = {};
 		var flowid = req.params.flowid;
 		
@@ -305,52 +275,30 @@ module.exports = function Routes (elric) {
 		
 		flow = elric.models.flow.cache[flowid];
 		
-		var flow_blocks = {};
+		elric.editFlow(req, res, flow);
+	});
+	
+	/**
+	 * Create a new flowblock to use in a flow
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.19
+	 * @version  2013.02.19
+	 */
+	elric.app.post('/flow/block/create', function (req, res) {
 		
-		// Get all the flow blocks
-		for (var i in elric.models.flowBlock.cache) {
-			var fb = elric.models.flowBlock.cache[i];
-			
-			if (fb.flow_id == flowid) {
-				flow_blocks[fb._id] = fb;
-			}
-		}
-
-		// Normalize the activities
-		for (var activity_name in elric.activities) {
-			var a = elric.activities[activity_name];
-
-			activities[activity_name] = {
-				name: a.name,
-				title: a.title,
-				plugin: a.plugin,
-				categories: a.categories,
-				ongoing: a.ongoing,
-				new: a.new,
-				payload: a.payload,
-				blueprint: a.blueprint,
-				origin: a.origin
-			};
-		}
+		var new_construct = {
+			user_id: req.session.user._id,
+			flow_id: req.body.flow_id,
+			block_type: req.body.block_type
+		};
 		
-		// Normalize the actions
-		for (var action_name in elric.actions) {
-			var a = elric.memobjects.actions[action_name];
-			
-			actions[action_name] = {
-				name: a.name,
-				title: a.title,
-				description: a.description,
-				activity_trigger: a.activity_trigger
-			};
-		}
-
-		elric.expose('flow_activities', activities, res);
-		elric.expose('flow_actions', actions, res);
-		elric.expose('flow_flow', flow, res);
-		elric.expose('flow_blocks', flow_blocks, res);
-
-		elric.render(req, res, 'flows/add', {activities: activities, actions: actions});
+		var block = new elric.models.flowBlock.model(new_construct);
+		
+		// Send the block to the client
+		res.end(JSON.stringify(block));
+		
+		block.save();
 	});
 	
 	/**
@@ -368,7 +316,6 @@ module.exports = function Routes (elric) {
 		elric.expose('flow_block', block, res);
 		
 		elric.render(req, res, 'flows/block_edit', {block: block});
-		
 	});
 	
 	/**
@@ -387,30 +334,6 @@ module.exports = function Routes (elric) {
 		var blocks = req.body.blocks;
 		
 		var flow = elric.models.flow.cache[req.params.id];
-		
-		elric.saveFlow(name, flow, blocks, user_id, req);
-		
-	});
-	
-	/**
-	 * Add a new flow
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    2013.02.18
-	 * @version  2013.02.18
-	 */
-	elric.app.post('/flow/add', function (req, res) {
-		
-		res.end('{"message": "ok", "error": false}');
-		
-		var name = req.body.name;
-		var user_id = req.session.user._id;
-		var blocks = req.body.blocks;
-		
-		var flow = new elric.models.flow.model({
-			name: name,
-			user_id: user_id
-		});
 		
 		elric.saveFlow(name, flow, blocks, user_id, req);
 		

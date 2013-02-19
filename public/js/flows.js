@@ -215,16 +215,32 @@ Elric.plumb.add_anchor_type = function add_anchor_type (toId, anchor) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.18
- * @version  2013.02.18
+ * @version  2013.02.19
  *
  * @param    {String}    block_type
  */
 Elric.plumb.add_new_block = function add_new_block (block_type, options) {
 	
 	if (typeof options == 'undefined') options = {};
-	if (typeof options.id == 'undefined') options.id = 'new-block-' + block_type + '-' + (new Date()).getTime();
+	
 	options.block_type = block_type;
 	options.class = block_type;
+	
+	// If there is no id, ask the server to create a block
+	if (typeof options.id == 'undefined') {
+		
+		var reqdata = {
+			flow_id: Elric.plumb.state.flow_id,
+			block_type: block_type
+		};
+		return;
+		$.post('/flow/block/create', reqdata, function(data) {
+			options.id = data._id;
+			Elric.plumb.create_block(options);
+		});
+		
+		return;
+	}
 	
 	Elric.plumb.create_block(options);
 }
@@ -327,14 +343,8 @@ Elric.plumb.create_block = function (options) {
  */
 Elric.plumb.save = function save () {
 	
-	var url = '';
-	
-	if (Elric.plumb.state.flow_id) {
-		url = '/flow/save/' + Elric.plumb.state.flow_id;
-	} else {
-		url = '/flow/add';
-	}
-	
+	var url = '/flow/save/' + Elric.plumb.state.flow_id;
+
 	var blocks = Elric.plumb.state.objects;
 	
 	for (var id in blocks) {
@@ -344,7 +354,6 @@ Elric.plumb.save = function save () {
 		
 		block.top = parseInt($block.css('top'));
 		block.left = parseInt($block.css('left'));
-		
 	}
 	
 	var flow_data = {
@@ -397,48 +406,47 @@ Elric.plumb.makeFlow = function makeFlow () {
 		Elric.plumb.state.flow = flow;
 		Elric.plumb.state.flow_id = flow._id;
 		
-		for (var i in blocks) {
-			var b = blocks[i];
-			
-			var options = {
-				id: b._id,
-				top: b.top,
-				left: b.left
-			};
-			
-			Elric.plumb.add_new_block(b.block_type, options);
-		}
+		// If this flow doesn't have blocks yet, add an entrance block
+		if ($.isEmptyObject(Elric.exposed.flow_blocks)) {
+			Elric.plumb.add_new_block('entrance', {left: 300});
+		} else { // It does have blocks, so show them
 		
-		// Now we go over the blocks again to create links
-		for (var i in blocks) {
-			var b = blocks[i];
-			
-			for (var target in b.out_on_true) {
-				var con = b.out_on_true[target];
+			for (var i in blocks) {
+				var b = blocks[i];
 				
-				var src = b._id + '-true';
-				var trg = con + '-in';
+				var options = {
+					id: b._id,
+					top: b.top,
+					left: b.left
+				};
 				
-				jsPlumb.connect({source: jsPlumb.getEndpoint(src), target: jsPlumb.getEndpoint(trg)});
+				Elric.plumb.add_new_block(b.block_type, options);
 			}
 			
-			for (var target in b.out_on_false) {
-				var con = b.out_on_false[target];
+			// Now we go over the blocks again to create links
+			for (var i in blocks) {
+				var b = blocks[i];
 				
-				var src = b._id + '-false';
-				var trg = con + '-in';
+				for (var target in b.out_on_true) {
+					var con = b.out_on_true[target];
+					
+					var src = b._id + '-true';
+					var trg = con + '-in';
+					
+					jsPlumb.connect({source: jsPlumb.getEndpoint(src), target: jsPlumb.getEndpoint(trg)});
+				}
 				
-				jsPlumb.connect({source: jsPlumb.getEndpoint(src), target: jsPlumb.getEndpoint(trg)});
+				for (var target in b.out_on_false) {
+					var con = b.out_on_false[target];
+					
+					var src = b._id + '-false';
+					var trg = con + '-in';
+					
+					jsPlumb.connect({source: jsPlumb.getEndpoint(src), target: jsPlumb.getEndpoint(trg)});
+				}
+				
 			}
-			
 		}
-		
-	} else { // This is a new flow
-		Elric.plumb.state.flow = false;
-		Elric.plumb.state.flow_id = false;
-		
-		// A new flow always starts with an entrance
-		Elric.plumb.add_new_block('entrance', {left: 300});
 	}
 	
 	// Add listeners for adding new blocks

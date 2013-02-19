@@ -598,12 +598,79 @@ module.exports = function (elric) {
 	}
 	
 	/**
+	 * Edit a block
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.19
+	 * @version  2013.02.19
+	 */
+	elric.editFlow = function editFlow(req, res, flow) {
+		
+		var flowid = flow._id;
+
+		var activities = {};
+		var actions = {};
+		var flow_blocks = {};
+		
+		// Get all the flow blocks
+		for (var i in elric.models.flowBlock.cache) {
+			
+			var fb = elric.models.flowBlock.cache[i];
+
+			if (fb.flow_id.toString() == flowid) {
+				flow_blocks[fb._id] = fb;
+			}
+		}
+
+		// Normalize the activities
+		for (var activity_name in elric.activities) {
+			var a = elric.activities[activity_name];
+
+			activities[activity_name] = {
+				name: a.name,
+				title: a.title,
+				plugin: a.plugin,
+				categories: a.categories,
+				ongoing: a.ongoing,
+				new: a.new,
+				payload: a.payload,
+				blueprint: a.blueprint,
+				origin: a.origin
+			};
+		}
+		
+		// Normalize the actions
+		for (var action_name in elric.actions) {
+			var a = elric.memobjects.actions[action_name];
+			
+			actions[action_name] = {
+				name: a.name,
+				title: a.title,
+				description: a.description,
+				activity_trigger: a.activity_trigger
+			};
+		}
+
+		elric.expose('flow_activities', activities, res);
+		elric.expose('flow_actions', actions, res);
+		elric.expose('flow_flow', flow, res);
+		elric.expose('flow_blocks', flow_blocks, res);
+
+		elric.render(req, res, 'flows/add', {activities: activities, actions: actions});
+	}
+	
+	/**
 	 * Save a (new) flow block
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.18
 	 * @version  2013.02.18
 	 *
+	 * @param    {string}   name       The name of the flow
+	 * @param    {object}   flow
+	 * @param    {object}   blocks
+	 * @param    {string}   user_id
+	 * @param    {object}   req
 	 */
 	elric.saveFlow = function saveFlow (name, flow, blocks, user_id, req) {
 		
