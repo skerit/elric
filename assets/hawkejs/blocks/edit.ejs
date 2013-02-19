@@ -1,6 +1,6 @@
-<% expands('flows/add') %>
+<% expands('flows/edit') %>
 
-<% start('flow-add-hack') %>
+<% start('flow-edit-object') %>
 
 <div id="flow-modal" class="modal hide fade">
   <div class="modal-header">
@@ -8,7 +8,7 @@
     <h3>Edit flow block</h3>
   </div>
   <div id="flow-modal-body" class="modal-body">
-    
+    <% assign('flow-edit-modal-body') %>
   </div>
   <div class="modal-footer">
     <button id="flow-block-close" data-dismiss="modal" class="btn">Close</button>
@@ -16,4 +16,4 @@
   </div>
 </div>
 
-<% end('flow-add-hack') %>
+<% end('flow-edit-object') %>

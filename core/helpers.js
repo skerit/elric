@@ -656,7 +656,7 @@ module.exports = function (elric) {
 		elric.expose('flow_flow', flow, res);
 		elric.expose('flow_blocks', flow_blocks, res);
 
-		elric.render(req, res, 'flows/add', {activities: activities, actions: actions});
+		elric.render(req, res, 'flows/edit', {activities: activities, actions: actions});
 	}
 	
 	/**
@@ -720,7 +720,6 @@ module.exports = function (elric) {
 		}
 		
 		flow.save();
-		
 	}
 	
 	/**

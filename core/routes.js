@@ -315,7 +315,7 @@ module.exports = function Routes (elric) {
 		
 		elric.expose('flow_block', block, res);
 		
-		elric.render(req, res, 'flows/block_edit', {block: block});
+		elric.render(req, res, 'blocks/edit_' + block.block_type, {block: block});
 	});
 	
 	/**

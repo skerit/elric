@@ -380,11 +380,10 @@ Elric.plumb.state.modal = false;
 
 // Create the flow
 Elric.plumb.makeFlow = function makeFlow () {
-	
+
 	Elric.plumb.state.source_endpoints = [];
 	Elric.plumb.state.target_endpoints = [];
 	Elric.plumb.state.objects = {};
-	Elric.plumb.state.modal = $('#flow-modal');
 	Elric.plumb.state.element = $('#flowview');
 	
 	// Listen for new connections
@@ -471,8 +470,11 @@ Elric.plumb.makeFlow = function makeFlow () {
 		Elric.plumb.save();
 		e.preventDefault();
 	});
-	
-	
 }
 
-hawkejs.event.on('create-block-flow-add-hack', Elric.plumb.makeFlow);
+hawkejs.event.on('create-block-flow-edit-hack', Elric.plumb.makeFlow);
+
+// The modal has been (re) created
+hawkejs.event.on('create-block-flow-edit-object', function() {
+	Elric.plumb.state.modal = $('#flow-modal');
+});
