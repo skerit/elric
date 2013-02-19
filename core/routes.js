@@ -313,9 +313,15 @@ module.exports = function Routes (elric) {
 		var block_id = req.params.id;
 		var block = elric.models.flowBlock.cache[block_id];
 		
+		var payload = {
+			block: block,
+			activities: elric.activities,
+			actions: elric.actions
+		};
+		
 		elric.expose('flow_block', block, res);
 		
-		elric.render(req, res, 'blocks/edit_' + block.block_type, {block: block});
+		elric.render(req, res, 'blocks/edit_' + block.block_type, payload);
 	});
 	
 	/**

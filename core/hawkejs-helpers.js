@@ -133,7 +133,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.06
-	 * @version  2013.02.06
+	 * @version  2013.02.20
 	 *
 	 * @param    {string}    name     The name of the field
 	 * @param    {object}    options  The options
@@ -232,7 +232,12 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		html += '</select>\n';
 		
 		if (options.label) {
-			html = '<label class="control-label" for="' + name + '">' + title + '</label>\n' + html;
+			
+			var label = title;
+			
+			if (options.label !== true && options.label !== false) label = options.label;
+			
+			html = '<label class="control-label" for="' + name + '">' + label + '</label>\n' + html;
 		}
 		
 		// If a wrapper is wanted, add it

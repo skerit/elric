@@ -676,6 +676,8 @@ module.exports = function (elric) {
 		
 		var block_records = {};
 		
+		if (name) flow.name = name;
+		
 		// Create a new record for every block, so we got an id
 		for (var i in blocks) {
 			var block = blocks[i];

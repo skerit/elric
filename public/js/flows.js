@@ -233,7 +233,7 @@ Elric.plumb.add_new_block = function add_new_block (block_type, options) {
 			flow_id: Elric.plumb.state.flow_id,
 			block_type: block_type
 		};
-		return;
+		
 		$.post('/flow/block/create', reqdata, function(data) {
 			options.id = data._id;
 			Elric.plumb.create_block(options);
@@ -267,6 +267,7 @@ Elric.plumb.create_block = function (options) {
 	
 	switch (options.block_type) {
 		
+		case 'activity':
 		case 'conditional':
 		case 'scenario':
 			edit_button = '<button class="btn btn-mini btn-inverse" data-block-type="' + options.block_type + '" data-block-id="' + options.id + '" data-block-edit="button" type="button">Edit</button>';
@@ -318,6 +319,7 @@ Elric.plumb.create_block = function (options) {
 			anchors = ['true'];
 			break;
 		
+		case 'activity':
 		case 'conditional':
 			anchors = ['in', 'true', 'false'];
 			break;
@@ -329,7 +331,6 @@ Elric.plumb.create_block = function (options) {
 	
 	// Create flow anchors
 	Elric.plumb.add_anchor_types(options.id, anchors);
-	
 }
 
 /**

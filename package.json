@@ -28,7 +28,9 @@
   },
 	"devDependencies": {
 		"benchmark": "1.0.x",
-		"microtime": "0.3.x"
+		"microtime": "0.3.x",
+		"v8-profiler": "3.6.x",
+		"node-inspector": "0.2.x"
 	},
 	"license": "GPLv3",
   "engines": {

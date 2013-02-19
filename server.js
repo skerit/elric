@@ -42,6 +42,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
  * This variable will be passed allong to plugins
  */
 var elric = {};
+GLOBAL.elric = elric;
 
 elric.isFirstRun = true; // Initial first run setting
 elric.classes = {};
