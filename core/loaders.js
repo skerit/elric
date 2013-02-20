@@ -250,7 +250,7 @@ module.exports = function (elric) {
 		                            constructor);
 
 		// Store the new activity class
-		elric.actions[actionName] = action;
+		elric.actions[actionName] = new action(elric);
 		
 		return action;
 	}

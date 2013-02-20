@@ -602,7 +602,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.19
-	 * @version  2013.02.19
+	 * @version  2013.02.20
 	 */
 	elric.editFlow = function editFlow(req, res, flow) {
 		
@@ -656,7 +656,7 @@ module.exports = function (elric) {
 		elric.expose('flow_flow', flow, res);
 		elric.expose('flow_blocks', flow_blocks, res);
 
-		elric.render(req, res, 'flows/edit', {activities: activities, actions: actions});
+		elric.render(req, res, 'flows/edit', {flow_name: flow.name, activities: activities, actions: actions});
 	}
 	
 	/**
@@ -664,7 +664,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.18
-	 * @version  2013.02.18
+	 * @version  2013.02.20
 	 *
 	 * @param    {string}   name       The name of the flow
 	 * @param    {object}   flow
@@ -674,47 +674,24 @@ module.exports = function (elric) {
 	 */
 	elric.saveFlow = function saveFlow (name, flow, blocks, user_id, req) {
 		
-		var block_records = {};
-		
-		if (name) flow.name = name;
-		
-		// Create a new record for every block, so we got an id
-		for (var i in blocks) {
-			var block = blocks[i];
-			
-			if (typeof elric.models.flowBlock.cache[i] == 'undefined') {
-				var nr = new elric.models.flowBlock.model({
-					user_id: user_id,
-					flow_id: flow._id,
-					block_type: block.type,
-					top: block.top,
-					left: block.left,
-					out_on_true: [],
-					out_on_false: []
-				});
-			} else {
-				var nr = elric.models.flowBlock.cache[i];
-			}
-			
-			nr.top = block.top;
-			nr.left = block.left;
-			nr.out_on_true = [];
-			nr.out_on_false = [];
-			
-			block_records[i] = nr;
-		}
+		if (name && name != 'false') flow.name = name;
 		
 		// Now modify all the links with this new id
 		for (var i in blocks) {
+			
 			var block = blocks[i];
-			var record = block_records[i];
+			var record = elric.models.flowBlock.cache[block.id];
+			
+			record.top = block.top;
+			record.left = block.left;
+			record.out_on_true = [];
+			record.out_on_false = [];
 			
 			for (var connection_type in block.to_connections) {
 				var connections = block.to_connections[connection_type];
 				
 				for (var to_id in connections) {
-					var new_id = block_records[to_id]._id;
-					record['out_on_' + connection_type].push(new_id);
+					record['out_on_' + connection_type].push(to_id);
 				}
 			}
 			

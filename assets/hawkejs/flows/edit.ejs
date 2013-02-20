@@ -11,7 +11,7 @@
 
 <div id="flowbuttons">
 	<div class="btn-nongroup">
-		<input id="flowname" name="flowname" type="text" placeholder="Flow name"><br/>
+		<input id="flowname" name="flowname" type="text" placeholder="Flow name" value="<%= flow_name %>"><br/>
 		<div class="btn-group">
 			<button class="btn btn-primary" data-target="addElementType" data-elementType="wall"><i class="icon-plus-sign"></i> Add block</button>
 			<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
@@ -21,6 +21,7 @@
 				<li><a href="#" data-target="addFlowBlock" data-flow-block="entrance">Add flow entrance</a></li>
 				<li><a href="#" data-target="addFlowBlock" data-flow-block="activity">Add activity</a></li>
 				<li><a href="#" data-target="addFlowBlock" data-flow-block="conditional">Add conditional</a></li>
+				<li><a href="#" data-target="addFlowBlock" data-flow-block="action">Add action</a></li>
 				<li><a href="#" data-target="addFlowBlock" data-flow-block="scenario">Add scenario</a></li>
 			</ul>
 		</div>

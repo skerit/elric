@@ -215,11 +215,14 @@ Elric.plumb.add_anchor_type = function add_anchor_type (toId, anchor) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.18
- * @version  2013.02.19
+ * @version  2013.02.20
  *
  * @param    {String}    block_type
  */
 Elric.plumb.add_new_block = function add_new_block (block_type, options) {
+	
+	var block;
+	var reqdata;
 	
 	if (typeof options == 'undefined') options = {};
 	
@@ -229,7 +232,15 @@ Elric.plumb.add_new_block = function add_new_block (block_type, options) {
 	// If there is no id, ask the server to create a block
 	if (typeof options.id == 'undefined') {
 		
-		var reqdata = {
+		// Only create a new entrance block if no other exist!
+		if (block_type == 'entrance') {
+			for (var i in Elric.exposed.flow_blocks) {
+				block = Elric.exposed.flow_blocks[i];
+				if (block.block_type == 'entrance') return;
+			}
+		}
+		
+		reqdata = {
 			flow_id: Elric.plumb.state.flow_id,
 			block_type: block_type
 		};
@@ -237,7 +248,7 @@ Elric.plumb.add_new_block = function add_new_block (block_type, options) {
 		$.post('/flow/block/create', reqdata, function(data) {
 			options.id = data._id;
 			Elric.plumb.create_block(options);
-		});
+		}, 'json');
 		
 		return;
 	}
@@ -250,7 +261,7 @@ Elric.plumb.add_new_block = function add_new_block (block_type, options) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.18
- * @version  2013.02.18
+ * @version  2013.02.20
  *
  * @param    {Object}    options
  */
@@ -267,6 +278,7 @@ Elric.plumb.create_block = function (options) {
 	
 	switch (options.block_type) {
 		
+		case 'action':
 		case 'activity':
 		case 'conditional':
 		case 'scenario':
@@ -317,6 +329,10 @@ Elric.plumb.create_block = function (options) {
 		
 		case 'entrance':
 			anchors = ['true'];
+			break;
+		
+		case 'action':
+			anchors = ['in', 'true'];
 			break;
 		
 		case 'activity':

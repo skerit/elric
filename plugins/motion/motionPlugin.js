@@ -349,7 +349,7 @@ var Motion = function Motion (elriclink) {
 				
 				// Add an identifier if it's a new camera
 				if (newCamera) {
-					camera.identifier = client.username.toLocaleLowerCase() + '_camera_' + camera.thread;
+					camera.identifier = client.name.toLowerCase() + '_camera_' + camera.thread;
 				}
 				
 				// Set the camera host
