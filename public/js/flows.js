@@ -384,7 +384,6 @@ Elric.plumb.makeListing = function makeListing ($object, select_options, conditi
 	
 	var resave = function resave () {
 		conditions = data;
-		console.log(conditions);
 	}
 
 	// Create the listing fields
@@ -393,7 +392,7 @@ Elric.plumb.makeListing = function makeListing ($object, select_options, conditi
 	
 	// Create the new input field
 	var $input = $('<div class="new"></div>');
-	var $button = $(' <button>Add another</button>').click(function (e) {
+	var $button = $('<button>Add another</button>').click(function (e) {
 		e.preventDefault();
 		newinput();
 	});
@@ -419,18 +418,21 @@ Elric.plumb.makeListing = function makeListing ($object, select_options, conditi
 			
 			// Prepare the property select
 			var property_select_construct = {
+				valueField: false,
 				elements: select_options,
 				value: property,
 				return: true,
 				attributes: {'data-condition-id': index, 'data-condition-type': 'property'}
 			};
-			
+
 			// Create a property select object
 			var property_html = hawkejs.helpers.fieldSelect('property-' + index, property_select_construct);
 			var $property_select = $(property_html);
 			
 			// Prepare the operator select
 			var operator_select_construct = {
+				valueField: false,
+				titleField: false,
 				elements: {'equals': 'equals', 'contains': 'contains', 'gt': 'greater than', 'st': 'smaller than'},
 				value: operator,
 				return: true,
@@ -503,17 +505,56 @@ Elric.plumb.edit_block_activity = function ($element) {
 	var $flux = $('.flux', $element);
 	var block = Elric.exposed.flow_block;
 	
+	if (typeof block.conditions == 'undefined') block.conditions = [];
+	if (typeof block.settings == 'undefined') block.settings = {};
+	
 	$select.change(function (e) {
 		
 		$this = $(this);
-		console.log($this);
+		
+		// Get the activity name
 		var activity_name = $this.val();
+		
+		// Store this in the block settings
+		block.settings.activity = activity_name;
+		
+		// Get the activity
 		var activity = Elric.exposed.flow_activities[activity_name];
 		
-		console.log('You selected ' + activity_name);
+		$flux.html('');
 		
+		Elric.plumb.makeListing($flux, activity.blueprint, block.conditions);
 		
 	});
+	
+	// Set the save functionality
+	$('#flow-block-save').click(function(){
+		
+		// Create a clone of the conditions
+		var moved_conditions = block.conditions.splice(0);
+		
+		// Reset the original conditions
+		block.conditions = [];
+		
+		// and now only copy over those that are useful
+		for (var i = 0; i < moved_conditions.length; i++) {
+			var c = moved_conditions[i];
+			
+			if (c.property && c.operator) {
+				block.conditions.push(c);
+			}
+		}
+		
+		$.post('/flow/block/' + block._id + '/save', {block: block}, function() {
+			
+		});
+	});
+	
+	// Set the current selections
+	if (typeof block.settings.activity != 'undefined') {
+		$select.val(block.settings.activity);
+		$select.change();
+	}
 }
 
 // The can be only 1 jsplumb instance active at the same time

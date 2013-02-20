@@ -302,6 +302,38 @@ module.exports = function Routes (elric) {
 	});
 	
 	/**
+	 * Save a flowblock
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.20
+	 * @version  2013.02.20
+	 */
+	elric.app.post('/flow/block/:id/save', function (req, res) {
+		
+		var block_id = req.params.id;
+		var block = req.body.block;
+		
+		var FB = elric.models.flowBlock.model;
+		
+		FB.findOne({_id: block_id}, function (err, block_record){
+			
+			delete block._id;
+			delete block.user_id;
+			delete block.flow_id;
+			delete block.updated;
+			delete block.created;
+			
+			// Inject the block into the existing record
+			elric.inject(block_record, block);
+			
+			// Save the modified block record
+			block_record.save();
+		});
+		
+		res.end('ok');
+	});
+	
+	/**
 	 * Edit a flow block
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>

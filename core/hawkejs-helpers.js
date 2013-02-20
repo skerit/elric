@@ -212,28 +212,42 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 			
 			option = options.elements[i];
 			
+			var cur_option_value;
+			
+			if (options.valueField) {
+				cur_option_value = option[options.valueField]
+			} else {
+				// If valueField is explicitly false, the value is the key
+				cur_option_value = i;
+			}
+			
 			// Reset the selected attribute
 			selected = '';
 			
 			// Check given value?
 			if (options.value !== false) {
-				if (option[options.valueField] == options.value) selected = 'selected';
+				if (cur_option_value == options.value) selected = 'selected';
 			}
 			
 			opttitle = '';
 			
-			if (typeof option[options.titleField] != 'undefined') {
-				opttitle = option[options.titleField];
-			} else if (typeof option['name'] != 'undefined') {
-				opttitle = option['name'];
-			} else if (typeof option['title'] != 'undefined') {
-				opttitle = option['title'];
+			if (options.titleField) {
+				if (typeof option[options.titleField] != 'undefined') {
+					opttitle = option[options.titleField];
+				} else if (typeof option['name'] != 'undefined') {
+					opttitle = option['name'];
+				} else if (typeof option['title'] != 'undefined') {
+					opttitle = option['title'];
+				} else {
+					opttitle = option[options.valueField];
+				}
 			} else {
-				opttitle = option[options.valueField];
+				// If titleField is explicitly false, the title is the value
+				opttitle = option;
 			}
 
 			html += '<option value="'
-				+ option[options.valueField]
+				+ cur_option_value
 				+ '" ' + selected + '>'
 				+ opttitle + '</option>\n';
 		}
