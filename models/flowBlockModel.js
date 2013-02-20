@@ -33,10 +33,13 @@ module.exports = function flowBlock (elric) {
 			required: true,
 			fieldType: 'String'
 		},
+		// The conditions of this block
+		conditions: {
+			type: {}
+		},
 		// The settings of this block
 		settings: {
-			type: {},
-			array: true
+			type: {}
 		},
 		// The top position of this block in the flow
 		top: {

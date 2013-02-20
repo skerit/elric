@@ -1,5 +1,10 @@
 <% expands('blocks/edit') -%>
 
 <% start('flow-edit-modal-body') -%>
-<% fieldSelect('activities', {elements: activities, null: 'Select activity'}) %>
+<% fieldSelect('activities', {elements: activities, null: 'Select activity', valueField: 'name'}) %>
+
+<div class="flux">
+	
+</div>
+
 <% end('flow-edit-modal-body') -%>

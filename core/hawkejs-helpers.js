@@ -176,6 +176,9 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		// Set the name as default name field
 		if (typeof options.titleField == 'undefined') options.titleField = 'title';
 		
+		// There are no extra attributes by default
+		if (typeof options.attributes == 'undefined') options.attributes = {};
+		
 		// See what title to add
 		if (options.title) {
 			if (options.title !== true) {
@@ -186,7 +189,13 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		}
 		
 		// Start creating the select
-		html = '<select name="' + name + '">\n';
+		html = '<select name="' + name + '" '
+		
+		for (var attribute_name in options.attributes) {
+			html += attribute_name + '="' + hawkejs.helpers.encode(options.attributes[attribute_name]) + '" ';
+		}
+		
+		html += '>\n';
 		
 		if (options.null) {
 			
@@ -222,7 +231,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 			} else {
 				opttitle = option[options.valueField];
 			}
-			
+
 			html += '<option value="'
 				+ option[options.valueField]
 				+ '" ' + selected + '>'

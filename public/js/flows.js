@@ -365,7 +365,155 @@ Elric.plumb.save = function save () {
 	$.post(url, flow_data, function(data) {
 		
 	});
+}
+
+/**
+ * Create a listing field
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.20
+ * @version  2013.02.20
+ *
+ * @param    {Object}    $object           The jQuery object to use
+ * @param    {Object}    select_options    The select options
+ * @param    {Object}    conditions        The 
+ */
+Elric.plumb.makeListing = function makeListing ($object, select_options, conditions) {
 	
+	var data = conditions;
+	
+	var resave = function resave () {
+		conditions = data;
+		console.log(conditions);
+	}
+
+	// Create the listing fields
+	var $base = $('<div class="listing"></div>');
+	var $ul = $('<ul><li style="visibility:hidden;"></li></ul>');
+	
+	// Create the new input field
+	var $input = $('<div class="new"></div>');
+	var $button = $(' <button>Add another</button>').click(function (e) {
+		e.preventDefault();
+		newinput();
+	});
+	
+	var newinput = function newinput () {
+		var newvalue = {property: '', operator: '', value: ''};
+		var newid = data.push(newvalue)-1;
+		addLi(newid, newvalue);
+		resave();
+	}
+	
+	// A function for adding listing elements to a ul
+	var addLi = (function ($beforeinput) {
+		return function (index, value_object) {
+			
+			// Create a new list element
+			var $newli = $('<li></li>');
+			
+			// Get the current values of this condition
+			var property = value_object.property;
+			var operator = value_object.operator;
+			var value = value_object.value;
+			
+			// Prepare the property select
+			var property_select_construct = {
+				elements: select_options,
+				value: property,
+				return: true,
+				attributes: {'data-condition-id': index, 'data-condition-type': 'property'}
+			};
+			
+			// Create a property select object
+			var property_html = hawkejs.helpers.fieldSelect('property-' + index, property_select_construct);
+			var $property_select = $(property_html);
+			
+			// Prepare the operator select
+			var operator_select_construct = {
+				elements: {'equals': 'equals', 'contains': 'contains', 'gt': 'greater than', 'st': 'smaller than'},
+				value: operator,
+				return: true,
+				attributes: {'data-condition-id': index, 'data-condition-type': 'operator'}
+			};
+			
+			// Create the operator select object
+			var operator_html = hawkejs.helpers.fieldSelect('operator-' + index, operator_select_construct);
+			var $operator_select = $(operator_html);
+			
+			// And finally: the value to check against
+			var $value_input = $('<input type="text" id="value-' + index + '" data-condition-id="' + index + '" data-condition-type="value" value="' + hawkejs.helpers.encode(value) + '"></input>');
+			
+			$newli.append($property_select).append($operator_select).append($value_input);
+			$beforeinput.before($newli);
+			
+			$('[data-condition-id="' + index + '"]', $newli).change(function () {
+				$this = $(this);
+				var element_id = $this.attr('id');
+				var condition_id = $this.attr('data-condition-id');
+				var type = $this.attr('data-condition-type');
+				var value = $this.val();
+
+				data[condition_id][type] = value;
+				resave();
+			});
+			
+		}
+	})($input);
+	
+	// Add the button to the input
+	$input.append($button);
+	
+	// Add the new input field to the ul
+	$ul.append($input);
+	
+	var emptyli = true;
+	
+	// Add the existing data to the ul
+	for (var index in data) {
+		var value = data[index];
+		addLi(index, value);
+		emptyli = false;
+	}
+	
+	// Create 1 empty input to get the user started
+	if (emptyli) {
+		newinput();
+	}
+	
+	// Add the ul to the base
+	$base.append($ul);
+	
+	$object.after($base);
+}
+
+
+/**
+ * Ready the modal for editing an activity block
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.20
+ * @version  2013.02.20
+ *
+ * @param    {Object}    $element
+ */
+Elric.plumb.edit_block_activity = function ($element) {
+	
+	var $select = $('[name="activities"]', $element);
+	var $flux = $('.flux', $element);
+	var block = Elric.exposed.flow_block;
+	
+	$select.change(function (e) {
+		
+		$this = $(this);
+		console.log($this);
+		var activity_name = $this.val();
+		var activity = Elric.exposed.flow_activities[activity_name];
+		
+		console.log('You selected ' + activity_name);
+		
+		
+	});
 }
 
 // The can be only 1 jsplumb instance active at the same time
@@ -473,7 +621,28 @@ Elric.plumb.makeFlow = function makeFlow (block_name, template_name) {
 	});
 }
 
+// When the flow-main block gets (re)created, initiate the flow
 hawkejs.event.on('create:template[flows/edit]-block[flow-main]', Elric.plumb.makeFlow);
+
+// Ready the edit-block modal
+hawkejs.event.on('create:block[flow-edit-modal-body]', function (block_name, template_name) {
+	
+	var $element = $('#hawkejs-insert-block-flow-edit-modal-body');
+	
+	switch (template_name) {
+		
+		case 'blocks/edit_activity':
+			Elric.plumb.edit_block_activity($element);
+			break;
+		
+		case 'blocks/edit_conditional':
+			break;
+		
+		case 'blocks/edit_scenario':
+			break;
+	}
+	
+});
 
 // The modal has been (re) created
 hawkejs.event.on('create:block[flow-edit-object]', function() {
