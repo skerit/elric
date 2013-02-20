@@ -86,4 +86,4 @@ Elric.viewClient = function viewClient (parameters) {
 }
 
 // Parse the client capabilities on block creation
-hawkejs.event.on('create-block-client-main', Elric.viewClient);
+hawkejs.event.on('create:block[client-main]', Elric.viewClient);

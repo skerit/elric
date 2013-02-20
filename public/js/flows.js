@@ -380,8 +380,8 @@ Elric.plumb.state.element = false;
 Elric.plumb.state.modal = false;
 
 // Create the flow
-Elric.plumb.makeFlow = function makeFlow () {
-
+Elric.plumb.makeFlow = function makeFlow (block_name, template_name) {
+	
 	Elric.plumb.state.source_endpoints = [];
 	Elric.plumb.state.target_endpoints = [];
 	Elric.plumb.state.objects = {};
@@ -473,9 +473,9 @@ Elric.plumb.makeFlow = function makeFlow () {
 	});
 }
 
-hawkejs.event.on('create-block-flow-edit-hack', Elric.plumb.makeFlow);
+hawkejs.event.on('create:template[flows/edit]-block[flow-main]', Elric.plumb.makeFlow);
 
 // The modal has been (re) created
-hawkejs.event.on('create-block-flow-edit-object', function() {
+hawkejs.event.on('create:block[flow-edit-object]', function() {
 	Elric.plumb.state.modal = $('#flow-modal');
 });

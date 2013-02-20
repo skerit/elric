@@ -153,7 +153,7 @@ var $window = $(window);
  * Enable device buttons
  * @todo: This is a proof of concept, this code needs to be reworked
  */
-hawkejs.event.on('create-block-device-hack', function (blockname){
+hawkejs.event.on('create:template[page/devices]-block[container-fluid]', function (blockname){
 	
 	$('.devicecommand').click(function(e) {
 		
@@ -173,7 +173,7 @@ hawkejs.event.on('create-block-device-hack', function (blockname){
 /**
  * Apply the jScrollPane plugin to every sidebar
  */
-hawkejs.event.on('create-block-sidebar', function (blockname){
+hawkejs.event.on('create:block[sidebar]', function (blockname, origin_template_name) {
 	
 	// Recapture the new sidebar
 	$sidebar = $('#sidebar .wrapper');
@@ -186,7 +186,7 @@ hawkejs.event.on('create-block-sidebar', function (blockname){
 /**
  * Apply timeago to new elements in the fluid container
  */
-hawkejs.event.on('create-block-container-fluid', function (blockname){
+hawkejs.event.on('create:block[container-fluid]', function (blockname, origin_template_name){
 	$("#content .container-fluid .timeago").timeago();
 });
 

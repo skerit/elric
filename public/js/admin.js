@@ -74,7 +74,7 @@ $('#hawkejs-space-admin-main').on('click', '.editButton', function(e) {
 	
 });
 
-hawkejs.event.on('create-block-admin-main', function() {
+hawkejs.event.on('create:block[admin-main]', function() {
 	
 	// Add listeners for linked fields
 	$('[data-linked-value-change-type]').each(function(){

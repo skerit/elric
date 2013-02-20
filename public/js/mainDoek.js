@@ -1,7 +1,7 @@
 /**
  * Recreate everything when the doek block is loaded
  */
-hawkejs.event.on('create-block-doek-hack', function (blockname){
+hawkejs.event.on('create:template[doek/index]-block[container-fluid]', function (blockname){
 	Elric.rooms = {}
 	
 	/**
