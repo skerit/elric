@@ -39,6 +39,7 @@ module.exports = function (elric) {
 		this.model = {};
 		this.cache = {};
 		this.index = {};
+		this.many = {};
 		this.special = {json: {}};
 		
 		this._prepost = {
@@ -207,6 +208,11 @@ module.exports = function (elric) {
 				this.index[fieldname] = {cache: {}};
 			}
 			
+			// Also store under other indexes
+			if (e.index == true) {
+				this.many[fieldname] = {cache: {}};
+			}
+			
 			if (e.array) {
 				
 				// If it's an empty object,
@@ -323,6 +329,11 @@ module.exports = function (elric) {
 		// Find all records in this model
 		model.find({}, function (err, items) {
 			
+			// Reset the many indexes
+			for (var index_name in thisModel.many) {
+				thisModel.many[index_name] = {cache: {}};
+			}
+			
 			// Store every item in the temp var
 			for (var index in items) {
 				
@@ -332,9 +343,20 @@ module.exports = function (elric) {
 				// under its _id
 				thisModel.cache[item._id] = item;
 				
-				// Also store it in other index caches
+				// Also store it in unique index caches
 				for (var index_name in thisModel.index) {
 					thisModel.index[index_name].cache[item[index_name]] = item;
+				}
+				
+				// Also store it in other index caches
+				for (var index_name in thisModel.many) {
+					
+					var m = thisModel.many[index_name];
+					
+					if (typeof m.cache[item[index_name]] == 'undefined') {
+						m.cache[item[index_name]] = {};
+					}
+					m.cache[item[index_name]][item._id] = item;
 				}
 				
 			}

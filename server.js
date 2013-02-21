@@ -255,8 +255,11 @@ require('./websocket/handler')(elric);
 require('./websocket/client')(elric);
 require('./websocket/browser')(elric);
 
-// Initiate the Quartermaster
+// Initiate the Quartermaster (device handler)
 elric.quartermaster = new (require('./core/quartermaster'))(elric);
+
+// Initiate the Director (scenario handler)
+elric.director = require('./core/director')(elric);
 
 // Make sure our storage folder exists
 elric.tools.mkdirp(local.storage);

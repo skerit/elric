@@ -25,6 +25,7 @@ module.exports = function scenarioBlock (elric) {
 			type: this.mongoose.Schema.Types.ObjectId,
 			required: true,
 			fieldType: 'Select',
+			index: true,
 			source: {type: 'model', name: 'scenario'}
 		},
 		// The scenario block type
