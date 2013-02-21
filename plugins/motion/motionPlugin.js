@@ -27,10 +27,6 @@ var Motion = function Motion (elriclink) {
 	var storage = {};
 	this.storage = storage;
 	
-	// Store active activities in here
-	var activities = {};
-	this.activities = {};
-	
 	// Load all the cameras when the clients have been prepared
 	elric.events.all.on('clientsprepared', function() {
 		thisMotion.registerAllCameras();
@@ -112,14 +108,10 @@ var Motion = function Motion (elriclink) {
 			packet.eventid = record._id;
 			
 			// Also create the Activity we can use for scripting scenarios
-			var origin = {room: roomId, element: roomElementId};
-			var a = elric.fireActivity('motion', {payload: packet, origin: origin});
-			
-			// Store the ongoing activity in here
-			if (a) activities[cs.eventid] = a;
+			var origin = {room_id: roomId, element_id: roomElementId};
+			var a = elric.fireActivity('motion', packet, origin);
 			
 			console.log('Motion event detected on ' + req.params.cameraid);
-			
 		});
 		
 	});

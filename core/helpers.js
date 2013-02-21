@@ -710,7 +710,7 @@ module.exports = function (elric) {
 	 *
 	 * @param   {string}   activity_name   The activity name
 	 */
-	elric.fireActivity = function fireActivity (activity_name, options) {
+	elric.fireActivity = function fireActivity (activity_name, options, origin) {
 		
 		// Do nothing if the activity doesn't exist
 		if (typeof elric.activities[activity_name] == 'undefined') return false;

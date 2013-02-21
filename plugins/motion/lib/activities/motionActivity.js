@@ -6,9 +6,6 @@ module.exports = function motionActivity (elric) {
 	
 	this.categories = ['Movement', 'Motion'];
 	
-	// This event has a beginning & end, so it's not instantaneous
-	this.ongoing = true;
-	
 	this.blueprint = {
 		cameraid: {
 			fieldType: 'String',
@@ -48,11 +45,7 @@ module.exports = function motionActivity (elric) {
 	};
 	
 	this.instanceConstructor = function (elric, options) {
-		
-		var payload = options.payload;	
-		if (typeof payload.origin == 'undefined') payload.origin = {};
-		
-		this.payload = payload;
+		this.payload = options;
 	}
 	
 }
