@@ -194,31 +194,23 @@ module.exports = function Routes (elric) {
 		var command = req.body.command;
 		var command_type = req.body.command_type;
 		
-		elric.log.debug('Sending command "' + command + '" to device "' + deviceid + '" through the director');
+		elric.log.debug('Sending command "' + command + '" to device "' + deviceid + '" through the quartermaster');
 		
 		// Send the command to the director, which will propagate it
-		elric.director.sendCommand(deviceid, {command_type: command_type, command: command});
+		elric.quartermaster.sendCommand(deviceid, {command_type: command_type, command: command});
 	});
 	
 	/**
-	 * Flow & Scenario routes
+	 * Scenario routes
 	 */
-	elric.addRoute('/flows', [{menu: 'sidebar', icon: 'random'}], 'Flows & Scenarios', function (req, res) {
+	elric.addRoute('/scenarios', [{menu: 'sidebar', icon: 'random'}], 'Scenarios', function (req, res) {
 	
 		var scenario = elric.models.scenario;
-		var flow = elric.models.flow;
 		var par = {};
 		
-		// Prepare function to find all rooms
+		// Prepare function to find all roomElements
 		par.scenarios = function(callback) {
 			scenario.model.find({}, function(err, items) {
-				callback(null, items);
-			});
-		}
-		
-		// Prepare function to find all roomElements
-		par.flows = function(callback) {
-			flow.model.find({}, function(err, items) {
 				callback(null, items);
 			});
 		};
@@ -230,70 +222,70 @@ module.exports = function Routes (elric) {
 				
 				results.elementTypes = elric.memobjects.elementTypes;
 				
-				elric.expose('flow-results', results, res);
+				elric.expose('scenario-results', results, res);
 				
-				elric.render(req, res, 'flows/index', results);
+				elric.render(req, res, 'scenarios/index', results);
 			}
 		);
 	});
 	
 	/**
-	 * Add a new flow and edit it
+	 * Add a new scenario and edit it
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.11
-	 * @version  2013.02.19
+	 * @version  2013.02.21
 	 */
-	elric.app.get('/flow/add', function (req, res) {
+	elric.app.get('/scenario/add', function (req, res) {
 		
-		// Create a new flow
-		var flow = new elric.models.flow.model({name: 'unnamed', user_id: req.session.user._id});
+		// Create a new scenario
+		var scenario = new elric.models.scenario.model({name: 'unnamed', user_id: req.session.user._id});
 		
-		// Already send this flow to the client for editing
-		elric.editFlow(req, res, flow);
+		// Already send this scenario to the client for editing
+		elric.editScenario(req, res, scenario);
 		
 		// And save it
-		flow.save();
+		scenario.save();
 	});
 	
 	/**
-	 * Edit an existing flow
+	 * Edit an existing scenario
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.18
-	 * @version  2013.02.19
+	 * @version  2013.02.21
 	 */
-	elric.app.get('/flow/edit/:flowid', function (req, res) {
+	elric.app.get('/scenario/edit/:scenarioid', function (req, res) {
 		
-		var flow = {};
-		var flowid = req.params.flowid;
+		var scenario = {};
+		var scenarioid = req.params.scenarioid;
 		
-		if (typeof elric.models.flow.cache[flowid] == 'undefined') {
-			res.end('No flow found');
+		if (typeof elric.models.scenario.cache[scenarioid] == 'undefined') {
+			res.end('No scenario found');
 			return;
 		}
 		
-		flow = elric.models.flow.cache[flowid];
+		scenario = elric.models.scenario.cache[scenarioid];
 		
-		elric.editFlow(req, res, flow);
+		elric.editScenario(req, res, scenario);
 	});
 	
 	/**
-	 * Create a new flowblock to use in a flow
+	 * Create a new scenarioblock to use in a scenario
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.19
-	 * @version  2013.02.19
+	 * @version  2013.02.21
 	 */
-	elric.app.post('/flow/block/create', function (req, res) {
+	elric.app.post('/scenario/block/create', function (req, res) {
 		
 		var new_construct = {
 			user_id: req.session.user._id,
-			flow_id: req.body.flow_id,
+			scenario_id: req.body.scenario_id,
 			block_type: req.body.block_type
 		};
 		
-		var block = new elric.models.flowBlock.model(new_construct);
+		var block = new elric.models.scenarioBlock.model(new_construct);
 		
 		// Send the block to the client
 		res.end(JSON.stringify(block));
@@ -302,24 +294,24 @@ module.exports = function Routes (elric) {
 	});
 	
 	/**
-	 * Save a flowblock
+	 * Save a scenarioblock
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.20
-	 * @version  2013.02.20
+	 * @version  2013.02.21
 	 */
-	elric.app.post('/flow/block/:id/save', function (req, res) {
+	elric.app.post('/scenario/block/:id/save', function (req, res) {
 		
 		var block_id = req.params.id;
 		var block = req.body.block;
 		
-		var FB = elric.models.flowBlock.model;
+		var FB = elric.models.scenarioBlock.model;
 		
 		FB.findOne({_id: block_id}, function (err, block_record){
 			
 			delete block._id;
 			delete block.user_id;
-			delete block.flow_id;
+			delete block.scenario_id;
 			delete block.updated;
 			delete block.created;
 			
@@ -334,16 +326,16 @@ module.exports = function Routes (elric) {
 	});
 	
 	/**
-	 * Edit a flow block
+	 * Edit a scenario block
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.19
-	 * @version  2013.02.19
+	 * @version  2013.02.21
 	 */
-	elric.app.get('/flow/block/edit/:id', function (req, res) {
+	elric.app.get('/scenario/block/edit/:id', function (req, res) {
 		
 		var block_id = req.params.id;
-		var block = elric.models.flowBlock.cache[block_id];
+		var block = elric.models.scenarioBlock.cache[block_id];
 		
 		var payload = {
 			block: block,
@@ -351,19 +343,19 @@ module.exports = function Routes (elric) {
 			actions: elric.actions
 		};
 		
-		elric.expose('flow_block', block, res);
+		elric.expose('scenario_block', block, res);
 		
 		elric.render(req, res, 'blocks/edit_' + block.block_type, payload);
 	});
 	
 	/**
-	 * Save an existing flow
+	 * Save an existing scenario
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.18
-	 * @version  2013.02.18
+	 * @version  2013.02.21
 	 */
-	elric.app.post('/flow/save/:id', function (req, res) {
+	elric.app.post('/scenario/save/:id', function (req, res) {
 		
 		res.end('{"message": "ok", "error": false}');
 		
@@ -371,9 +363,9 @@ module.exports = function Routes (elric) {
 		var user_id = req.session.user._id;
 		var blocks = req.body.blocks;
 		
-		var flow = elric.models.flow.cache[req.params.id];
+		var scenario = elric.models.scenario.cache[req.params.id];
 		
-		elric.saveFlow(name, flow, blocks, user_id, req);
+		elric.saveScenario(name, scenario, blocks, user_id, req);
 		
 	});
 	

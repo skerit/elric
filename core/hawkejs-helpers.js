@@ -342,7 +342,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		
 		if (options.ghost) {
 			if (options.ghost === true) {
-				ghost = name;
+				ghost = title;
 			} else {
 				ghost = options.ghost;
 			}

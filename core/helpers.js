@@ -602,23 +602,23 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.19
-	 * @version  2013.02.20
+	 * @version  2013.02.21
 	 */
-	elric.editFlow = function editFlow(req, res, flow) {
+	elric.editScenario = function editScenario (req, res, scenario) {
 		
-		var flowid = flow._id;
+		var scenarioid = scenario._id;
 
 		var activities = {};
 		var actions = {};
-		var flow_blocks = {};
+		var scenario_blocks = {};
 		
-		// Get all the flow blocks
-		for (var i in elric.models.flowBlock.cache) {
+		// Get all the scenario blocks
+		for (var i in elric.models.scenarioBlock.cache) {
 			
-			var fb = elric.models.flowBlock.cache[i];
+			var fb = elric.models.scenarioBlock.cache[i];
 
-			if (fb.flow_id.toString() == flowid) {
-				flow_blocks[fb._id] = fb;
+			if (fb.scenario_id.toString() == scenarioid) {
+				scenario_blocks[fb._id] = fb;
 			}
 		}
 
@@ -642,45 +642,51 @@ module.exports = function (elric) {
 		// Normalize the actions
 		for (var action_name in elric.actions) {
 			var a = elric.memobjects.actions[action_name];
-			
+
 			actions[action_name] = {
 				name: a.name,
 				title: a.title,
 				description: a.description,
-				activity_trigger: a.activity_trigger
+				blueprint: a.blueprint
 			};
 		}
+		
+		elric.expose('scenario_activities', activities, res);
+		elric.expose('scenario_actions', actions, res);
+		elric.expose('scenario_scenario', scenario, res);
+		elric.expose('scenario_blocks', scenario_blocks, res);
 
-		elric.expose('flow_activities', activities, res);
-		elric.expose('flow_actions', actions, res);
-		elric.expose('flow_flow', flow, res);
-		elric.expose('flow_blocks', flow_blocks, res);
-
-		elric.render(req, res, 'flows/edit', {flow_name: flow.name, activities: activities, actions: actions});
+		elric.render(req, res, 'scenarios/edit', {scenario_name: scenario.name, activities: activities, actions: actions});
 	}
 	
 	/**
-	 * Save a (new) flow block
+	 * Save a (new) scenario block
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.18
-	 * @version  2013.02.20
+	 * @version  2013.02.21
 	 *
-	 * @param    {string}   name       The name of the flow
-	 * @param    {object}   flow
+	 * @param    {string}   name       The name of the scenario
+	 * @param    {object}   scenario
 	 * @param    {object}   blocks
 	 * @param    {string}   user_id
 	 * @param    {object}   req
 	 */
-	elric.saveFlow = function saveFlow (name, flow, blocks, user_id, req) {
+	elric.saveScenario = function saveScenario (name, scenario, blocks, user_id, req) {
 		
-		if (name && name != 'false') flow.name = name;
+		if (name && name != 'false') scenario.name = name;
+		
+		scenario.triggers = [];
 		
 		// Now modify all the links with this new id
 		for (var i in blocks) {
 			
 			var block = blocks[i];
-			var record = elric.models.flowBlock.cache[block.id];
+			var record = elric.models.scenarioBlock.cache[block.id];
+			
+			if (record.settings && typeof record.settings.activity != 'undefined') {
+				scenario.triggers.push({type: 'activity', value: record.settings.activity});
+			}
 			
 			record.top = block.top;
 			record.left = block.left;
@@ -698,7 +704,7 @@ module.exports = function (elric) {
 			record.save();
 		}
 		
-		flow.save();
+		scenario.save();
 	}
 	
 	/**

@@ -211,11 +211,11 @@ Elric.plumb.add_anchor_type = function add_anchor_type (toId, anchor) {
 }
 
 /**
- * Add a new block to the flow
+ * Add a new block to the scenario
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.18
- * @version  2013.02.20
+ * @version  2013.02.21
  *
  * @param    {String}    block_type
  */
@@ -234,18 +234,18 @@ Elric.plumb.add_new_block = function add_new_block (block_type, options) {
 		
 		// Only create a new entrance block if no other exist!
 		if (block_type == 'entrance') {
-			for (var i in Elric.exposed.flow_blocks) {
-				block = Elric.exposed.flow_blocks[i];
+			for (var i in Elric.exposed.scenario_blocks) {
+				block = Elric.exposed.scenario_blocks[i];
 				if (block.block_type == 'entrance') return;
 			}
 		}
 		
 		reqdata = {
-			flow_id: Elric.plumb.state.flow_id,
+			scenario_id: Elric.plumb.state.scenario_id,
 			block_type: block_type
 		};
 		
-		$.post('/flow/block/create', reqdata, function(data) {
+		$.post('/scenario/block/create', reqdata, function(data) {
 			options.id = data._id;
 			Elric.plumb.create_block(options);
 		}, 'json');
@@ -300,13 +300,13 @@ Elric.plumb.create_block = function (options) {
 		};
 	}
 	
-	var html = '<div id="' + options.id + '" class="flowblock ' + options.class + '" ';
+	var html = '<div id="' + options.id + '" class="scenarioblock ' + options.class + '" ';
 	html += 'data-block-type="' + options.block_type + '" ';
 	html += 'style="top:' + options.top + 'px;left:' + options.left + 'px" >'
 	html += '<strong>' + options.block_type + '</strong><br/>' + edit_button + '<br/>';
 	html += '</div>';
 	
-	// Add the block to the flow
+	// Add the block to the scenario
 	Elric.plumb.state.element.append(html);
 	
 	var $element = $('#' + options.id);
@@ -314,7 +314,7 @@ Elric.plumb.create_block = function (options) {
 	$('[data-block-edit="button"]', $element).click(function() {
 		var $this = $(this);
 		
-		goToAjaxView('/flow/block/edit/' + options.id, function() {
+		goToAjaxView('/scenario/block/edit/' + options.id, function() {
 			Elric.plumb.state.modal.modal();
 		});
 		
@@ -345,22 +345,22 @@ Elric.plumb.create_block = function (options) {
 			break;
 	}
 	
-	// Create flow anchors
+	// Create scenario anchors
 	Elric.plumb.add_anchor_types(options.id, anchors);
 }
 
 /**
- * Save the current flow to the database
+ * Save the current scenario to the database
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.18
- * @version  2013.02.18
+ * @version  2013.02.21
  *
  * @param    {Object}    options
  */
 Elric.plumb.save = function save () {
 	
-	var url = '/flow/save/' + Elric.plumb.state.flow_id;
+	var url = '/scenario/save/' + Elric.plumb.state.scenario_id;
 
 	var blocks = Elric.plumb.state.objects;
 	
@@ -373,12 +373,12 @@ Elric.plumb.save = function save () {
 		block.left = parseInt($block.css('left'));
 	}
 	
-	var flow_data = {
-		name: Elric.plumb.state.flow_name,
+	var scenario_data = {
+		name: Elric.plumb.state.scenario_name,
 		blocks: blocks
 	};
 	
-	$.post(url, flow_data, function(data) {
+	$.post(url, scenario_data, function(data) {
 		
 	});
 }
@@ -505,6 +505,86 @@ Elric.plumb.makeListing = function makeListing ($object, select_options, conditi
 	$object.after($base);
 }
 
+/**
+ * Ready the modal for editing an action block
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.21
+ * @version  2013.02.21
+ *
+ * @param    {Object}    $element
+ */
+Elric.plumb.edit_block_action = function ($element) {
+	
+	var $select = $('[name="actions"]', $element);
+	var $flux = $('.flux', $element);
+	var block = Elric.exposed.scenario_block;
+	
+	if (typeof block.settings == 'undefined') block.settings = {};
+	if (typeof block.settings.payload == 'undefined') block.settings.payload = {};
+	
+	$select.change(function (e) {
+		
+		$this = $(this);
+		
+		// Get the action name
+		var action_name = $this.val();
+		
+		// Store this in the block settings
+		block.settings.action = action_name;
+		
+		// Get the activity
+		var action = Elric.exposed.scenario_actions[action_name];
+		
+		var html = '';
+		
+		for (var field_name in action.blueprint) {
+			
+			var b = action.blueprint[field_name];
+			
+			var input_constructor = {
+				title: b.title,
+				return: true,
+				value: block.settings[field_name]
+			};
+			
+			html += hawkejs.helpers.fieldInput(field_name, input_constructor);
+			
+		}
+		
+		$flux.html(html);
+		
+	});
+	
+	// Set the save functionality
+	$('#scenario-block-save').click(function(){
+		
+		// Get all the inputs
+		var $inputs = $('input', $flux);
+		
+		// and now only copy over those that are useful
+		for (var i = 0; i < $inputs.length; i++) {
+			var $input = $($inputs[i]);
+			
+			var name = $input.attr('name');
+			var value = $input.val();
+			
+			block.settings[name] = value;
+			
+		}
+		
+		$.post('/scenario/block/' + block._id + '/save', {block: block}, function() {
+			
+		});
+	});
+	
+	// Set the current selections
+	if (typeof block.settings.action != 'undefined') {
+		$select.val(block.settings.action);
+		$select.change();
+	}
+	
+}
 
 /**
  * Ready the modal for editing an activity block
@@ -519,7 +599,7 @@ Elric.plumb.edit_block_activity = function ($element) {
 	
 	var $select = $('[name="activities"]', $element);
 	var $flux = $('.flux', $element);
-	var block = Elric.exposed.flow_block;
+	var block = Elric.exposed.scenario_block;
 	
 	if (typeof block.conditions == 'undefined') block.conditions = [];
 	if (typeof block.settings == 'undefined') block.settings = {};
@@ -535,7 +615,7 @@ Elric.plumb.edit_block_activity = function ($element) {
 		block.settings.activity = activity_name;
 		
 		// Get the activity
-		var activity = Elric.exposed.flow_activities[activity_name];
+		var activity = Elric.exposed.scenario_activities[activity_name];
 		
 		$flux.html('');
 		
@@ -544,7 +624,7 @@ Elric.plumb.edit_block_activity = function ($element) {
 	});
 	
 	// Set the save functionality
-	$('#flow-block-save').click(function(){
+	$('#scenario-block-save').click(function(){
 		
 		// Create a clone of the conditions
 		var moved_conditions = block.conditions.splice(0);
@@ -561,7 +641,7 @@ Elric.plumb.edit_block_activity = function ($element) {
 			}
 		}
 		
-		$.post('/flow/block/' + block._id + '/save', {block: block}, function() {
+		$.post('/scenario/block/' + block._id + '/save', {block: block}, function() {
 			
 		});
 	});
@@ -575,22 +655,22 @@ Elric.plumb.edit_block_activity = function ($element) {
 
 // The can be only 1 jsplumb instance active at the same time
 Elric.plumb.state = {};
-Elric.plumb.state.flow = false;
-Elric.plumb.state.flow_name = false;
-Elric.plumb.state.flow_id = false;
+Elric.plumb.state.scenario = false;
+Elric.plumb.state.scenario_name = false;
+Elric.plumb.state.scenario_id = false;
 Elric.plumb.state.source_endpoints = [];
 Elric.plumb.state.target_endpoints = [];
 Elric.plumb.state.objects = {};
 Elric.plumb.state.element = false;
 Elric.plumb.state.modal = false;
 
-// Create the flow
-Elric.plumb.makeFlow = function makeFlow (block_name, template_name) {
+// Create the scenario
+Elric.plumb.makeScenario = function makeScenario (block_name, template_name) {
 	
 	Elric.plumb.state.source_endpoints = [];
 	Elric.plumb.state.target_endpoints = [];
 	Elric.plumb.state.objects = {};
-	Elric.plumb.state.element = $('#flowview');
+	Elric.plumb.state.element = $('#scenarioview');
 	
 	// Listen for new connections
 	jsPlumb.bind("jsPlumbConnection", function(connInfo, originalEvent) {
@@ -602,17 +682,17 @@ Elric.plumb.makeFlow = function makeFlow (block_name, template_name) {
 		Elric.plumb.delete_connection(connInfo);
 	});
 	
-	// If we're editing a flow ...
-	if (Elric.exposed.flow_flow) {
+	// If we're editing a scenario ...
+	if (Elric.exposed.scenario_scenario) {
 		
-		var flow = Elric.exposed.flow_flow;
-		var blocks = Elric.exposed.flow_blocks;
+		var scenario = Elric.exposed.scenario_scenario;
+		var blocks = Elric.exposed.scenario_blocks;
 		
-		Elric.plumb.state.flow = flow;
-		Elric.plumb.state.flow_id = flow._id;
+		Elric.plumb.state.scenario = scenario;
+		Elric.plumb.state.scenario_id = scenario._id;
 		
-		// If this flow doesn't have blocks yet, add an entrance block
-		if ($.isEmptyObject(Elric.exposed.flow_blocks)) {
+		// If this scenario doesn't have blocks yet, add an entrance block
+		if ($.isEmptyObject(Elric.exposed.scenario_blocks)) {
 			Elric.plumb.add_new_block('entrance', {left: 300});
 		} else { // It does have blocks, so show them
 		
@@ -655,41 +735,45 @@ Elric.plumb.makeFlow = function makeFlow (block_name, template_name) {
 	}
 	
 	// Add listeners for adding new blocks
-	$('[data-target="addFlowBlock"]').click(function(e) {
+	$('[data-target="addScenarioBlock"]').click(function(e) {
 		
 		e.preventDefault();
 		
 		var $this = $(this);
-		var block_type = $this.attr('data-flow-block');
+		var block_type = $this.attr('data-scenario-block');
 		
 		Elric.plumb.add_new_block(block_type);
 		
 	});
 	
-	// Store the name of the flow
-	$('#flowname').change(function(){
-		Elric.plumb.state.flow_name = $(this).val();
+	// Store the name of the scenario
+	$('#scenarioname').change(function(){
+		Elric.plumb.state.scenario_name = $(this).val();
 	});
 	
 	// Listen to the save button
-	$('#saveflow').click(function(e) {
+	$('#savescenario').click(function(e) {
 		Elric.plumb.save();
 		e.preventDefault();
 	});
 }
 
-// When the flow-main block gets (re)created, initiate the flow
-hawkejs.event.on('create:template[flows/edit]-block[flow-main]', Elric.plumb.makeFlow);
+// When the scenario-main block gets (re)created, initiate the scenario
+hawkejs.event.on('create:template[scenarios/edit]-block[scenario-main]', Elric.plumb.makeScenario);
 
 // Ready the edit-block modal
-hawkejs.event.on('create:block[flow-edit-modal-body]', function (block_name, template_name) {
+hawkejs.event.on('create:block[scenario-edit-modal-body]', function (block_name, template_name) {
 	
-	var $element = $('#hawkejs-insert-block-flow-edit-modal-body');
+	var $element = $('#hawkejs-insert-block-scenario-edit-modal-body');
 	
 	switch (template_name) {
 		
 		case 'blocks/edit_activity':
 			Elric.plumb.edit_block_activity($element);
+			break;
+		
+		case 'blocks/edit_action':
+			Elric.plumb.edit_block_action($element);
 			break;
 		
 		case 'blocks/edit_conditional':
@@ -702,6 +786,6 @@ hawkejs.event.on('create:block[flow-edit-modal-body]', function (block_name, tem
 });
 
 // The modal has been (re) created
-hawkejs.event.on('create:block[flow-edit-object]', function() {
-	Elric.plumb.state.modal = $('#flow-modal');
+hawkejs.event.on('create:block[scenario-edit-object]', function() {
+	Elric.plumb.state.modal = $('#scenario-modal');
 });

@@ -1,12 +1,12 @@
 /**
- * The flow block model:
- * These are the blocks a flow is made of
+ * The scenario block model:
+ * These are the blocks a scenario is made of
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.02.18
- * @version  2013.02.18
+ * @version  2013.02.21
  */
-module.exports = function flowBlock (elric) {
+module.exports = function scenarioBlock (elric) {
 	
 	// Enable caching this model
 	this.enableCache = true;
@@ -14,20 +14,20 @@ module.exports = function flowBlock (elric) {
 	this.icon = 'th-large';
 	
 	this.blueprint = {
-		// The user who created this flow block
+		// The user who created this scenario block
 		user_id: {
 			type: this.mongoose.Schema.Types.ObjectId,
 			required: true,
 			fieldType: 'Select',
 			source: {type: 'model', name: 'user'}
 		},
-		flow_id: {
+		scenario_id: {
 			type: this.mongoose.Schema.Types.ObjectId,
 			required: true,
 			fieldType: 'Select',
-			source: {type: 'model', name: 'flow'}
+			source: {type: 'model', name: 'scenario'}
 		},
-		// The flow block type
+		// The scenario block type
 		block_type: {
 			type: String,
 			required: true,
@@ -41,11 +41,11 @@ module.exports = function flowBlock (elric) {
 		settings: {
 			type: {}
 		},
-		// The top position of this block in the flow
+		// The top position of this block in the scenario
 		top: {
 			type: Number
 		},
-		// The left position of this block in the flow
+		// The left position of this block in the scenario
 		left: {
 			type: Number
 		},
@@ -62,8 +62,8 @@ module.exports = function flowBlock (elric) {
 	};
 	
 	this.admin = {
-		title: 'Flow Blocks',
-		fields: ['user_id', 'flow_id', 'block_type', 'settings', 'out_on_true', 'out_on_false']
+		title: 'Scenario Blocks',
+		fields: ['user_id', 'scenario_id', 'block_type', 'settings', 'out_on_true', 'out_on_false']
 	};
 	
 }

@@ -1,18 +1,18 @@
 /**
  * The scenario model:
- * These are actions that need to happen
+ * These are a set of conditions that link to scenarios
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    2013.01.31
- * @version  2013.01.31
+ * @version  2013.02.21
  */
 module.exports = function scenario (elric) {
-	
-	this.icon = 'cogs';
 	
 	// Enable caching this model
 	this.enableCache = true;
 
+	this.icon = 'random';
+	
 	this.blueprint = {
 		// The user who created this scenario
 		user_id: {
@@ -27,16 +27,17 @@ module.exports = function scenario (elric) {
 			required: true,
 			fieldType: 'String'
 		},
-		// What actually needs to happen
-		actions: {
+		// What triggers this scenario
+		// This is evaluated from the scenario blocks
+		triggers: {
 			type: {},
 			array: true
-		}
+		},
 	};
 	
 	this.admin = {
 		title: 'Scenarios',
-		fields: ['user_id', 'name', 'actions']
+		fields: ['user_id', 'name', 'triggers']
 	};
 	
 }

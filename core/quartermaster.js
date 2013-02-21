@@ -1,6 +1,6 @@
 var elric = {};
 
-var Director = function Director (elricMaster) {
+var Quartermaster = function Quartermaster (elricMaster) {
 	elric = elricMaster;
 	this.elric = elricMaster;
 	
@@ -9,7 +9,7 @@ var Director = function Director (elricMaster) {
 	this.D = elric.models.device;
 }
 
-var bp = Director.prototype;
+var bp = Quartermaster.prototype;
 
 /**
  * Get a device object
@@ -122,7 +122,7 @@ bp.getDeviceType = function getDeviceType (device) {
  */
 bp.sendCommand = function sendCommand (device, options, callback) {
 	
-	var thisDirector = this;
+	var thisQuartermaster = this;
 	
 	device = this.getDevice(device);
 	
@@ -202,7 +202,7 @@ bp.sendCommand = function sendCommand (device, options, callback) {
 					d_cmd.handler(device, current_state, function (protocol_commands, new_state) {
 						
 						// @todo: We're not sure the command was actually sent ...
-						thisDirector.setDeviceState(device, new_state);
+						thisQuartermaster.setDeviceState(device, new_state);
 						
 						new_options.command_type = 'protocol';
 						
@@ -240,7 +240,7 @@ bp.sendCommand = function sendCommand (device, options, callback) {
  */
 bp.setDeviceState = function setDeviceState (device, new_state_value) {
 	
-	var thisDirector = this;
+	var thisQuartermaster = this;
 	
 	if (new_state_value === false) return;
 	
@@ -250,9 +250,9 @@ bp.setDeviceState = function setDeviceState (device, new_state_value) {
 		
 		// Because findOneAndUpdate is yet another save-method mongoose does not
 		// fire 'save' events for, we'll have to do it ourselves
-		thisDirector.elric.models.deviceState.index.device_id.cache[device._id] = item;
+		thisQuartermaster.elric.models.deviceState.index.device_id.cache[device._id] = item;
 		
 	})
 }
 
-module.exports = Director;
+module.exports = Quartermaster;
