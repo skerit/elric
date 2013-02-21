@@ -1,4 +1,4 @@
-module.exports = function (elric) {
+module.exports = function motionActivity (elric) {
 
 	this.name = 'motion';
 	this.title = 'Motion';
@@ -47,12 +47,12 @@ module.exports = function (elric) {
 		}
 	};
 	
-	this.create = function create (options) {
+	this.instanceConstructor = function (elric, options) {
 		
 		var payload = options.payload;	
 		if (typeof payload.origin == 'undefined') payload.origin = {};
-
-		return payload;
+		
+		this.payload = payload;
 	}
 	
 }

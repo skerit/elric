@@ -706,7 +706,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.14
-	 * @version  2013.02.18
+	 * @version  2013.02.21
 	 *
 	 * @param   {string}   activity_name   The activity name
 	 */
@@ -719,7 +719,7 @@ module.exports = function (elric) {
 		
 		var new_activity = activity.create(options);
 		
-		activity.fire(new_activity);
+		new_activity.fire();
 		
 		return new_activity;
 	}
