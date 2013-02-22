@@ -762,7 +762,7 @@ Elric.plumb.makeScenario = function makeScenario (block_name, template_name) {
 hawkejs.event.on('create:template[scenarios/edit]-block[scenario-main]', Elric.plumb.makeScenario);
 
 // Ready the edit-block modal
-hawkejs.event.on('create:block[scenario-edit-modal-body]', function (block_name, template_name) {
+hawkejs.event.on('create:block[scenario-edit-modal-body]', function (block_name, template_name, old_template_name, render_variables) {
 	
 	var $element = $('#hawkejs-insert-block-scenario-edit-modal-body');
 	
@@ -786,6 +786,6 @@ hawkejs.event.on('create:block[scenario-edit-modal-body]', function (block_name,
 });
 
 // The modal has been (re) created
-hawkejs.event.on('create:block[scenario-edit-object]', function() {
+hawkejs.event.on('create:block[scenario-edit-object]', function(blockname, templatename, render_variables) {
 	Elric.plumb.state.modal = $('#scenario-modal');
 });
