@@ -431,7 +431,7 @@ Elric.plumb.makeListing = function makeListing ($object, select_options, conditi
 			var property = value_object.property;
 			var operator = value_object.operator;
 			var value = value_object.value;
-			
+
 			// Prepare the property select
 			var property_select_construct = {
 				valueField: false,
@@ -459,22 +459,47 @@ Elric.plumb.makeListing = function makeListing ($object, select_options, conditi
 			var operator_html = hawkejs.helpers.fieldSelect('operator-' + index, operator_select_construct);
 			var $operator_select = $(operator_html);
 			
-			// And finally: the value to check against
-			var $value_input = $('<input type="text" id="value-' + index + '" data-condition-id="' + index + '" data-condition-type="value" value="' + hawkejs.helpers.encode(value) + '"></input>');
+			var $value_input_placeholder = $('<div class="value-placeholder"></div>');
 			
-			$newli.append($property_select).append($operator_select).append($value_input);
+			$property_select.change(function() {
+				
+				// For some reason, $property_select.val() or $(this).val() don't work
+				// we have to reget the property like this.
+				// Which is wasteful, but there's no better way.
+				var $this = $('[name="' + 'property-' + index + '"]', $newli);
+				
+				var property_type = $this.val();
+				var field_blueprint = select_options[property_type];
+				
+				var options = {
+					blueprint: field_blueprint,
+					value: value,
+					return: true,
+					'data-condition-type': 'value',
+					'data-condition-id': index
+				};
+				
+				var value_input_html = hawkejs.helpers.blueprintField(property_type, options);
+				$value_input_placeholder.html(value_input_html);
+				
+				var $value_input = $('input', $value_input_placeholder);
+				
+				Elric.createSelect($value_input);
+				
+				$value_input.change(function(e){
+					$this = $(this);
+					var new_value = $this.val();
+					data[index]['value'] = new_value;
+					resave();
+				});
+				
+			});
+			
+			$newli.append($property_select).append($operator_select).append($value_input_placeholder);
 			$beforeinput.before($newli);
 			
-			$('[data-condition-id="' + index + '"]', $newli).change(function () {
-				$this = $(this);
-				var element_id = $this.attr('id');
-				var condition_id = $this.attr('data-condition-id');
-				var type = $this.attr('data-condition-type');
-				var value = $this.val();
-
-				data[condition_id][type] = value;
-				resave();
-			});
+			// Trigger a first property change
+			$property_select.change();
 			
 		}
 	})($input);
@@ -540,6 +565,9 @@ Elric.plumb.edit_block_action = function ($element) {
 		
 		for (var field_name in action.blueprint) {
 			
+			console.log(action.blueprint);
+			
+			/*
 			var b = action.blueprint[field_name];
 			
 			var input_constructor = {
@@ -549,6 +577,7 @@ Elric.plumb.edit_block_action = function ($element) {
 			};
 			
 			html += hawkejs.helpers.fieldInput(field_name, input_constructor);
+			*/
 			
 		}
 		

@@ -10,7 +10,8 @@ module.exports = function motionActivity (elric) {
 		cameraid: {
 			fieldType: 'String',
 			title: 'Camera ID',
-			description: 'The camera identifier, as it is known in the database'
+			description: 'The camera identifier, as it is known in the database',
+			source: {type: 'model', name: 'motionCamera'}
 		},
 		pixels: {
 			fieldType: 'Number',

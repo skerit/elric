@@ -5,7 +5,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 	var helpers = hawkejs.helpers;
 	
 	/**
-	 * Generate an admin field
+	 * Generate an admin field (old style)
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.06
@@ -129,11 +129,116 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 	}
 	
 	/**
+	 * Create a field based on blueprint settings
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.23
+	 * @version  2013.02.23
+	 *
+	 * @param    {Object}    blueprint   The field blueprint
+	 *
+	 * @returns  {String}    The html
+	 */
+	helpers.blueprintField = function blueprintField (name, options) {
+		
+		if (typeof options.blueprint == 'undefined') return '';
+		if (typeof options.return == 'undefined') options.return = false;
+		
+		var html = '';
+		var blueprint = options.blueprint;
+		var construct = {};
+		
+		construct.return = true;
+		
+		// Add source info, for where to get the elements of this field
+		if (blueprint.source) {
+			construct.sourceType = blueprint.source.type;
+			construct.sourceName = blueprint.source.name;
+		}
+		
+		// Add custom attributes
+		if (options.attributes) construct.attributes = options.attributes;
+		
+		if (typeof options.value != 'undefined') construct.value = options.value;
+	
+		html = hawkejs.helpers.fieldSelect(name, construct);
+	
+		if (options.return) return html;
+		
+		this.scope.buf.push(html);
+	}
+	
+	/**
+	 * Get an option for a select field
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.23
+	 * @version  2013.02.23
+	 *
+	 * @param    {Object}    options  The options
+	 *
+	 * @returns  {String}    The html
+	 */
+	helpers.selectOption = function selectOption (element, options) {
+		
+		// Do nothing if the options isn't defined
+		if (typeof options == 'undefined') options = {};
+		
+		// Set the _id as default value field
+		if (typeof options.valueField == 'undefined') options.valueField = '_id';
+		
+		// Set the name as default name field
+		if (typeof options.titleField == 'undefined') options.titleField = 'title';
+		
+		var cur_option_value;
+		var html = '';
+		
+		if (options.valueField) {
+			cur_option_value = element[options.valueField]
+		} else {
+			// If valueField is explicitly false, the value is the key
+			cur_option_value = options._value;
+		}
+		
+		// Reset the selected attribute
+		selected = '';
+		
+		// Check given value?
+		if (options.value !== false) {
+			if (cur_option_value == options.value) selected = 'selected';
+		}
+		
+		opttitle = '';
+		
+		if (options.titleField) {
+			if (typeof element[options.titleField] != 'undefined') {
+				opttitle = element[options.titleField];
+			} else if (typeof element['name'] != 'undefined') {
+				opttitle = element['name'];
+			} else if (typeof element['title'] != 'undefined') {
+				opttitle = element['title'];
+			} else {
+				opttitle = element[options.valueField];
+			}
+		} else {
+			// If titleField is explicitly false, the title is the value
+			opttitle = element;
+		}
+
+		html += '<option value="'
+			+ cur_option_value
+			+ '" ' + selected + '>'
+			+ opttitle + '</option>\n';
+			
+		return html;
+	}
+	
+	/**
 	 * Create a select field
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.06
-	 * @version  2013.02.20
+	 * @version  2013.02.23
 	 *
 	 * @param    {string}    name     The name of the field
 	 * @param    {object}    options  The options
@@ -150,7 +255,8 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		if (typeof options == 'undefined') return;
 		
 		// There is no select without elements
-		if (typeof options.elements == 'undefined') return;
+		if (typeof options.elements == 'undefined'
+		    && typeof options.sourceName == 'undefined') return;
 		
 		// Add control group wrappers by default
 		if (typeof options.wrapper == 'undefined') options.wrapper = true;
@@ -170,14 +276,35 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		// Enable a title by default
 		if (typeof options.title == 'undefined') options.title = true;
 		
-		// Set the _id as default value field
-		if (typeof options.valueField == 'undefined') options.valueField = '_id';
-		
-		// Set the name as default name field
-		if (typeof options.titleField == 'undefined') options.titleField = 'title';
-		
 		// There are no extra attributes by default
 		if (typeof options.attributes == 'undefined') options.attributes = {};
+		
+		// This is a select field by default (select2 used hidden inputs)
+		var elementType = 'select';
+		
+		// If no elements are given, but we do have a sourceName,
+		// then we'll get the data via ajax.
+		if (!options.elements && options.sourceName) {
+			
+			if (typeof options.sourceType == 'undefined') {
+				options.sourceType = 'model';
+			}
+			
+			// We're going to use select2, so the source element is an input
+			elementType = 'input';
+			
+			options.elements = [];
+			options.attributes['data-source-type'] = options.sourceType;
+			options.attributes['data-source-name'] = options.sourceName;
+			options.attributes['data-plugin'] = 'select2';
+			options.attributes['type'] = 'hidden';
+			
+			if (options.null && options.null !== true) {
+				options.attributes['placeholder'] = options.null;
+			}
+			
+			if (options.value) options.attributes['value'] = hawkejs.helpers.encode(options.value);
+		}
 		
 		// See what title to add
 		if (options.title) {
@@ -189,7 +316,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		}
 		
 		// Start creating the select
-		html = '<select name="' + name + '" '
+		html = '<' + elementType + ' name="' + name + '" '
 		
 		for (var attribute_name in options.attributes) {
 			html += attribute_name + '="' + hawkejs.helpers.encode(options.attributes[attribute_name]) + '" ';
@@ -197,8 +324,8 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		
 		html += '>\n';
 		
-		if (options.null) {
-			
+		if (options.null && elementType == 'select') {
+		
 			if (options.null == true) {
 				html += '<option value=""></option>';
 			} else {
@@ -212,47 +339,15 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 			
 			option = options.elements[i];
 			
-			var cur_option_value;
-			
-			if (options.valueField) {
-				cur_option_value = option[options.valueField]
-			} else {
-				// If valueField is explicitly false, the value is the key
-				cur_option_value = i;
+			if (options.valueField == false) {
+				options._value = i;
 			}
 			
-			// Reset the selected attribute
-			selected = '';
+			html += hawkejs.helpers.selectOption(option, options);
 			
-			// Check given value?
-			if (options.value !== false) {
-				if (cur_option_value == options.value) selected = 'selected';
-			}
-			
-			opttitle = '';
-			
-			if (options.titleField) {
-				if (typeof option[options.titleField] != 'undefined') {
-					opttitle = option[options.titleField];
-				} else if (typeof option['name'] != 'undefined') {
-					opttitle = option['name'];
-				} else if (typeof option['title'] != 'undefined') {
-					opttitle = option['title'];
-				} else {
-					opttitle = option[options.valueField];
-				}
-			} else {
-				// If titleField is explicitly false, the title is the value
-				opttitle = option;
-			}
-
-			html += '<option value="'
-				+ cur_option_value
-				+ '" ' + selected + '>'
-				+ opttitle + '</option>\n';
 		}
 		
-		html += '</select>\n';
+		html += '</' + elementType + '>\n';
 		
 		if (options.label) {
 			

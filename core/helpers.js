@@ -771,6 +771,32 @@ module.exports = function (elric) {
   }
 	
 	/**
+	 * Clone and strip a record object of its prototype functions
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.24
+	 * @version  2013.02.24
+	 *
+	 * @param   {object}   record     The record
+	 *
+	 * @returns {object}   A clone of the record's data
+	 */
+	elric.cloneRecord = function cloneRecord (record) {
+		
+		var data;
+		
+		if (record['_doc']) {
+			data = record._doc;
+		} else {
+			data = record;
+		}
+		
+		var result = elric.inject({}, data);
+		
+		return result;
+	}
+	
+	/**
 	 * Inject the properties of one object into another target object
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -792,7 +818,10 @@ module.exports = function (elric) {
 			
 			// Go over every property of the current object
 			for (var i in extension) {
-				target[i] = extension[i];
+				// Only clone own properties
+				if (extension.hasOwnProperty(i)) {
+					target[i] = extension[i];
+				}
 			}
 		}
 		

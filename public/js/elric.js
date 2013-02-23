@@ -149,6 +149,97 @@ Elric.repopulateNotifications();
 var $sidebar = $('#sidebar .wrapper');
 var $window = $(window);
 
+Elric.createSelect = function createSelect ($object) {
+	
+	var type = $object.attr('data-source-type');
+	var name = $object.attr('data-source-name');
+
+	$.post('/api/data/set/' + type + '/' + name, {format: 'array'}, function (recordset){
+
+		$object.select2({
+			query: function (query) {
+				
+				var data = {results: []};
+				var search = query.term;
+				
+				for (var i = 0; i < recordset.length; i++) {
+					if (recordset[i].text.indexOf(search) == 0) {
+						data.results.push(recordset[i]);
+					}
+				}
+				
+				// If the search string isn't empty, add it as a "new" value
+				if (search) {
+					data.results.push({id: search, text: 'New value: ' + search});
+				}
+				
+				query.callback(data);
+			},
+			initSelection: function (element, callback) {
+				
+				var set_id = element.val();
+				var set_value = false;
+				
+				for (var i in recordset) {
+					if (recordset[i].id == set_id) set_value = recordset[i];
+				}
+				
+				if (!set_value) {
+					set_value = {id: set_id, text: 'Custom value: ' + set_id};
+				}
+				
+        callback(set_value);
+			}
+		});
+		
+	}, 'json');
+	
+//	$("#e10_2").select2({
+//    data:{ results: data, text: 'tag' },
+//    formatSelection: format,
+//    formatResult: format
+//	});
+//	
+	/*
+	$object.select2({
+		//placeholder: "Search for a movie",
+		minimumInputLength: 0,
+		ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+				url: '/api/data/set/' + type + '/' + name,
+				type: 'POST',
+				dataType: 'json',
+				data: function (term, page) {return {format: 'array'};},
+				results: function (data, page) { // parse the results into the format expected by Select2.
+						// since we are using custom formatting functions we do not need to alter remote JSON data
+						console.log(data);
+						return {results: data, text: 'title'};
+				}
+		},
+		/*initSelection: function(element, callback) {
+				// the input tag has a value attribute preloaded that points to a preselected movie's id
+				// this function resolves that id attribute to an object that select2 can render
+				// using its formatResult renderer - that way the movie name is shown preselected
+				var id=$(element).val();
+				if (id!=="") {
+						$.ajax("http://api.rottentomatoes.com/api/public/v1.0/movies/"+id+".json", {
+								data: {
+										apikey: "ju6z9mjyajq2djue3gbvv26t"
+								},
+								dataType: "jsonp"
+						}).done(function(data) { callback(data); });
+				}
+		},*/
+		/*formatResult: function (object, container, query){
+			console.log('One item to format:')
+			console.log(object);
+		}, // omitted for brevity, see the source of this page
+		//formatSelection: movieFormatSelection,  // omitted for brevity, see the source of this page
+		dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
+		escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
+	});*/
+	
+}
+
 /**
  * Enable device buttons
  * @todo: This is a proof of concept, this code needs to be reworked

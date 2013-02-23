@@ -25,6 +25,7 @@ var hawkejs = require('./hawkejs');
  * Our own modules
  */
 var Routes = require('./core/routes');
+var Api = require('./core/api');
 var local = require('./local');
 
 // Prepare the routes variable
@@ -275,6 +276,8 @@ app.initializeRoutes = function() {
 	
 	routes = new Routes(elric);
 	elric.routes = routes;
+	
+	Api(elric);
 	
 	elric.isFirstRun = false;
 }
