@@ -59,7 +59,7 @@ Elric.plumb.endpoints.entrance = {
 };
 
 Elric.plumb.endpoints.out_true = {
-	anchor: "BottomLeft",
+	anchor: "BottomRight",
 	endpoint: "Dot",
 	paintStyle: {fillStyle: "#74A039", radius: 7},
 	isSource: true,
@@ -79,7 +79,7 @@ Elric.plumb.endpoints.out_true = {
 };
 
 Elric.plumb.endpoints.out_false = {
-	anchor: "BottomRight",
+	anchor: "BottomLeft",
 	endpoint: "Dot",
 	paintStyle: {fillStyle: "#E22607", radius: 7},
 	isSource: true,
@@ -124,7 +124,7 @@ Elric.plumb.init_connection = function init_connection (connInfo) {
 	objects[connInfo.sourceId].to_connections[type][connInfo.targetId] = connInfo.targetId;
 	
 	// Add a label to the connection
-	connection.getOverlay("label").setLabel(connection.sourceId.substring(6) + "-" + connection.targetId.substring(6));
+	//connection.getOverlay("label").setLabel(type);
 }
 
 /**
@@ -136,7 +136,7 @@ Elric.plumb.init_connection = function init_connection (connInfo) {
  *
  * @param    {Object}    connection
  */
-Elric.plumb.delete_connection = function init_connection (connInfo) {
+Elric.plumb.delete_connection = function delete_connection (connInfo) {
 	
 	// Create by reference objects
 	var objects = Elric.plumb.state.objects;
@@ -281,6 +281,7 @@ Elric.plumb.create_block = function (options) {
 		case 'action':
 		case 'activity':
 		case 'conditional':
+		case 'valuesetter':
 		case 'scenario':
 			edit_button = '<button class="btn btn-mini btn-inverse" data-block-type="' + options.block_type + '" data-block-id="' + options.id + '" data-block-edit="button" type="button">Edit</button>';
 			break;
@@ -331,6 +332,7 @@ Elric.plumb.create_block = function (options) {
 			anchors = ['true'];
 			break;
 		
+		case 'valuesetter':
 		case 'action':
 			anchors = ['in', 'true'];
 			break;
@@ -395,7 +397,7 @@ Elric.plumb.save = function save () {
  * @param    {Object}    conditions        The 
  */
 Elric.plumb.makeListing = function makeListing ($object, select_options, conditions) {
-	
+
 	var data = conditions;
 	
 	var resave = function resave () {
@@ -437,10 +439,11 @@ Elric.plumb.makeListing = function makeListing ($object, select_options, conditi
 				valueField: false,
 				elements: select_options,
 				value: property,
+				group: 'group',
 				return: true,
 				attributes: {'data-condition-id': index, 'data-condition-type': 'property'}
 			};
-
+			
 			// Create a property select object
 			var property_html = hawkejs.helpers.fieldSelect('property-' + index, property_select_construct);
 			var $property_select = $(property_html);
@@ -616,6 +619,52 @@ Elric.plumb.edit_block_action = function ($element) {
 }
 
 /**
+ * Ready the modal for editing a value setter block
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    2013.02.25
+ * @version  2013.02.25
+ *
+ * @param    {Object}    $element
+ */
+Elric.plumb.edit_block_valuesetter = function ($element) {
+	
+	// Get the elements inside this modal
+	var $select = $('[name="scope"]', $element);
+	var $name = $('[name="varname"]', $element);
+	var $value = $('[name="varvalue"]', $element);
+	
+	// Get the place where we can put specific elements
+	var $flux = $('.flux', $element);
+	
+	// Get the block we're currently editing
+	var block = Elric.exposed.scenario_block;
+	
+	if (typeof block.conditions == 'undefined') block.conditions = [];
+	if (typeof block.settings == 'undefined') block.settings = {};
+	
+	// When we change the activity, reset the options underneath
+	$select.change(function (e) {
+		
+		$this = $(this);
+		
+		// Store the scope in the block settings
+		block.settings.scope = $this.val();
+	});
+	
+	// Set the save functionality
+	$('#scenario-block-save').click(function(){
+		
+		block.settings.var_name = $name.val();
+		block.settings.var_value = $value.val();
+		
+		$.post('/scenario/block/' + block._id + '/save', {block: block}, function() {});
+	});
+	
+}
+
+
+/**
  * Ready the modal for editing an activity block
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
@@ -626,13 +675,19 @@ Elric.plumb.edit_block_action = function ($element) {
  */
 Elric.plumb.edit_block_activity = function ($element) {
 	
+	// Get the activity select
 	var $select = $('[name="activities"]', $element);
+	
+	// Get the place where we can put specific elements
 	var $flux = $('.flux', $element);
+	
+	// Get the block we're currently editing
 	var block = Elric.exposed.scenario_block;
 	
 	if (typeof block.conditions == 'undefined') block.conditions = [];
 	if (typeof block.settings == 'undefined') block.settings = {};
 	
+	// When we change the activity, reset the options underneath
 	$select.change(function (e) {
 		
 		$this = $(this);
@@ -645,11 +700,10 @@ Elric.plumb.edit_block_activity = function ($element) {
 		
 		// Get the activity
 		var activity = Elric.exposed.scenario_activities[activity_name];
-		
+
 		$flux.html('');
 		
 		Elric.plumb.makeListing($flux, activity.blueprint, block.conditions);
-		
 	});
 	
 	// Set the save functionality
@@ -670,9 +724,7 @@ Elric.plumb.edit_block_activity = function ($element) {
 			}
 		}
 		
-		$.post('/scenario/block/' + block._id + '/save', {block: block}, function() {
-			
-		});
+		$.post('/scenario/block/' + block._id + '/save', {block: block}, function() {});
 	});
 	
 	// Set the current selections
@@ -803,6 +855,10 @@ hawkejs.event.on('create:block[scenario-edit-modal-body]', function (block_name,
 		
 		case 'blocks/edit_action':
 			Elric.plumb.edit_block_action($element);
+			break;
+		
+		case 'blocks/edit_valuesetter':
+			Elric.plumb.edit_block_valuesetter($element);
 			break;
 		
 		case 'blocks/edit_conditional':

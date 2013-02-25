@@ -1,4 +1,5 @@
 var validate = require('mongoose-validator').validate;
+var EventEmitter = require('events').EventEmitter;
 var $ = require('jquery');
 
 module.exports = function (elric) {
@@ -26,13 +27,14 @@ module.exports = function (elric) {
 	 * 
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.05
-	 * @version  2013.02.05
+	 * @version  2013.02.25
 	 */
 	bp.preConstructor = function preConstructor () {
 		
 		// Recreate these variables
 		// otherwise they're shared accross all models
 		
+		this.event = new EventEmitter();
 		this.blueprint = {};
 		this.admin = {};
 		this.schema = {};
@@ -107,35 +109,47 @@ module.exports = function (elric) {
 	bp.special = {};
 	
 	/**
-	 * Add pre schema callbacks
+	 * Add callbacks
 	 * These will be added to the schema before the model is made
+	 * or to the event listener, depending on the event name
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.15
-	 * @version  2013.01.15
+	 * @version  2013.02.25
 	 *
 	 * @param    {string}   name      The event name (save, init, ...)
 	 * @param    {callback} callback  The callback to make
 	 */
 	bp.pre = function preSchema (name, callback) {
-		var newCallback = {name: name, callback: callback};
-		this._prepost.pre.push(newCallback);
+		
+		if (name == 'save') {
+			var newCallback = {name: name, callback: callback};
+			this._prepost.pre.push(newCallback);
+		} else {
+			this.event.on(name + '-pre', callback);
+		}
 	}
 	
 	/**
 	 * Add post callbacks
 	 * These will be added to the schema before the model is made
+	 * or to the event listener, depending on the event name
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.15
-	 * @version  2013.01.31
+	 * @version  2013.02.25
 	 *
 	 * @param    {string}   name      The event name (save, init, ...)
 	 * @param    {callback} callback  The callback to make
 	 */
 	bp.post = function postSchema (name, callback) {
-		var newCallback = {name: name, callback: callback};
-		this._prepost.post.push(newCallback);
+		
+		if (name == 'save') {
+			var newCallback = {name: name, callback: callback};
+			this._prepost.post.push(newCallback);
+		} else {
+			this.event.on(name + '-post', callback);
+		}
 	}
 	
 	/**
@@ -312,7 +326,7 @@ module.exports = function (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.01.14
-	 * @version  2013.02.13
+	 * @version  2013.02.25
 	 *
 	 * @param    {object}   model        The model
 	 * @param    {object}   storage      Store the findings in here,
@@ -325,6 +339,8 @@ module.exports = function (elric) {
 		if (storage === undefined) storage = false;
 		
 		if (storage) t = storage;
+		
+		this.event.emit('generatecache-pre');
 		
 		// Find all records in this model
 		model.find({}, function (err, items) {
@@ -360,6 +376,8 @@ module.exports = function (elric) {
 				}
 				
 			}
+			
+			thisModel.event.emit('generatecache-post');
 		});
 	}
 }

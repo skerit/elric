@@ -67,4 +67,8 @@ module.exports = function scenarioBlock (elric) {
 		fields: ['user_id', 'scenario_id', 'block_type', 'settings', 'out_on_true', 'out_on_false']
 	};
 	
+	this.post('generatecache', function() {
+		elric.director.instantiateVariables();
+	});
+	
 }

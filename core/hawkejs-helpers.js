@@ -3,6 +3,18 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 	
 	// Helpers link
 	var helpers = hawkejs.helpers;
+	var counter = 0;
+	
+	/**
+	 * Get a unique number, which is just a counter
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.24
+	 * @version  2013.02.24
+	 */
+	helpers.getCount = function getCount () {
+		return counter++;
+	}
 	
 	/**
 	 * Generate an admin field (old style)
@@ -149,6 +161,7 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		var construct = {};
 		
 		construct.return = true;
+		construct.attributes = {};
 		
 		// Add source info, for where to get the elements of this field
 		if (blueprint.source) {
@@ -159,13 +172,22 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		// Add custom attributes
 		if (options.attributes) construct.attributes = options.attributes;
 		
+		// Add an id
+		if (typeof construct.attributes.id == 'undefined') {
+			construct.attributes.id = name + '-c' + hawkejs.helpers.getCount();
+		}
+		
 		if (typeof options.value != 'undefined') construct.value = options.value;
 	
 		html = hawkejs.helpers.fieldSelect(name, construct);
 	
 		if (options.return) return html;
 		
+		// We did not have to return it, so push it to the buffer
 		this.scope.buf.push(html);
+		
+		// And emit an event
+		this.events.custom.push({name: 'create:element[blueprintField]', params: [options.attributes.id]});
 	}
 	
 	/**
@@ -279,6 +301,9 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		// There are no extra attributes by default
 		if (typeof options.attributes == 'undefined') options.attributes = {};
 		
+		// There is no grouping by default
+		if (typeof options.group == 'undefined') options.group = false;
+		
 		// This is a select field by default (select2 used hidden inputs)
 		var elementType = 'select';
 		
@@ -324,6 +349,33 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 		
 		html += '>\n';
 		
+		// If we want to group items together, we have to make sure they're propperly sorted
+		if (options.group) {
+			var original_elements = options.elements;
+			var grouping = {};
+			
+			// first we add everything to their own groups
+			for (var i in original_elements) {
+				var element = original_elements[i];
+				
+				if (grouping[element[options.group]] == undefined) grouping[element[options.group]] = {};
+				
+				grouping[element[options.group]][i] = element;
+			}
+			
+			// Reset the original elements
+			options.elements = {};
+			
+			// Now we go over these groups again
+			for (var group_name in grouping) {
+				// Now go over every entry in this group
+				for (var element_id in grouping[group_name]) {
+					var gel = grouping[group_name][element_id];
+					options.elements[element_id] = gel;
+				}
+			}
+		}
+		
 		if (options.null && elementType == 'select') {
 		
 			if (options.null == true) {
@@ -334,10 +386,22 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 			
 		}
 		
+		var current_group = false;
+		
 		// Add the options
 		for (var i in options.elements) {
 			
 			option = options.elements[i];
+			
+			if (options.group) {
+				if (current_group != option[options.group]) {
+					current_group = option[options.group];
+					
+					// Close the previous optgroup, but only if it isn't the first time
+					if (current_group !== false) html += '</optgroup>';
+					html += '<optgroup label="' + option[options.group] + '">';
+				}
+			}
 			
 			if (options.valueField == false) {
 				options._value = i;
@@ -346,6 +410,9 @@ module.exports = function elricHawkejsHelpers (hawkejs) {
 			html += hawkejs.helpers.selectOption(option, options);
 			
 		}
+		
+		// Make sure the last optgroup is closed
+		if (options.group) html += '</optgroup>';
 		
 		html += '</' + elementType + '>\n';
 		

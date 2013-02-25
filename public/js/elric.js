@@ -281,6 +281,14 @@ hawkejs.event.on('create:block[container-fluid]', function (blockname, origin_te
 	$("#content .container-fluid .timeago").timeago();
 });
 
+/**
+ * Listen to newly created blueprint fields
+ */
+hawkejs.event.on('create:element[blueprintField]', function (element_id){
+	//@todo: check if it's a select field, if it is: apply select2
+});
+
+
 $window.load(function () {
 	
 	var resize = false;

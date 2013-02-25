@@ -367,6 +367,9 @@ module.exports = function Routes (elric) {
 		
 		elric.saveScenario(name, scenario, blocks, user_id, req);
 		
+		var test = elric.director.getVariables(scenario);
+		console.log(test);
+		
 	});
 	
 }

@@ -40,4 +40,8 @@ module.exports = function scenario (elric) {
 		fields: ['user_id', 'name', 'triggers']
 	};
 	
+	this.post('generatecache', function() {
+		elric.director.instantiateVariables();
+	});
+	
 }
