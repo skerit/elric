@@ -1,7 +1,7 @@
 <% expands('blocks/edit') -%>
 
 <% start('scenario-edit-modal-body') -%>
-<% fieldSelect('scope', {elements: {local: 'Local', global: 'Global'}, null: 'Select variable scope', valueField: false, titleField: false}) %>
+<% fieldSelect('scope', {elements: {local: 'Local', global: 'Global'}, null: 'Select variable scope', valueField: false, titleField: false, value: block.settings.scope}) %>
 
 <%
 var var_name = '';

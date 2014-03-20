@@ -44,6 +44,7 @@ module.exports = function roomElement (elric) {
 			type: this.mongoose.Schema.Types.ObjectId,
 			required: false,
 			fieldType: 'Select',
+			index: true,
 			source: {type: 'object', name: 'elementType'} // @todo: This is just a copy so far
 		},
 		x: {

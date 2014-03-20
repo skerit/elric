@@ -235,7 +235,7 @@ module.exports = function Director (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.22
-	 * @version  2013.02.22
+	 * @version  2013.02.26
 	 *
 	 * @param    {Object}    scenario    The scenario to execute
 	 * @param    {Object}    activity    The activity instance trigger
@@ -245,7 +245,12 @@ module.exports = function Director (elric) {
 		// Get the entrance block
 		var entrance = getScenarioBlock(false, scenario);
 		
-		if (entrance) runBlock(entrance, activity);
+		// Prepare the (local) payload
+		var payload = {activity: {}, local: {}, global: this.global_variables, current_activity: activity};
+		
+		payload.activity[activity.parent.name] = activity;
+		
+		if (entrance) runBlock(entrance, payload);
 	}
 	
 	/**
@@ -256,12 +261,13 @@ module.exports = function Director (elric) {
 	 * @version  2013.02.25
 	 *
 	 * @param    {Object}    block       The block to start from
-	 * @param    {Object}    activity    The activity instance trigger
+	 * @param    {Object}    payload     The payload
 	 */
-	var runBlock = function runBlock (block, activity) {
+	var runBlock = function runBlock (block, payload) {
 		
 		var is_true = false;
 		var next_blocks;
+		var activity = payload.current_activity;
 		
 		// If the block we're running is an entrance,
 		// just get all the next blocks to run
@@ -314,6 +320,18 @@ module.exports = function Director (elric) {
 			action.activate(action_payload);
 			
 			is_true = true;
+		} else if (block.block_type == 'valuesetter') {
+			
+			var var_name = block.settings.var_name;
+			var var_ttl = block.settings.var_ttl;
+			var scope = block.settings.scope;
+			
+			// @todo: parse this value for expressions (additions and such)
+			var var_value = block.settings.var_value;
+			var old_value = payload[scope][var_name];
+			
+			payload[scope][var_name] = var_value;
+			
 		}
 		
 		if (is_true) {
@@ -337,12 +355,12 @@ module.exports = function Director (elric) {
 	 *
 	 * @author   Jelle De Loecker   <jelle@kipdola.be>
 	 * @since    2013.02.22
-	 * @version  2013.02.22
+	 * @version  2013.03.01
 	 */
 	elric.events.activities.on('activity', function (event_info, activity) {
 		
 		var activity_name = activity.parent.name;
-		var scenarios = this.getScenarios(activity_name);
+		var scenarios = thisDirector.getScenarios(activity_name);
 		
 		for (var scenario_id in scenarios) {
 			runScenario(scenarios[scenario_id], activity);

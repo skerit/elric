@@ -8,7 +8,6 @@ var less = require('less');
 var lessmw = require('less-middleware')
 var path = require('path');
 var store = new express.session.MemoryStore;
-var $ = require('jquery');
 var bcrypt = require('bcrypt');
 var async = require('async');
 var io = require('socket.io');

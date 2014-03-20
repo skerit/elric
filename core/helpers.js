@@ -828,4 +828,42 @@ module.exports = function (elric) {
 		return target;
 	}
 	
+	/**
+	 * Get a room element object of an item
+	 *
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    2013.02.26
+	 * @version  2013.02.26
+	 *
+	 * @param   {object}   id         The id (or object with an id or _id property)
+	 *
+	 * @returns {object}   Returns the roomElement record
+	 */
+	elric.getRoomElement = function getRoomElement (id) {
+		
+		// Create a link to the model cache
+		var many = elric.models.roomElement.many.type_external_id;
+		
+		if (typeof id == 'object') {
+			
+			if (id._id) {
+				id = id._id;
+			} else if (id.id) {
+					id = id.id;
+			} else {
+				return false;
+			}
+		}
+		
+		if (typeof many[id] != 'undefined') {
+			
+			for (var i in many[id]) {
+				// Return the first record found
+				return many[id][i];
+			}
+		}
+		
+		return false;
+	}
+	
 }

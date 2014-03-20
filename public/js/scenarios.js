@@ -633,6 +633,7 @@ Elric.plumb.edit_block_valuesetter = function ($element) {
 	var $select = $('[name="scope"]', $element);
 	var $name = $('[name="varname"]', $element);
 	var $value = $('[name="varvalue"]', $element);
+	var $ttl = $('[name="varttl"]', $element);
 	
 	// Get the place where we can put specific elements
 	var $flux = $('.flux', $element);
@@ -657,6 +658,8 @@ Elric.plumb.edit_block_valuesetter = function ($element) {
 		
 		block.settings.var_name = $name.val();
 		block.settings.var_value = $value.val();
+		block.settings.var_ttl = $ttl.val();
+		block.settings.scope = $select.val();
 		
 		$.post('/scenario/block/' + block._id + '/save', {block: block}, function() {});
 	});
