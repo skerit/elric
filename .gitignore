@@ -1,11 +1,36 @@
-node_modules
+# Ignore certain public folders
+app/public/views/*
+!app/public/views/empty
+
+# Ignore the contents of the temp folder
+temp/*
+
+# Except for the empty file
+!temp/empty
+
+# Ignore IDE specific files
 *.komodo*
-public/bootstrap
-public/stylesheets
-public/views
-public/js/hawkejs-client-side.js
-public/hawkejs
-local.js
-*.log
-*.sublime-project
-*.sublime-workspace
+*.sublime*
+.idea/
+
+# Ignore special files
+.DS_Store
+.fuse*
+._*
+*.bin
+
+# Ignore log files
+npm-debug.log
+v8.log
+
+# Ignore uploaded files
+/files/
+
+# Ignore node modules
+/node_modules/
+
+# Ignore the local config
+app/config/local.js
+
+# Ignore old backup files
+old/
