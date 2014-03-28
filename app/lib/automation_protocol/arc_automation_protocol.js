@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-alchemy.create(function ArcAutomationProtocol() {
+alchemy.create('AutomationProtocol', function ArcAutomationProtocol() {
 
 	/**
 	 * The pre constructor
