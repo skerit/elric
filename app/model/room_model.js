@@ -11,6 +11,8 @@ Model.extend(function RoomModel() {
 	
 	this.preInit = function preInit() {
 
+		this.parent();
+
 		this.icon = 'home';
 
 		this.blueprint = {

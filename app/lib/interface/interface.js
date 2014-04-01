@@ -1,7 +1,7 @@
-var elementTypes = alchemy.shared('elementTypes');
+var interfaces = alchemy.shared('Elric.interfaces');
 
 /**
- * The Element Type class
+ * The Interface class
  *
  * @constructor
  *
@@ -9,7 +9,7 @@ var elementTypes = alchemy.shared('elementTypes');
  * @since    0.0.1
  * @version  0.1.0
  */
-alchemy.create(function ElementType() {
+alchemy.create(function Interface() {
 
 	/**
 	 * Set the title properties
@@ -24,7 +24,7 @@ alchemy.create(function ElementType() {
 	this.__extended__ = function __extended__(parent, child) {
 
 		// Extract the name
-		var name     = child.name.replace(/ElementType$/, ''),
+		var name     = child.name.replace(/Interface$/, ''),
 		    typeName = name.underscore(),
 		    title    = name.titleize();
 
@@ -37,7 +37,7 @@ alchemy.create(function ElementType() {
 
 		// Register this protocol
 		if (!child.prototype.extendonly) {
-			elementTypes[typeName] = title;
+			interfaces[typeName] = title;
 		}
 	};
 
@@ -51,24 +51,29 @@ alchemy.create(function ElementType() {
 	this.preInit = function preInit() {
 
 		/**
-		 * The dimensions this element type has
-		 * 0 = a single dot
-		 * 1 = a line
-		 * 2 = any
+		 * The supported protocols
 		 */
-		this.dimensions = 2;
+		this.protocols = [];
 		
-		/**
-		 * Colours
-		 */
-		this.colourOri = '#000000';
-		this.colourHover = '#909090';
-		this.colourSelect = '#500000';
+	};
+
+	/**
+	 * The actual logic behind this action
+	 * 
+	 * @author   Jelle De Loecker   <jelle@kipdola.be>
+	 * @since    0.0.1
+	 * @version  0.1.0
+	 * 
+	 * @param   {String}   device      The device object
+	 * @param   {Object}   interface_data    Interface data
+	 * @param   {Object}   options     An object of options
+	 * @param   {Function} callback    The function to call back
+	 */
+	this.sendCommand = function sendCommand (device, interface_data, options, callback) {
 		
-		/**
-		 * What model to use for selects
-		 */
-		this.model = false;
+		interface_data.client.submit('device_command_' + options.interface_type, options);
+		
+		if (callback) callback();
 	};
 
 });

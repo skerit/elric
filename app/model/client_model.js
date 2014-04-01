@@ -11,6 +11,8 @@ Model.extend(function ClientModel() {
 	
 	this.preInit = function preInit() {
 
+		this.parent();
+
 		this.icon = 'desktop';
 
 		this.blueprint = {

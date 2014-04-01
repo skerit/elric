@@ -11,6 +11,8 @@ Model.extend(function ClientCapabilityModel() {
 	
 	this.preInit = function preInit() {
 
+		this.parent();
+
 		this.capabilities = alchemy.shared('Elric.capabilities');
 
 		this.belongsTo = {

@@ -12,8 +12,9 @@
  */
 alchemy.usePlugin('styleboost');
 alchemy.usePlugin('jquery');
+alchemy.usePlugin('select2');
 alchemy.usePlugin('jsoneditor');
-alchemy.usePlugin('acl');
 alchemy.usePlugin('i18n');
+alchemy.usePlugin('acl');
 alchemy.usePlugin('menu');
 alchemy.usePlugin('chimera', {});

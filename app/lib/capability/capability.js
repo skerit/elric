@@ -32,7 +32,7 @@ alchemy.create(function Capability() {
 	this.__extended__ = function __extended__(parent, child) {
 
 		// Extract the name
-		var name     = child.name.replace(/ElricAction$/, ''),
+		var name     = child.name.replace(/Capability$/, ''),
 		    typeName = name.underscore(),
 		    title    = name.titleize();
 

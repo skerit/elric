@@ -11,6 +11,8 @@ Model.extend(function RoomModel() {
 	
 	this.preInit = function preInit() {
 
+		this.parent();
+
 		this.icon = 'lightbulb-o';
 
 		this.element_types = alchemy.shared('elementTypes');
