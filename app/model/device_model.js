@@ -50,12 +50,12 @@ Model.extend(function DeviceModel() {
 		this.modelEdit = {
 			general: {
 				title: __('chimera', 'General'),
-				fields: ['name', 'device_type', 'automation_protocol', 'address', 'interface_type', 'interfaces']
+				fields: ['name', 'device_type', 'automation_protocol', 'address', 'interface_type', 'interface_id']
 			}
 		};
 
 		this.modelIndex = {
-			fields: ['name', 'device_type', 'automation_protocol', 'address', 'interface_type', 'interfaces']
+			fields: ['name', 'device_type', 'automation_protocol', 'address', 'interface_type', 'interface_id']
 		};
 	};
 });

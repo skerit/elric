@@ -19,6 +19,8 @@ alchemy.usePlugin('acl');
 alchemy.usePlugin('menu');
 alchemy.usePlugin('chimera', {});
 
+alchemy.usePlugin('elric-elro');
+
 // Send the menu options to the client
 alchemy.on('alchemy.render', function(settings, callback) {
 

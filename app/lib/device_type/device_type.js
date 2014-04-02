@@ -70,7 +70,7 @@ alchemy.create(function DeviceType() {
 		categories[child.prototype.category] = typeName;
 
 		// Register this protocol
-		if (!child.prototype.extendonly) {
+		if (!child.prototype.extendonly || !child.prototype.hasOwnProperty('extendonly')) {
 			deviceTypes[typeName] = title;
 		}
 	};
