@@ -37,7 +37,7 @@ alchemy.create(function ElementType() {
 
 		// Register this protocol
 		if (!child.prototype.extendonly) {
-			elementTypes[typeName] = title;
+			elementTypes[typeName] = new child();
 		}
 	};
 

@@ -1,0 +1,185 @@
+<html>
+    
+    <head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="jquery.mousewheel.js"></script>
+        <script src="doek.js"></script>
+        <script src="doek.canvas.js"></script>
+        <script src="doek.layer.js"></script>
+        <script src="doek.object.js"></script>
+        <script src="doek.node.js"></script>
+        <script src="doek.node.line.js"></script>
+        <script src="doek.node.rectangle.js"></script>
+        <script src="doek.event.js"></script>
+        <script src="doek.action.js"></script>
+        <style type="text/css">
+            #world {border: 1px solid black;}
+        </style>
+    </head>
+    <body>
+        <div id="world" data-width=500 data-height=500></div>
+        <div id="toolbar">
+            <button id="addline">Add line</button>
+            <button id="addrectangle">Add rectangle</button>
+        </div>
+        
+        <script>
+            var d = new Doek.Canvas('world');
+            var gridObject = d.addGrid();
+            
+            // Enable tiled
+            d.settings.tiled = true;
+
+            var hoverStyle = new Doek.Style('hover');
+            hoverStyle.properties.strokeStyle = '#EE3030';
+            gridObject.addStyle(hoverStyle);
+            gridObject.clickable = true;
+            var upStyle = new Doek.Style('upped');
+            upStyle.properties.strokeStyle = '#101099';
+            gridObject.addStyle(upStyle);
+            
+            gridObject.on('mouseMove', function(caller, payload){
+                this.applyStyle('hover');
+                //console.log({'objectp': payload});
+            });
+            
+            gridObject.parentLayer.on('mouseMove', function(caller, payload){
+                //this.applyStyle('hover');
+                //console.log({'layerp': payload});
+            });
+            
+            gridObject.on('mouseOut', function(caller){
+                this.applyStyle('ori');
+            });
+            
+            gridObject.on('mouseup', function(callernode, payload){
+                if (payload.originnode != callernode) {
+                    callernode.applyStyle('upped');
+                }
+            });
+            
+            var layer = d.addLayer('main', 5);
+
+            d.setMode('edit');
+            
+            // Create a new action
+            var addLine = new Doek.Action('addLine');
+            
+            addLine.on('init', function (caller, payload) {
+                addLine.storage.layer = payload.layer;
+            });
+            
+            addLine.on('finished', function (caller, payload) {
+                publictest = this.storage.line;
+            });
+            
+            addLine.on('mouseupFirst', function(caller, payload) {
+
+                this.storage.object = new Doek.Object(this.storage.layer);
+                this.storage.object.tiled = true;
+                
+                var style = new Doek.Style('ori');
+                style.properties.strokeStyle = '#DD0000';
+                style.properties.lineWidth = 1;
+                
+                var p = payload.startposition;
+                
+                var myline = this.storage.object.addLine(p.absX, p.absY, p.absX, p.absY, style);
+                
+                var hstyle = new Doek.Style('hover');
+                hstyle.properties.strokeStyle = '#009910';
+                this.storage.object.addStyle(hstyle);
+                
+                this.storage.line = myline;
+                this.storage.layer.addObject(this.storage.object);
+                
+            });
+            
+            addLine.on('mousemoveFirstClick', function (caller, payload) {
+                
+                var pos = payload.position;
+                this.storage.line.setEndpoint(pos);
+                
+            });
+            var publictest = {};
+            addLine.on('mouseupn', function (caller, payload) {
+                
+                d.setMode('normal');
+               this.storage.line.on('mousemove', function() {
+                   this.applyStyle('hover');
+                });
+               
+               this.storage.line.on('mouseout', function() {
+                   this.applyStyle('ori');
+                });
+               
+               // This action only requires one click, so send the finished event
+                this.event.doEvent('finished', this, payload);
+                
+            });
+            
+            addLine.on('finished', function (caller, payload) {
+                
+                // Store the object here, so we still have
+                // a reference to it after we've deleted it
+                var obj = this.storage.object;
+                
+                // Remove the object from every collection it has ever been added to
+                obj._remove({redraw: true});
+
+                // Get the line we just created
+                var line = this.storage.line;
+                
+            });
+            
+            d.registerAction(addLine);
+            
+            // Create a new action
+            // Adding a rectangle
+            var addRectangle = new Doek.Action('addRectangle');
+            
+            addRectangle.on('init', function(caller, payload){
+                addRectangle.storage.layer = payload.layer;
+            })
+            
+            addRectangle.on('mouseupFirst', function(caller, payload) {
+
+                this.storage.object = new Doek.Object(this.storage.layer);
+                this.storage.object.tiled = true;
+                
+                var style = new Doek.Style('ori');
+                style.properties.strokeStyle = '#DD0000';
+                style.properties.lineWidth = 1;
+                
+                var p = payload.startposition;
+                
+                var myrectangle = this.storage.object.addRectangle(p.absX, p.absY, p.absX, p.absY, style);
+                
+                var hstyle = new Doek.Style('hover');
+                hstyle.properties.strokeStyle = '#009910';
+                this.storage.object.addStyle(hstyle);
+                
+                this.storage.rectangle = myrectangle;
+                this.storage.layer.addObject(this.storage.object);
+            });
+            
+            addRectangle.on('mousemoveFirstClick', function (caller, payload) {
+                
+                var pos = payload.position;
+                this.storage.rectangle.setEndpoint(pos);
+                
+            });
+            
+            d.registerAction(addRectangle);
+            
+            $('#addline').click(function(){
+                d.setAction('addLine', {layer: layer});
+            });
+            
+            $('#addrectangle').click(function(){
+                d.setAction('addRectangle', {layer: layer});
+            });
+            
+        </script>
+    </body>
+</html>

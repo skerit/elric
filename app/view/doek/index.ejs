@@ -1,14 +1,35 @@
-<% expands('layout/admin_main');
+<% expands('layouts/admin_main');
+
+// Always add the bootstrap js files
+asset.script([
+	'doek/jquery.mousewheel',
+	'doek/doek',
+	'doek/doek.canvas',
+	'doek/doek.layer',
+	'doek/doek.object',
+	'doek/doek.node',
+	'doek/doek.node.line',
+	'doek/doek.node.rectangle',
+	'doek/doek.event',
+	'doek/doek.action',
+	'doek.nodes',
+	'mainDoek',
+	'doek.actions'
+	], {block: 'head'});
+
+asset.style('elric', {block: 'head'});
 
 set_block('title', 'Doek');
 set_title('Doek');
 
+emit('doekview', {urls: urls, rooms: rooms, elements: elements, elementTypes: elementTypes});
+
 start(store('chimera-view-setting').contentblock) %>
-<div class="row-fluid">
-	<div id="doeksidebar" class="well span4">
+<div class="row">
+	<div id="doeksidebar" class="well col-md-4">
 		<div class="selects elements">
 			<%
-				fieldSelect('rooms', {
+				form.fieldSelect('rooms', {
 					elements: rooms,
 					valueField: '_id',
 					titleField: 'name',
@@ -16,7 +37,7 @@ start(store('chimera-view-setting').contentblock) %>
 				})
 			%>
 			<%
-				fieldSelect('elements', {
+				form.fieldSelect('elements', {
 					elements: elements,
 					valueField: '_id',
 					titleField: 'name',
@@ -28,10 +49,10 @@ start(store('chimera-view-setting').contentblock) %>
 		<div class="edit element">
 			<h4>Edit element</h4>
 			<form id="editElement">
-				<% fieldInput('_id', {type: 'hidden'}) %>
-				<% fieldInput('name', {ghost: 'Name'}) %>
+				<% form.fieldInput('_id', {type: 'hidden'}) %>
+				<% form.fieldInput('name', {ghost: 'Name'}) %>
 				<%
-					fieldSelect('room_id', {
+					form.fieldSelect('room_id', {
 						elements: rooms,
 						valueField: '_id',
 						titleField: 'name',
@@ -39,19 +60,19 @@ start(store('chimera-view-setting').contentblock) %>
 						null: ' -- Room -- '
 					})
 				%>
-				<% fieldInput('element_type', {ghost: 'Element Type'}) %>
+				<% form.fieldInput('element_type', {ghost: 'Element Type'}) %>
 				<div class="control-group">
-					<select id="type_external_id" name="type_external_id"></select>
+					<select id="type_external_id" name="data[type_external_id]"></select>
 				</div>
-				<% fieldInput('x', {ghost: 'X', prepend: 'X'}) %>
-				<% fieldInput('y', {ghost: 'Y', prepend: 'Y'}) %>
-				<% fieldInput('dx', {ghost: 'DX', prepend: 'DX'}) %>
-				<% fieldInput('dy', {ghost: 'DY', prepend: 'DY'}) %>
-				<button class="btn btn-success" id="saveElement" ><i class="icon-hdd"></i> Save</button>
+				<% form.fieldInput('x', {ghost: 'X', prepend: 'X'}) %>
+				<% form.fieldInput('y', {ghost: 'Y', prepend: 'Y'}) %>
+				<% form.fieldInput('dx', {ghost: 'DX', prepend: 'DX'}) %>
+				<% form.fieldInput('dy', {ghost: 'DY', prepend: 'DY'}) %>
+				<button class="btn btn-success" id="saveElement" ><i class="fa fa-hdd"></i> Save</button>
 			</form>
 		</div>
 	</div>
-	<div id="doekContainer" class="span8">
+	<div id="doekContainer" class="col-md-8">
 		<div id="toolbar">
 			<div class="btn-group" data-toggle-name="doek_mode" data-elric-function="buttonChange" data-toggle="buttons-radio" >
 				<button type="button" value="select" class="btn" data-toggle="button">Select</button>
@@ -59,7 +80,7 @@ start(store('chimera-view-setting').contentblock) %>
 			</div>
 			<div class="btn-nongroup">
 				<div class="btn-group">
-					<button class="btn btn-primary" data-target="addElementType" data-elementType="wall"><i class="icon-plus-sign"></i> Add wall</button>
+					<button class="btn btn-primary" data-target="addElementType" data-elementType="wall"><i class="fa fa-plus-sign"></i> Add wall</button>
 					<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
 						<span class="caret"></span>
 					</button>
@@ -68,7 +89,7 @@ start(store('chimera-view-setting').contentblock) %>
 					</ul>
 				</div>
 				
-				<button class="btn btn-success" id="savemap" ><i class="icon-hdd"></i> Save all</button>
+				<button class="btn btn-success" id="savemap" ><i class="fa fa-hdd"></i> Save all</button>
 			</div>
 			<input type="hidden" name="doek_mode" value="0" />
 			<div class="clear"></div>

@@ -18,3 +18,32 @@ alchemy.usePlugin('i18n');
 alchemy.usePlugin('acl');
 alchemy.usePlugin('menu');
 alchemy.usePlugin('chimera', {});
+
+// Send the menu options to the client
+alchemy.on('alchemy.render', function(settings, callback) {
+
+	// Only send this data on the initial pageload
+	if (!settings.ajax) {
+
+		var path = '/public/scripts/elric.js';
+
+		if (!settings.payload.request) {
+			settings.payload.request = {};
+		}
+
+		if (!settings.payload.request.tags) {
+			settings.payload.request.tags ={};
+		}
+
+		// Add the CDN script
+		settings.payload.request.tags[path] = {
+			type: 'script',
+			path: path,
+			block: 'head',
+			order: 1000,
+			suborder: 1000
+		};
+	}
+
+	callback();
+});

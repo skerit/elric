@@ -1,3 +1,5 @@
+var async = alchemy.use('async');
+
 /**
  * The Doek Manager Module
  *
@@ -30,12 +32,100 @@ alchemy.create('ChimeraModule', function DoekManagerChimeraModule() {
 			route: '/add',
 			title: __('chimera', 'Add'),
 			icon: 'plus'
+		},
+		addElement: {
+			route: '/addElement'
+		},
+		updateElement: {
+			route: '/updateElement'
 		}
 	};
 
 	this.actionLists = {
 		paginate: ['index', 'add'],
 		record: ['view', 'edit']
+	};
+
+	/**
+	 * Add a new element to the given room
+	 *
+	 * @author   Jelle De Loecker   <jelle@codedor.be>
+	 * @since    0.0.1
+	 * @version  0.1.0
+	 */
+	this.addElement = function addElement(render) {
+
+		var req = render.req,
+		    data;
+
+		if (req.body.room_id && req.body.element_type) {
+
+			data = {
+				name: 'UnnamedElement',
+				room_id: req.body.room_id,
+				element_type: req.body.element_type,
+				x: 10,
+				y: 10,
+				width: 0,
+				height: 0,
+				dx: 30,
+				dy: 30
+			};
+
+			this.getModel('RoomElement').save({RoomElement: data}, function(err, result) {
+				render.res.send(result[0].item);
+			});
+		} else {
+			render.res.send({'error': 'Error: not all fields were found'});
+		}
+	};
+
+	/**
+	 * Update an element
+	 *
+	 * @author   Jelle De Loecker   <jelle@codedor.be>
+	 * @since    0.0.1
+	 * @version  0.1.0
+	 */
+	this.updateElement = function updateElement(render) {
+
+		var req      = render.req,
+		    tasks    = [],
+		    elements = req.body.elements,
+		    roomEl   = this.getModel('RoomElement'),
+		    data,
+		    id,
+		    el;
+
+		Object.each(elements, function(element, id) {
+
+			tasks[tasks.length] = function(callback) {
+
+				var data = {
+					_id: id,
+					room_id: element.room_id,
+					x: element.x,
+					y: element.y,
+					dx: element.dx,
+					dy: element.dy,
+					name: element.name
+				};
+
+				roomEl.save({RoomElement: data}, function(err, result) {
+					
+					if (err) {
+						return callback(err);
+					}
+
+					callback(null, result[0].item);
+				});
+			};
+		});
+
+		async.parallel(tasks, function(err, results) {
+			render.res.send(results);
+		});
+		
 	};
 
 	/**
@@ -47,7 +137,9 @@ alchemy.create('ChimeraModule', function DoekManagerChimeraModule() {
 	 */
 	this.index = function index(render) {
 		
-		var tasks = {};
+		var that       = this,
+		    tasks      = {},
+		    urlParams  = render.req.route.params;
 		
 		// Prepare function to find all rooms
 		tasks.rooms = function getRooms(callback) {
@@ -92,7 +184,12 @@ alchemy.create('ChimeraModule', function DoekManagerChimeraModule() {
 
 			render.viewVars.rooms = results.rooms;
 			render.viewVars.elements = results.elements;
-			render.viewVars.elementTypes = Object.keys(alchemy.shared('elementTypes'));
+			render.viewVars.elementTypes = alchemy.shared('elementTypes');
+
+			render.viewVars.urls = {
+				addElement: that.getActionUrl('addElement', urlParams),
+				updateElement: that.getActionUrl('updateElement', urlParams)
+			};
 			
 			render.view = 'doek/index';
 

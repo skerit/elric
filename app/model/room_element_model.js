@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-Model.extend(function RoomModel() {
+Model.extend(function RoomElementModel() {
 	
 	this.preInit = function preInit() {
 
