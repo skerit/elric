@@ -102,16 +102,20 @@ alchemy.create('ChimeraModule', function DoekManagerChimeraModule() {
 			tasks[tasks.length] = function(callback) {
 
 				var data = {
-					_id: id,
-					room_id: element.room_id,
-					x: element.x,
-					y: element.y,
-					dx: element.dx,
-					dy: element.dy,
+					_id: alchemy.castObjectId(id),
+					room_id: alchemy.castObjectId(element.room_id),
+					x: parseInt(element.x),
+					y: parseInt(element.y),
+					dx: parseInt(element.dx),
+					dy: parseInt(element.dy),
 					name: element.name
 				};
 
+				pr(data, true)
+
 				roomEl.save({RoomElement: data}, function(err, result) {
+
+					pr(err, true)
 					
 					if (err) {
 						return callback(err);

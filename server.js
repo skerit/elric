@@ -36,3 +36,16 @@ process.on('uncaughtException', function(error) {
 alchemy.start(function onAlchemyReady() {
 
 });
+
+alchemy.ready(function() {
+
+	alchemy.callServer('ws://192.168.1.3:3000', function(server) {
+
+		pr('Going to send file to the server')
+		server.sendFile('/tmp/nothing', function() {
+			pr('We sent nothing!')
+		});
+
+	});
+
+});

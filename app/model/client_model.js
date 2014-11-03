@@ -1,49 +1,41 @@
 /**
- * The Client Model
+ * The Client Capability Model
  *
  * @constructor
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-Model.extend(function ClientModel() {
-	
-	this.preInit = function preInit() {
+var Client = Model.extend(function ClientModel(options) {
 
-		this.parent();
+	var chimera,
+	    list,
+	    edit;
 
-		this.icon = 'desktop';
+	ClientModel.super.call(this, options);
 
-		this.blueprint = {
-			name: {
-				type: 'String',
-				required: true
-			},
-			key: {
-				type: 'String',
-				required: true
-			},
-			hostname: {
-				type: 'String',
-				required: true
-			},
-			ip: {
-				type: 'String',
-				required: true
-			}
-		};
+	// Create the chimera behaviour
+	chimera = this.addBehaviour('chimera');
 
-		this.modelEdit = {
-			general: {
-				title: __('chimera', 'General'),
-				fields: ['name', 'key', 'hostname', 'ip']
-			}
-		};
+	// Get the list group
+	list = chimera.getActionFields('list');
 
-		this.modelIndex = {
-			fields: ['name', 'key', 'hostname', 'ip']
-		};
-	};
+	list.addField('name');
+	list.addField('key');
+	list.addField('hostname');
+	list.addField('ip');
 
+	// Get the edit group
+	edit = chimera.getActionFields('edit');
+
+	edit.addField('name');
+	edit.addField('key');
+	edit.addField('hostname');
+	edit.addField('ip');
 });
+
+Client.addField('name', 'String');
+Client.addField('key', 'String');
+Client.addField('hostname', 'String');
+Client.addField('ip', 'String');

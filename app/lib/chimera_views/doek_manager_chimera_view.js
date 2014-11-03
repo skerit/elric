@@ -24,7 +24,7 @@ function getMenuItemTypes() {
  * @since    0.0.1
  * @version  0.0.1
  */
-alchemy.create('ChimeraView', function MenuManagerChimeraView() {
+alchemy.create('ChimeraView', function DoekManagerChimeraView() {
 
 	/**
 	 * Build the edit view

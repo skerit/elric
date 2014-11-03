@@ -1,4 +1,21 @@
-var protocols = alchemy.shared('AutomationProtocols');
+var Protocols = alchemy.shared('Elric.Protocols'),
+    Blast      = __Protoblast;
+
+Blast.on('extended', function(parent, child) {
+
+	var typeName,
+	    name;
+
+	if (parent.name.endsWith('AutomationProtocol')) {
+		name = child.name.beforeLast('AutomationProtocol') || 'AutomationProtocol';
+		typeName = name.underscore();
+
+		child.setProperty('title', name);
+		child.setProperty('typeName', typeName);
+
+		Protocols[typeName] = child;
+	}
+});
 
 /**
  * The Base Automation Protocol class

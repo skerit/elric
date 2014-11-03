@@ -5,51 +5,36 @@
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-Model.extend(function ClientCapabilityModel() {
-	
-	this.preInit = function preInit() {
+var ClientCapability = Model.extend(function ClientCapabilityModel(options) {
 
-		this.parent();
+	var chimera,
+	    list,
+	    edit;
 
-		this.capabilities = alchemy.shared('Elric.capabilities');
+	ClientCapabilityModel.super.call(this, options);
 
-		this.belongsTo = {
-			Client: {
-				modelName: 'Client',
-				foreignKey: 'client_id'
-			}
-		};
+	// Create the chimera behaviour
+	chimera = this.addBehaviour('chimera');
 
-		this.blueprint = {
-			client_id: {
-				type: 'ObjectId',
-				required: true
-			},
-			capability: {
-				type: 'Enum',
-				required: true
-			},
-			enabled: {
-				type: 'Boolean',
-				required: true
-			},
-			settings: {
-				type: 'Object'
-			}
-		};
+	// Get the list group
+	list = chimera.getActionFields('list');
 
-		this.modelEdit = {
-			general: {
-				title: __('chimera', 'General'),
-				fields: ['client_id', 'capability', 'enabled']
-			}
-		};
+	list.addField('client_id');
+	list.addField('capability');
+	list.addField('enabled');
 
-		this.modelIndex = {
-			fields: ['client_id', 'capability', 'enabled']
-		};
-	};
+	// Get the edit group
+	edit = chimera.getActionFields('edit');
 
+	edit.addField('client_id');
+	edit.addField('capability');
+	edit.addField('enabled');
 });
+
+ClientCapability.addField('capability', 'Enum');
+ClientCapability.addField('enabled', 'Boolean');
+ClientCapability.addField('settings', 'Object');
+
+ClientCapability.belongsTo('Client');

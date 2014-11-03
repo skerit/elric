@@ -1,10 +1,11 @@
 {
 	"name": "elric",
 	"description": "The Elric server",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"dependencies": {
-		"alchemymvc": "0.1.x",
-		"alchemy-chimera": "0.1.x",
+		"alchemymvc": "1.0.x",
+		"alchemy-chimera": "1.0.x",
+
 		"alchemy-i18n": "0.1.x",
 		"alchemy-styleboost": "0.1.x",
 		"alchemy-jquery": "0.1.x",
@@ -33,6 +34,6 @@
 	},
 	"license": "GPLv3",
 	"engines": {
-		"node": ">=0.8"
+		"node": ">=0.10"
 	}
 }
