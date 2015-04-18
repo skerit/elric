@@ -1,0 +1,50 @@
+.flexParent(@type: row; @alignment: space-between; @wrap: wrap) {
+	//display: -webkit-flex;
+	display: flex;
+
+	//-webkit-flex-flow: @type @wrap;
+	flex-flow: @type @wrap;
+
+	//-webkit-justify-content: @alignment;
+	justify-content: @alignment;
+}
+
+.flexChild(@type: 0 0 auto) {
+	//-webkit-flex: @type;
+	flex: @type;
+}
+
+.clearfix {
+	&:before, &:after {
+		content: "";
+		display: table;
+	}
+
+	&:after {
+		clear: both;
+	}
+}
+
+.select(@type) {
+	-webkit-touch-callout: @type;
+	-webkit-user-select: @type;
+	-khtml-user-select: @type;
+	-moz-user-select: @type;
+	-ms-user-select: @type;
+	user-select: @type;
+}
+
+.row() {
+	.flexParent();
+}
+
+.col(@size: 1) {
+
+	// Single colsize
+	@_single: 100% / 12;
+
+	// Calculate
+	@_basis: @_single * @size;
+
+	.flexChild(0 0 @_basis);
+}

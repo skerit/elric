@@ -5,57 +5,60 @@
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-Model.extend(function DeviceModel() {
-	
-	this.preInit = function preInit() {
+var Device = Model.extend(function DeviceModel() {
 
-		this.parent();
+	var chimera,
+	    list,
+	    edit;
 
-		this.icon = 'lightbulb';
+	CommandHistoryModel.super.call(this, options);
 
-		this.belongsTo = {
-			Interface: {
-				modelName: 'Interface',
-				foreignKey: 'interface_id'
-			}
-		};
+	this.device_types = alchemy.shared('device.Types');
+	this.automation_protocols = alchemy.shared('AutomationProtocols');
+	this.interface_types = alchemy.shared('Elric.interfaces');
 
-		this.device_types = alchemy.shared('device.Types');
-		this.automation_protocols = alchemy.shared('AutomationProtocols');
-		this.interface_types = alchemy.shared('Elric.interfaces');
+	// Create the chimera behaviour
+	chimera = this.addBehaviour('chimera');
 
-		this.blueprint = {
-			name: {
-				type: 'String'
-			},
-			device_type: {
-				type: 'Enum'
-			},
-			automation_protocol: {
-				type: 'Enum'
-			},
-			address: {
-				type: 'Object'
-			},
-			interface_type: {
-				type: 'Enum'
-			},
-			interface_id: {
-				type: 'ObjectId'
-			}
-		};
+	// Get the list group
+	list = chimera.getActionFields('list');
 
-		this.modelEdit = {
-			general: {
-				title: __('chimera', 'General'),
-				fields: ['name', 'device_type', 'automation_protocol', 'address', 'interface_type', 'interface_id']
-			}
-		};
+	list.addField('name');
+	list.addField('device_type');
+	list.addField('automation_protocol');
+	list.addField('address');
+	list.addField('interface_type');
+	list.addField('interface_id');
 
-		this.modelIndex = {
-			fields: ['name', 'device_type', 'automation_protocol', 'address', 'interface_type', 'interface_id']
-		};
-	};
+	// Get the edit group
+	edit = chimera.getActionFields('edit');
+
+	edit.addField('name');
+	edit.addField('device_type');
+	edit.addField('automation_protocol');
+	edit.addField('address');
+	edit.addField('interface_type')
+	edit.addField('interface_id')
+
+	this.icon = 'lightbulb';
+});
+
+/**
+ * Constitute the class wide schema
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Device.constitute(function addFields() {
+
+	this.belongsTo('Interface');
+
+	this.addField('name', 'String');
+	this.addField('device_type', 'Enum');
+	this.addField('automation_protocol', 'Enum');
+	this.addField('address', 'Object');
+	this.addField('interface_type', 'Enum');
 });

@@ -35,7 +35,16 @@ var Client = Model.extend(function ClientModel(options) {
 	edit.addField('ip');
 });
 
-Client.addField('name', 'String');
-Client.addField('key', 'String');
-Client.addField('hostname', 'String');
-Client.addField('ip', 'String');
+/**
+ * Constitute the class wide schema
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Client.constitute(function addFields() {
+	this.addField('name', 'String');
+	this.addField('key', 'String');
+	this.addField('hostname', 'String');
+	this.addField('ip', 'String');
+});

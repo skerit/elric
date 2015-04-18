@@ -1,3 +1,4 @@
+return;
 var async = alchemy.use('async'),
     MenuItemTypes = alchemy.shared('Menu.itemTypes');
 

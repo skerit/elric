@@ -1,4 +1,21 @@
-var capabilities = alchemy.shared('Elric.capabilities');
+var Capabilities = alchemy.shared('Elric.capabilities'),
+    Blast        = __Protoblast;
+
+Blast.on('extended', function(parent, child) {
+
+	var typeName,
+	    name;
+
+	if (parent.name.endsWith('Capability')) {
+		name = child.name.beforeLast('Capability') || 'Capability';
+		typeName = name.underscore();
+
+		child.setProperty('title', name.humanize());
+		child.setProperty('typeName', typeName);
+
+		Capabilities[typeName] = child;
+	}
+});
 
 /**
  * The Elric Capability class
@@ -10,62 +27,23 @@ var capabilities = alchemy.shared('Elric.capabilities');
  * @since    0.0.1
  * @version  0.1.0
  */
-alchemy.create(function Capability() {
+var Capability = Function.inherits('Informer', function Capability() {
 
-	/**
-	 * The version of the client file
-	 *
-	 * @type   {String}
-	 */
-	this.version = '0.1.0';
+	var schema = new alchemy.classes.Schema(this);
 
-	/**
-	 * Set the title properties
-	 *
-	 * @author   Jelle De Loecker   <jelle@codedor.be>
-	 * @since    0.1.0
-	 * @version  0.1.0
-	 *
-	 * @param    {Function}   parent   The parent class
-	 * @param    {Function}   child    The (extended) child class
-	 */
-	this.__extended__ = function __extended__(parent, child) {
-
-		// Extract the name
-		var name     = child.name.replace(/Capability$/, ''),
-		    typeName = name.underscore(),
-		    title    = name.titleize();
-
-		child.prototype.typeName = typeName;
-
-		// Do not let the child inherit the extendonly setting
-		if (!child.prototype.hasOwnProperty('title')) {
-			child.prototype.title = title;
-		}
-
-		// Register this protocol
-		if (!child.prototype.extendonly) {
-			capabilities[typeName] = title;
-		}
-	};
-
-	/**
-	 * The pre constructor
-	 * 
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    0.0.1
-	 * @version  0.1.0
-	 */
-	this.preInit = function preInit() {
-
-		/**
-		 * The description of this action
-		 */
-		this.description = '';
-		
-		/**
-		 * The structure of the payload
-		 */
-		this.blueprint = false;
-	};
+	this.schema = schema;
 });
+
+/**
+ * The version of the client file
+ *
+ * @type   {String}
+ */
+Capability.setProperty('version', '0.1.0');
+
+/**
+ * The description of this action
+ *
+ * @type   {String}
+ */
+Capability.setProperty('description', '');

@@ -1,0 +1,1 @@
+Router.get('Home', '/', 'Static#home');

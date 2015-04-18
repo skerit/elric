@@ -1,45 +1,58 @@
-#doekContainer {
+@import "partials/reset";
+@import "partials/font";
+@import "partials/color";
+@import "partials/util";
 
-	#map {border: 1px solid black;}
-	
-	#toolbar {
-		margin-bottom: 5px;
-		
-		>div {
-			margin-right: 5px;
-			float:left;
+html {
+	// The basis for rem units
+	// Regular text (like in an article) should be 1rem
+	font-size: 14px;
+	color: @color-lightest;
+	background-color: @color-gray;
+
+	// We use the Lato font
+	font-family: 'Lato', sans-serif;
+	text-rendering: optimizeLegibility;
+}
+
+figure {
+	display: inline-block;
+}
+
+#topbar {
+	position: fixed;
+	height: 3.85rem;
+	width: 100%;
+	.row();
+
+	.branding {
+		.flexChild(0 0 22rem);
+		padding: 0.75rem;
+		background-color: @color-darkest;
+
+		h1 {
+			.fontStyle(largest, bold);
+			display: inline-block;
+			text-transform: uppercase;
 		}
+	}
+
+	.toolbar {
+		.flexChild(1 0 auto);
+		background-color: @color-darker;
 	}
 }
 
-#doeksidebar {
-	
-	padding-left: 9px !important;
-	padding-right: 9px !important;
-	
-	h4 {
-		border-bottom: 1px solid;
-		margin: 5px 0 !important;
-	}
-	
-	.edit.element {
-		display: none;
-	}
-	
-	.selects {
-		.control-group {
-			margin-bottom: 0;
-		}
-	}
+#sidebar {
+	position: fixed;
+	top: 3.85rem;
+	width: 22rem;
+	height: 100%;
+	background-color: @color-darker;
 }
 
-.input-prepend, .input-append {
-	
-	.add-on {
-		width: 25px !important;
-	}
-	
-	input {
-		width: 170px !important;
-	}
+#content {
+	min-height: 100vh;
+	margin-left: 22rem;
+	padding-top: 3.85rem;
 }

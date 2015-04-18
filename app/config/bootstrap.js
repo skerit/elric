@@ -12,3 +12,4 @@
  */
 alchemy.usePlugin('chimera', {title: 'Elric'});
 alchemy.usePlugin('styleboost');
+alchemy.usePlugin('media');

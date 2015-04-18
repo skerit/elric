@@ -24,7 +24,10 @@ module.exports = {
 	
 	// Enable hawkejs on the client side
 	hawkejsClient: true,
-	
+
+	// Enable caching
+	cache: true,
+
 	// Disable debugging
 	debug: false,
 	

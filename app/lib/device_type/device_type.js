@@ -1,3 +1,4 @@
+return;
 var deviceTypes = alchemy.shared('device.Types'),
     categories  = alchemy.shared('device.categories');
 

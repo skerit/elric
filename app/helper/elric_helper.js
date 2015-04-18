@@ -1,5 +1,7 @@
 module.exports = function elricHelpers(hawkejs) {
 
+	return;
+
 	var helpers = hawkejs.helpers;
 
 	/**

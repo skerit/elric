@@ -1,0 +1,39 @@
+@import url(http://fonts.googleapis.com/css?family=Lato:400,900italic,900,700italic,700,400italic,300italic,300,100italic,100&subset=latin,latin-ext);
+@import url(http://fonts.googleapis.com/css?family=Share+Tech+Mono);
+
+// Font Weights
+@fontWeight-thin: 100;
+@fontWeight-light: 200;
+@fontWeight-normal: 400;
+@fontWeight-bold: 700;
+@fontWeight-ultra: 900;
+
+// Each step under `base` is 0.125rem smaller
+@fontSize-micro: 0.5rem;
+@fontSize-smallest: 0.625rem;
+@fontSize-smaller: 0.75rem;
+@fontSize-small: 0.875rem;
+
+// Base size is always 1rem;
+@fontSize-base: 1rem;
+
+// Each step above `base` is 0.250rem larger 
+@fontSize-large: 1.250rem;
+@fontSize-larger: 1.500rem;
+@fontSize-largest: 1.750rem;
+@fontSize-jumbo: 2.000rem;
+
+// fontStyle mixin
+.fontStyle(@size; @weight: normal; @style: normal) {
+
+	// Construct the correct variable name
+	@_size: ~"fontSize-@{size}";
+	@_weight: ~"fontWeight-@{weight}";
+
+	// Use those variables
+	font-weight: @@_weight;
+	font-size: @@_size;
+
+	// There are only 2 valid styles (+ inherits)
+	font-style: @style;
+}

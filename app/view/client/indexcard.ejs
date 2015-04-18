@@ -1,0 +1,36 @@
+<%
+var key, data;
+
+if (item && item[modelName]) {
+	data = item.UserData;
+	item = item[modelName];
+}
+%>
+<div class="col-md-<%= cardGrid %>">
+	<article class="pcard">
+		<header class="no-border">
+			<h1><%= (item.first_name || '') + ' ' + (item.last_name || '') %></h1>
+			<div class="tools">
+				<%
+					chimera.actions('record', {
+						'class': 'btn btn-xs',
+						routeVars: {
+							id: item._id
+						},
+						content: false
+					});
+				%>
+			</div>
+		</header>
+		<div class="body no-border">
+			<div class="row-fluid">
+				<div>
+				<i class="fa fa-database fa-6"></i>
+				<% for (key in item) { %>
+					<% echo(key + ': ' + item[key]) %><br>
+				<% } %>
+				</div>
+			</div>
+		</div>
+	</article>
+</div>

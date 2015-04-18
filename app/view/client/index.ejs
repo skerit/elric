@@ -1,0 +1,45 @@
+<%
+
+var client, i;
+
+expands('layouts/admin_main');
+
+start('chimera-page-title'); -%>
+<h1>Clients</h1>
+<% end('chimera-page-title'); %>
+
+<% start(store('chimera-view-setting').contentblock) -%>
+
+<%
+	for (i = 0; i < items.length; i++) {
+		client = items[i].Client;
+%>
+
+	<% if (i % 2 === 0) { %><div class="row"><% } %>
+
+	<div class="col-md-6">
+		<div class="grid simple vertical green">
+			<div class="grid-title no-border">
+				<h4><%= client.name %></h4>
+				<div class="tools"> <a href="javascript:;" class="collapse"></a> <a href="#grid-config" data-toggle="modal" class="config"></a> <a href="javascript:;" class="reload"></a> <a href="javascript:;" class="remove"></a> </div>
+			</div>
+			<div class="grid-body no-border">
+				<div class="row-fluid">
+					<div>
+						<h3>Colored<span class="semi-bold"> Band</span></h3>
+						<div class="color-bands green"></div>
+						<div class="color-bands purple"></div>
+						<div class="color-bands red"></div>
+						<div class="color-bands blue"></div>
+						<br>
+						<p>The overflow is clipped, and the rest of the content will be invisible, Play it ». scroll, The overflow is clipped, but a scroll-bar is added to see the rest of the </p>
+						<p> default, the textarea element comes with a vertical scrollbar (and maybe even a horizontal scrollbar). This vertical scrollbar enables the user to continue entering and reviewing their text (by scrolling up and down).</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<% if (i % 2 === 0) { %></div><% } %>
+<% } %>
+<% end(store('chimera-view-setting').contentblock) %>

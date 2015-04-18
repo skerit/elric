@@ -33,8 +33,17 @@ var ClientCapability = Model.extend(function ClientCapabilityModel(options) {
 	edit.addField('enabled');
 });
 
-ClientCapability.addField('capability', 'Enum');
-ClientCapability.addField('enabled', 'Boolean');
-ClientCapability.addField('settings', 'Object');
+/**
+ * Constitute the class wide schema
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+ClientCapability.constitute(function addFields() {
+	this.addField('capability', 'Enum');
+	this.addField('enabled', 'Boolean');
+	this.addField('settings', 'Object');
 
-ClientCapability.belongsTo('Client');
+	this.belongsTo('Client');
+});

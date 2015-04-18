@@ -1,5 +1,25 @@
 <% expands('layouts/base') %>
 
 <% start('body') %>
+<nav id="topbar">
+	<div class="branding">
+		<div class="logo">
+			<%= Media.figure('elric.png', {width: 30, height: 30}) %>
+			<h1>Elric</h1>
+		</div>
+		<div>
+			<a class="sidebar-switch pull-right"><span class="icon fa"></span></a>
+		</div>
+	</div>
+	<div class="toolbar">
+		
+	</div>
+</nav>
+
+<aside id="sidebar">
+
+</aside>
+<div id="content">
 	<% assign('main') %>
+</div>
 <% end('body') %>
