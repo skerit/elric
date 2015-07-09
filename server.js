@@ -15,22 +15,22 @@
  */
 require('alchemymvc');
 
+alchemy.create = function(name, fnc){
+	console.log('DEPRECATED CREATE:', name);
+};
+
+alchemy.onMulticast('client', function gotPackage(data) {
+	console.log('Got client package', data);
+});
+
 // Intercept uncaught exceptions so the server won't crash
 // @todo: this should be expanded and integrated into alchemy itself
 process.on('uncaughtException', function(error) {
-
-	// Try getting the render object from the arguments
-	var render = alchemy.getRenderObject(error.arguments);
 
 	// Indicate we caught an exception
 	log.error('Uncaught Exception!', {err: error});
 
 	console.log(error.stack)
-
-	// If we found a render object, we can cut the connection to the client
-	if (render) {
-		render.res.send(500, 'Uncaught Exception!');
-	}
 });
 
 alchemy.start(function onAlchemyReady() {

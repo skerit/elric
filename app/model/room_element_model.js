@@ -5,78 +5,74 @@
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-Model.extend(function RoomElementModel() {
-	
-	this.preInit = function preInit() {
+var RoomElement = Model.extend(function RoomElementModel(options) {
 
-		this.parent();
+	RoomElementModel.super.call(this, options);
 
-		this.icon = 'lightbulb-o';
+	this.element_types = alchemy.shared('Elric.elementTypes');
 
-		this.element_types = alchemy.shared('elementTypes');
+	this.icon = 'lightbulb-o';
+});
 
-		this.belongsTo = {
-			Room: {
-				modelName: 'Room',
-				foreignKey: 'room_id'
-			}
-		};
+/**
+ * Constitute the class wide schema
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+RoomElement.constitute(function addFields() {
 
-		this.blueprint = {
-			name: {
-				type: 'String',
-				required: true
-			},
-			room_id: {
-				type: 'ObjectId',
-				required: true
-			},
-			element_type: {
-				type: 'Enum',
-				required: true
-			},
-			type_external_id: {
-				type: 'ObjectId',
-				required: false
-			},
-			x: {
-				type: 'Number',
-				required: true
-			},
-			y: {
-				type: 'Number',
-				required: true
-			},
-			dx: {
-				type: 'Number',
-				required: true
-			},
-			dy: {
-				type: 'Number',
-				required: true
-			},
-			width: {
-				type: 'Number',
-				required: true
-			},
-			height: {
-				type: 'Number',
-				required: true
-			}
-		};
+	this.belongsTo('Room');
 
-		this.modelEdit = {
-			general: {
-				title: __('chimera', 'General'),
-				fields: ['name', 'room_id', 'element_type', 'type_external_id', 'x', 'y', 'dx', 'dy', 'width', 'height']
-			}
-		};
+	this.addField('name', 'String');
+	this.addField('element_type', 'Enum');
+	this.addField('type_external_id', 'ObjectId');
+	this.addField('x', 'Number');
+	this.addField('y', 'Number');
+	this.addField('dx', 'Number');
+	this.addField('dy', 'Number');
+	this.addField('width', 'Number');
+	this.addField('height', 'Number');
+});
 
-		this.modelIndex = {
-			fields: ['name', 'room_id', 'element_type', 'type_external_id', 'x', 'y', 'dx', 'dy', 'width', 'height']
-		};
-	};
+/**
+ * Configure chimera for this model
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+RoomElement.constitute(function chimeraConfig() {
 
+	var list,
+	    edit;
+
+	if (!this.chimera) {
+		return;
+	}
+
+	// Get the list group
+	list = this.chimera.getActionFields('list');
+
+	list.addField('name');
+	list.addField('room_id');
+	list.addField('element_type');
+	list.addField('type_external_id');
+
+	// Get the edit group
+	edit = this.chimera.getActionFields('edit');
+
+	edit.addField('name');
+	edit.addField('room_id');
+	edit.addField('element_type');
+	edit.addField('type_external_id');
+	edit.addField('x');
+	edit.addField('y');
+	edit.addField('dx');
+	edit.addField('dy');
+	edit.addField('width');
+	edit.addField('height');
 });

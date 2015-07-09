@@ -8,29 +8,7 @@
  * @version  1.0.0
  */
 var ClientCapability = Model.extend(function ClientCapabilityModel(options) {
-
-	var chimera,
-	    list,
-	    edit;
-
 	ClientCapabilityModel.super.call(this, options);
-
-	// Create the chimera behaviour
-	chimera = this.addBehaviour('chimera');
-
-	// Get the list group
-	list = chimera.getActionFields('list');
-
-	list.addField('client_id');
-	list.addField('capability');
-	list.addField('enabled');
-
-	// Get the edit group
-	edit = chimera.getActionFields('edit');
-
-	edit.addField('client_id');
-	edit.addField('capability');
-	edit.addField('enabled');
 });
 
 /**
@@ -46,4 +24,35 @@ ClientCapability.constitute(function addFields() {
 	this.addField('settings', 'Object');
 
 	this.belongsTo('Client');
+});
+
+/**
+ * Configure chimera for this model
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+ClientCapability.constitute(function chimeraConfig() {
+
+	var list,
+	    edit;
+
+	if (!this.chimera) {
+		return;
+	}
+
+	// Get the list group
+	list = this.chimera.getActionFields('list');
+
+	list.addField('client_id');
+	list.addField('capability');
+	list.addField('enabled');
+
+	// Get the edit group
+	edit = this.chimera.getActionFields('edit');
+
+	edit.addField('client_id');
+	edit.addField('capability');
+	edit.addField('enabled');
 });

@@ -5,67 +5,77 @@
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
+ * @version  1.0.0
+ */
+var Interface = Model.extend(function InterfaceModel(options) {
+
+	InterfaceModel.super.call(this, options);
+
+	this.interface_types = alchemy.shared('Elric.interfaces');
+
+	this.icon = 'screenshot';
+});
+
+/**
+ * Constitute the class wide schema
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Interface.constitute(function addFields() {
+
+	this.belongsTo('Client');
+
+	this.addField('title', 'String');
+	this.addField('interface_type', 'Enum');
+});
+
+/**
+ * Configure chimera for this model
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Interface.constitute(function chimeraConfig() {
+
+	var list,
+	    edit;
+
+	if (!this.chimera) {
+		return;
+	}
+
+	// Get the list group
+	list = this.chimera.getActionFields('list');
+
+	list.addField('title');
+	list.addField('client_id');
+	list.addField('interface_type');
+
+	// Get the edit group
+	edit = this.chimera.getActionFields('edit');
+
+	edit.addField('title');
+	edit.addField('client_id');
+	edit.addField('interface_type');
+});
+
+/**
+ * Prepare the recordset before saving
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    0.0.1
  * @version  0.1.0
  */
-Model.extend(function InterfaceModel() {
-	
-	this.preInit = function preInit() {
+Interface.setMethod(function prepareSave(recordset) {
 
-		this.parent();
+	var item = recordset.Interface;
 
-		this.icon = 'screenshot';
+	if (!item.title) {
+		item.title = item.interface_type + ' on ' + item.client_id;
+	}
 
-		this.interface_types = alchemy.shared('Elric.interfaces');
-
-		this.belongsTo = {
-			Client: {
-				modelName: 'Client',
-				foreignKey: 'client_id'
-			}
-		};
-
-		this.blueprint = {
-			client_id: {
-				type: 'ObjectId',
-				required: true
-			},
-			interface_type: {
-				type: 'Enum',
-				required: true
-			},
-			title: {
-				type: 'String'
-			}
-		};
-
-		this.modelEdit = {
-			general: {
-				title: __('chimera', 'General'),
-				fields: ['title', 'client_id', 'interface_type']
-			}
-		};
-
-		this.modelIndex = {
-			fields: ['title', 'client_id', 'interface_type']
-		};
-	};
-
-	/**
-	 * Prepare the recordset before saving
-	 *
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    0.0.1
-	 * @version  0.1.0
-	 */
-	this.prepareSave = function prepareSave(recordset) {
-
-		var item = recordset.Interface;
-
-		if (!item.title) {
-			item.title = item.interface_type + ' on ' + item.client_id;
-		}
-
-		return recordset;
-	};
-
+	return recordset;
 });

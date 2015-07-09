@@ -7,40 +7,13 @@
  * @since    0.0.1
  * @version  1.0.0
  */
-var Device = Model.extend(function DeviceModel() {
+var Device = Model.extend(function DeviceModel(options) {
 
-	var chimera,
-	    list,
-	    edit;
-
-	CommandHistoryModel.super.call(this, options);
+	DeviceModel.super.call(this, options);
 
 	this.device_types = alchemy.shared('device.Types');
 	this.automation_protocols = alchemy.shared('AutomationProtocols');
 	this.interface_types = alchemy.shared('Elric.interfaces');
-
-	// Create the chimera behaviour
-	chimera = this.addBehaviour('chimera');
-
-	// Get the list group
-	list = chimera.getActionFields('list');
-
-	list.addField('name');
-	list.addField('device_type');
-	list.addField('automation_protocol');
-	list.addField('address');
-	list.addField('interface_type');
-	list.addField('interface_id');
-
-	// Get the edit group
-	edit = chimera.getActionFields('edit');
-
-	edit.addField('name');
-	edit.addField('device_type');
-	edit.addField('automation_protocol');
-	edit.addField('address');
-	edit.addField('interface_type')
-	edit.addField('interface_id')
 
 	this.icon = 'lightbulb';
 });
@@ -61,4 +34,41 @@ Device.constitute(function addFields() {
 	this.addField('automation_protocol', 'Enum');
 	this.addField('address', 'Object');
 	this.addField('interface_type', 'Enum');
+});
+
+/**
+ * Configure chimera for this model
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Device.constitute(function chimeraConfig() {
+
+	var list,
+	    edit;
+
+	if (!this.chimera) {
+		return;
+	}
+
+	// Get the list group
+	list = this.chimera.getActionFields('list');
+
+	list.addField('name');
+	list.addField('device_type');
+	list.addField('automation_protocol');
+	list.addField('address');
+	list.addField('interface_type');
+	list.addField('interface_id');
+
+	// Get the edit group
+	edit = this.chimera.getActionFields('edit');
+
+	edit.addField('name');
+	edit.addField('device_type');
+	edit.addField('automation_protocol');
+	edit.addField('address');
+	edit.addField('interface_type');
+	edit.addField('interface_id');
 });
