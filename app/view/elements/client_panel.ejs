@@ -1,0 +1,43 @@
+<% update_url(Router.routeUrl('chimera@ActionLink', {controller: 'Client', action: 'detail'}, {get: {id: ''+client._id}})) %>
+
+<x-panel class="panel-third">
+	<!--<x-panel-overlay>TEST</x-panel-overlay>-->
+	<x-panel-header><%= client.hostname %></x-panel-header>
+	<x-panel-actions>
+		<x-switch title="Toggle client"></x-switch>
+	</x-panel-actions>
+	<x-panel-body>
+		<ul class="list-info list-horizontal has-icons">
+			<li>
+			<i class="info-icon"><%= Media.svg('power') %></i>
+				<p class="info-title">Status</p>
+				<p class="info-value">
+					<% live('client.connected', function gotVal(connected) { %>
+						<% if (connected) { %>
+							On-line
+						<% } else { %>
+							Off-line
+						<% } %>
+					<% }) %>
+				</p>
+			</li>
+			<li>
+				<i class="info-icon"><%= Media.svg('home-ip') %></i>
+				<p class="info-title">Ip</p>
+				<p class="info-value">
+					<%= client.ip %>
+				</p>
+			</li>
+			<li>
+				<i class="info-icon"><%= Media.svg('clock') %></i>
+				<p class="info-title">Uptime</p>
+				<p class="info-value">x year</p>
+			</li>
+		</ul>
+		<% if (!client.authorized) { %>
+			<button data-update-request="post" name="authorize" class="btn btn-success client-auth-button">
+				<i><%= Media.svg('lightning') %></i>Authorize
+			</button>
+		<% } %>
+	</x-panel-body>
+</x-panel>

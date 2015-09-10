@@ -1,6 +1,10 @@
 module.exports = {
-	hawkejsClient: true,
+	cache: false,
+	minify_js: false,
+	hawkejs_client: true,
 	debug: true,
-	logTrace: true,
-	logHttp: false
+	kill_on_file_change: true,
+	log_trace: true,
+	websockets: true,
+	session_length: '5 minutes'
 };

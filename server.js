@@ -15,12 +15,15 @@
  */
 require('alchemymvc');
 
+alchemy.configureService('elric::master');
+
 alchemy.create = function(name, fnc){
 	console.log('DEPRECATED CREATE:', name);
 };
 
-alchemy.onMulticast('client', function gotPackage(data) {
-	console.log('Got client package', data);
+alchemy.onMulticast('client', function gotPackage(data, packet, callback) {
+	console.log('Got client package', data, packet, 'responding...');
+	callback('hello back!');
 });
 
 // Intercept uncaught exceptions so the server won't crash

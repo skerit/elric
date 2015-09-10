@@ -1,21 +1,4 @@
-var Capabilities = alchemy.shared('Elric.capabilities'),
-    Blast        = __Protoblast;
-
-Blast.on('extended', function(parent, child) {
-
-	var typeName,
-	    name;
-
-	if (parent.name.endsWith('Capability')) {
-		name = child.name.beforeLast('Capability') || 'Capability';
-		typeName = name.underscore();
-
-		child.setProperty('title', name.humanize());
-		child.setProperty('typeName', typeName);
-
-		Capabilities[typeName] = child;
-	}
-});
+var Capabilities = alchemy.shared('Elric.capabilities');
 
 /**
  * The Elric Capability class
@@ -25,12 +8,33 @@ Blast.on('extended', function(parent, child) {
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  0.2.0
  */
-var Capability = Function.inherits('Informer', function Capability() {
+var Capability = Function.inherits('Informer', function Capability() {});
 
-	var schema = new alchemy.classes.Schema(this);
+/**
+ * Register the capability and set the schema
+ *
+ * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @since    0.2.0
+ * @version  0.2.0
+ */
+Capability.constitute(function register() {
 
+	var type_name,
+	    schema,
+	    name;
+
+	name = this.name.beforeLast('Capability') || this.name;
+	type_name = name.underscore();
+
+	this.setProperty('title', name.humanize());
+	this.setProperty('type_name', type_name);
+
+	Capabilities[type_name] = this;
+
+	// Create a new schema
+	schema = new alchemy.classes.Schema(this);
 	this.schema = schema;
 });
 
