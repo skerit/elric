@@ -30,6 +30,45 @@ Client.setMethod(function index(conduit) {
 });
 
 /**
+ * Configure a client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Client.setMethod(function configure(conduit) {
+
+	var client,
+	    temp,
+	    id = conduit.param('id'),
+	    i;
+
+	if (!id) {
+		return conduit.notFound();
+	}
+
+	// Get the client
+	for (i = 0; i < elric.clients.length; i++) {
+		temp = elric.clients[i];
+
+		if (String(temp._id) == id) {
+			client = temp;
+		}
+	}
+
+	this.set('pagetitle', client.hostname || client.ip);
+
+	console.log('CAPABILITIES', client.ClientCapability, client.ClientCapability.capability)
+
+	this.set('client_capabilities', client.ClientCapability);
+	this.set('client', client.Client);
+
+	this.render('client/chimera_edit');
+});
+
+/**
  * Send client specific detail
  *
  * @author   Jelle De Loecker <jelle@develry.be>

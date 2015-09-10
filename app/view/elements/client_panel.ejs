@@ -4,40 +4,22 @@
 	<!--<x-panel-overlay>TEST</x-panel-overlay>-->
 	<x-panel-header><%= client.hostname %></x-panel-header>
 	<x-panel-actions>
-		<x-switch title="Toggle client"></x-switch>
+		<% live('client.enabled', function gotVal(enabled) { %>
+			<x-switch title="Toggle client" <% if (client.enabled) print('checked') %>></x-switch>
+		<% }) %>
 	</x-panel-actions>
 	<x-panel-body>
-		<ul class="list-info list-horizontal has-icons">
-			<li>
-			<i class="info-icon"><%= Media.svg('power') %></i>
-				<p class="info-title">Status</p>
-				<p class="info-value">
-					<% live('client.connected', function gotVal(connected) { %>
-						<% if (connected) { %>
-							On-line
-						<% } else { %>
-							Off-line
-						<% } %>
-					<% }) %>
-				</p>
-			</li>
-			<li>
-				<i class="info-icon"><%= Media.svg('home-ip') %></i>
-				<p class="info-title">Ip</p>
-				<p class="info-value">
-					<%= client.ip %>
-				</p>
-			</li>
-			<li>
-				<i class="info-icon"><%= Media.svg('clock') %></i>
-				<p class="info-title">Uptime</p>
-				<p class="info-value">x year</p>
-			</li>
-		</ul>
-		<% if (!client.authorized) { %>
-			<button data-update-request="post" name="authorize" class="btn btn-success client-auth-button">
-				<i><%= Media.svg('lightning') %></i>Authorize
-			</button>
-		<% } %>
+		<% implement('elements/client_info', {wrap: false}) %>
+
+		<% live('client.authorized', function gotVal(authorized) {
+			if (!authorized) { %>
+				<button data-update-request="post" name="authorize" class="btn btn-success client-auth-button">
+					<i><%= Media.svg('lightning') %></i>Authorize
+				</button>
+			<% } else { %>
+				<% Router.printRoute('chimera@IdActionLink', {controller: 'Client', action: 'configure', id: client._id}, {className: 'btn btn-success', title: 'Configure'}) %>
+			<% }
+		}) %>
+		
 	</x-panel-body>
 </x-panel>

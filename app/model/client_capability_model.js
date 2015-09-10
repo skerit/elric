@@ -1,3 +1,5 @@
+var all_capabilities = alchemy.shared('Elric.capabilities');
+
 /**
  * The Client Capability Model
  *
@@ -19,11 +21,17 @@ var ClientCapability = Model.extend(function ClientCapabilityModel(options) {
  * @version  1.0.0
  */
 ClientCapability.constitute(function addFields() {
-	this.addField('capability', 'Enum');
+	this.addField('name', 'String'); // Enum?
 	this.addField('enabled', 'Boolean');
 	this.addField('settings', 'Object');
 
 	this.belongsTo('Client');
+
+	this.Document.setFieldGetter('capability', function getCapability() {
+		if (all_capabilities[this.name]) {
+			return new all_capabilities[this.name]();
+		}
+	});
 });
 
 /**
@@ -46,13 +54,13 @@ ClientCapability.constitute(function chimeraConfig() {
 	list = this.chimera.getActionFields('list');
 
 	list.addField('client_id');
-	list.addField('capability');
+	list.addField('name');
 	list.addField('enabled');
 
 	// Get the edit group
 	edit = this.chimera.getActionFields('edit');
 
 	edit.addField('client_id');
-	edit.addField('capability');
+	edit.addField('name');
 	edit.addField('enabled');
 });

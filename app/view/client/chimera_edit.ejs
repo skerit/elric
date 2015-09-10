@@ -1,0 +1,23 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+<% start('chimera-status') %>
+<% implement('elements/client_info', {wrapper: false}) %>
+<% end('chimera-status') %>
+
+<% start('chimera-cage') %>
+<% client_capabilities.forEach(function eachcc(cc) { %>
+	<x-panel class="panel-third">
+		<x-panel-header><%= cc.capability.title %></x-panel-header>
+		<x-panel-actions>
+			<% live('cc.enabled', function gotVal(enabled) { %>
+				<x-switch title="Toggle capability" <% if (cc.enabled) print('checked') %>></x-switch>
+			<% }) %>
+		</x-panel-actions>
+		<x-panel-body>
+			<p>Version <%= cc.capability.version %></p>
+			<p><%= cc.capability.description %></p>
+		</x-panel-body>
+	</x-panel>
+<% }) %>
+<% end('chimera-cage') %>

@@ -1,4 +1,4 @@
-var Capabilities = alchemy.shared('Elric.capabilities');
+var capabilities = alchemy.shared('Elric.capabilities');
 
 /**
  * The Elric Capability class
@@ -31,7 +31,7 @@ Capability.constitute(function register() {
 	this.setProperty('title', name.humanize());
 	this.setProperty('type_name', type_name);
 
-	Capabilities[type_name] = this;
+	capabilities[type_name] = this;
 
 	// Create a new schema
 	schema = new alchemy.classes.Schema(this);
@@ -51,3 +51,22 @@ Capability.setProperty('version', '0.1.0');
  * @type   {String}
  */
 Capability.setProperty('description', '');
+
+/**
+ * Return the basic record for JSON
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Capability.setMethod(function toJSON() {
+
+	return {
+		title: this.title,
+		type_name: this.type_name,
+		version: this.version,
+		description: this.description,
+		scema: this.constructor.schema
+	}
+
+});

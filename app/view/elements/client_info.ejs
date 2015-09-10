@@ -1,0 +1,49 @@
+<ul class="list-info list-horizontal has-icons">
+	<li>
+	<i class="info-icon"><%= Media.svg('power') %></i>
+		<p class="info-title">Status</p>
+		<p class="info-value">
+			<% live('client.connected', function gotVal(connected) { %>
+				<% if (connected) { %>
+					On-line
+				<% } else { %>
+					Off-line
+				<% } %>
+			<% }) %>
+		</p>
+	</li>
+	<li>
+		<i class="info-icon"><%= Media.svg('home-ip') %></i>
+		<p class="info-title">Ip</p>
+		<p class="info-value">
+			<%= client.ip %>
+		</p>
+	</li>
+	<li>
+		<i class="info-icon"><%= Media.svg('timer') %></i>
+		<p class="info-title">Uptime</p>
+		<p class="info-value">
+			<% live('client.start_time', function gotVal(start_time) {
+
+				if (!client.connected) {
+					return print('');
+				} else {
+					diff = Math.round(Date.difference('minutes', start_time));
+
+					if (diff > 59) {
+						diff = Math.round(Date.difference('hours', start_time));
+
+						if (diff > 23) {
+							diff = Math.round(Date.difference('days', start_time));
+							print(diff + ' days');
+						} else {
+							print(diff + ' hours');
+						}
+					} else {
+						print(diff + ' minutes');
+					}
+				}
+			}) %>
+		</p>
+	</li>
+</ul>

@@ -1,3 +1,5 @@
+var all_capabilities = alchemy.shared('Elric.capabilities');
+
 /**
  * The Elric Singleton class
  *
@@ -32,7 +34,6 @@ Elric.setMethod(function init() {
 		// Wait for model compositions and such
 		Blast.loaded(function() {
 			that.initClientList(done);
-			done();
 		})
 	});
 });
@@ -46,20 +47,87 @@ Elric.setMethod(function init() {
  */
 Elric.setMethod(function initClientList(callback) {
 
-	var that = this;
+	var that = this,
+	    docs;
 
-	Model.get('Client').find('all', function gotAllClients(err, result) {
+	Function.series(function getClients(next) {
+		Model.get('Client').find('all', function gotAllClients(err, result) {
 
-		result.forEach(function eachClientDocument(client) {
-			that.clients.push(client);
+			docs = result;
+
+			result.forEach(function eachClientDocument(client) {
+				that.clients.push(client);
+			});
+
+			that.emit('client_list');
+			next();
 		});
+	}, function getClientCapabilities(next) {
+		docs.loadCapabilityData(next);
+	}, function done(err) {
 
-		that.emit('client_list');
+		if (err) {
+			return console.error('Failed to load clients: ' + err);
+		}
 
 		if (callback) {
-			return callback();
+			callback();
 		}
 	});
+});
+
+/**
+ * Get a client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Elric.setMethod(function getClient(id) {
+
+	var client,
+	    temp,
+	    i;
+
+	// Get the client
+	for (i = 0; i < elric.clients.length; i++) {
+		temp = elric.clients[i];
+
+		if (String(temp._id) == id) {
+			client = temp;
+		}
+	}
+
+	return client;
+});
+
+/**
+ * Get a client's capability
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Elric.setMethod(function getClientCapabilities(id, callback) {
+
+	var capabilities,
+	    client;
+
+	if (typeof id == 'function') {
+		callback = id;
+		id = null;
+	}
+
+	capabilities = Object.assign({}, all_capabilities);
+
+	if (!id) {
+		return capabilities;
+	}
+
+	client = this.getClient(id);
+
+
+
 });
 
 /**
@@ -140,6 +208,9 @@ Elric.setMethod(function registerClient(eclient) {
 		if (err) {
 			return log.error('Error registering client ' + eclient.announcement.hostname + ': ' + err);
 		}
+
+		// Set the start_time (when the client started, not connected)
+		client_doc.start_time = info.start_time || Date.now();
 
 		// Attach the conduit
 		client_doc.attachConduit(eclient);

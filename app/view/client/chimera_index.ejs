@@ -1,8 +1,10 @@
 <% implement('layouts/chimera') %>
 <% style('elric-chimera') %>
 
-<% start('chimera-cage') %>
+<% start('chimera-status') %>
+<% end('chimera-status') %>
 
+<% start('chimera-cage') %>
 <% for (i = 0; i < clients.length; i++) { %>
 	<% client = clients[i].Client %>
 	<% print_element('elements/client_panel', {client: client}) %>
