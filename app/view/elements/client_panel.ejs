@@ -17,7 +17,15 @@
 					<i><%= Media.svg('lightning') %></i>Authorize
 				</button>
 			<% } else { %>
-				<% Router.printRoute('chimera@IdActionLink', {controller: 'Client', action: 'configure', id: client._id}, {className: 'btn btn-success', title: 'Configure'}) %>
+				<% Router.printRoute('chimera@IdActionLink', {
+					controller: 'Client',
+					action: 'configure',
+					id: client._id
+				}, {
+					className: 'btn btn-success client-config-button',
+					title: 'Configure',
+					content: '<i>' + Media.svg('gears') + '</i>Configure'
+				}) %>
 			<% }
 		}) %>
 		

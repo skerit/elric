@@ -1,6 +1,7 @@
 var bcrypt = alchemy.use('bcrypt'),
     connected_clients = alchemy.shared('elric.clients'),
-    all_capabilities = alchemy.shared('Elric.capabilities');
+    all_capabilities = alchemy.shared('Elric.capabilities'),
+    fs = alchemy.use('fs');
 
 /**
  * The Client Capability Model
@@ -290,9 +291,62 @@ Client.setDocumentMethod(function requestAuthentication(callback) {
 
 				that.submit('authenticated');
 
+				// Send client capabilities
+				that.sendCapabilities();
+
 				callback();
 			});
 		});
+	});
+});
+
+/**
+ * Send capability settings to the client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Client.setDocumentMethod(function sendCapabilities(callback) {
+
+	var that = this;
+
+	if (!callback) {
+		callback = Function.dummy;
+	}
+
+	log.info('Sending capabilities to "' + this.hostname + '"');
+
+	Function.forEach.parallel(Array.cast(this.ClientCapability), function eachCap(record, index, next) {
+
+		var ccap = record.ClientCapability;
+
+		// Skip the wrapper class
+		if (ccap.name === 'capability') {
+			return next();
+		}
+
+		// Look for the client file
+		elric.getClientFile(ccap.name, function gotFile(err, stat) {
+
+			var stream;
+
+			if (!err && (stat && stat.path)) {
+				stream = fs.createReadStream(stat.path);
+				that.submit('capability-settings', ccap, stream, next);
+			} else {
+				that.submit('capability-settings', ccap, next);
+			}
+		});
+	}, function done(err) {
+
+		if (err) {
+			log.error('Client "' + that.hostname + '" failed to receive capability files: ' + err);
+			return callback(err);
+		}
+
+		log.info('Client "' + that.hostname + '" has received capability files');
+		callback();
 	});
 });
 

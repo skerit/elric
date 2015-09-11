@@ -263,5 +263,21 @@ Elric.setMethod(function registerClient(eclient) {
 	});
 });
 
+/**
+ * Get a client file
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Elric.setMethod(function getClientFile(capability, callback) {
+
+	var filename = capability + '_client_file.js';
+
+	alchemy.findAssetPath(filename, 'client_files', function done(err, result) {
+		callback(err, result);
+	});
+});
+
 // Create the global instance
 global.elric = new Elric();
