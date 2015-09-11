@@ -1,0 +1,25 @@
+<%
+// Get the main document
+if (ccap.ClientCapability) {
+	ccap = ccap.ClientCapability;
+}
+
+// Set this block's update url
+update_url(Router.routeUrl(
+	'chimera@ActionLink',
+	{controller: 'Client', action: 'capability'},
+	{get: {id: ''+ccap._id}})
+);
+%>
+<x-panel>
+	<x-panel-header><%= ccap.capability.title %></x-panel-header>
+	<x-panel-actions>
+		<% live('ccap.enabled', function gotVal(enabled) { %>
+			<x-switch data-update-request="post" name="enable" title="Toggle capability" <% if (ccap.enabled) print('checked') %>></x-switch>
+		<% }) %>
+	</x-panel-actions>
+	<x-panel-body>
+		<p>Version <%= ccap.capability.version %></p>
+		<p><%= ccap.capability.description %></p>
+	</x-panel-body>
+</x-panel>

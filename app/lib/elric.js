@@ -102,6 +102,40 @@ Elric.setMethod(function getClient(id) {
 });
 
 /**
+ * Get a ClientCapability record
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Elric.setMethod(function getClientCapability(client_capability_id) {
+
+	var capabilities,
+	    client,
+	    result,
+	    ccap,
+	    i,
+	    j;
+
+	for (i = 0; i < elric.clients.length; i++) {
+		client = elric.clients[i];
+
+		client.ClientCapability.forEach(function eachCapability(ccap) {
+
+			if (result) return;
+
+			if (String(ccap._id) == client_capability_id) {
+				result = ccap;
+			}
+		});
+
+		if (result) {
+			return result;
+		}
+	}
+});
+
+/**
  * Get a client's capability
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -125,8 +159,6 @@ Elric.setMethod(function getClientCapabilities(id, callback) {
 	}
 
 	client = this.getClient(id);
-
-
 
 });
 
@@ -188,6 +220,7 @@ Elric.setMethod(function registerClient(eclient) {
 			hostname: info.hostname,
 			ip: eclient.socket.conn.remoteAddress,
 			enabled: false,
+			secret: '',
 			key: ''
 		};
 
@@ -203,19 +236,31 @@ Elric.setMethod(function registerClient(eclient) {
 			next();
 
 		});
-	}, function done(err) {
-
-		if (err) {
-			return log.error('Error registering client ' + eclient.announcement.hostname + ': ' + err);
-		}
+	}, function attachConduit(next) {
 
 		// Set the start_time (when the client started, not connected)
 		client_doc.start_time = info.start_time || Date.now();
 
 		// Attach the conduit
 		client_doc.attachConduit(eclient);
-	});
 
+		next();
+	}, function doAuthentication(next) {
+
+		// If the admin has not yet authorized this client, do nothing
+		if (!client_doc.authorized) {
+			return next();
+		}
+
+		client_doc.requestAuthentication(next);
+
+	}, function done(err) {
+
+		if (err) {
+			return log.error('Error registering client ' + eclient.announcement.hostname + ': ' + err);
+		}
+
+	});
 });
 
 // Create the global instance

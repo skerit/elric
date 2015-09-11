@@ -41,26 +41,15 @@ Client.setMethod(function index(conduit) {
 Client.setMethod(function configure(conduit) {
 
 	var client,
-	    temp,
-	    id = conduit.param('id'),
-	    i;
+	    id = conduit.param('id');
 
 	if (!id) {
 		return conduit.notFound();
 	}
 
-	// Get the client
-	for (i = 0; i < elric.clients.length; i++) {
-		temp = elric.clients[i];
-
-		if (String(temp._id) == id) {
-			client = temp;
-		}
-	}
+	client = elric.getClient(id);
 
 	this.set('pagetitle', client.hostname || client.ip);
-
-	console.log('CAPABILITIES', client.ClientCapability, client.ClientCapability.capability)
 
 	this.set('client_capabilities', client.ClientCapability);
 	this.set('client', client.Client);
@@ -80,29 +69,46 @@ Client.setMethod(function configure(conduit) {
 Client.setMethod(function detail(conduit) {
 
 	var client,
-	    temp,
-	    id = conduit.param('id'),
-	    i;
+	    id = conduit.param('id');
 
-	// Get the client
-	for (i = 0; i < elric.clients.length; i++) {
-		temp = elric.clients[i];
-
-		if (String(temp._id) == id) {
-			client = temp;
-		}
-	}
-
-	console.log('Got data:', conduit.body);
+	client = elric.getClient(id);
 
 	// An administrator has authorized this client
 	if (conduit.body.authorize) {
-		console.log('Client has been authorized ...');
 		client.authorize(function authorized(err) {
 			conduit.end({client: client.Client});
 		});
 	} else {
 		conduit.end({client: client.Client});
+	}
+});
+
+/**
+ * Send client capability data
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Client.setMethod(function capability(conduit) {
+
+	var ccap,
+	    id = conduit.param('id');
+
+	ccap = elric.getClientCapability(id);
+
+	// See if we need to toggle the "enabled" value
+	if (conduit.body.enable != null && conduit.body.enable !== ccap.enabled) {
+		ccap.enabled = conduit.body.enable;
+
+		ccap.update({enabled: conduit.body.enable}, function updated() {
+			console.log('Updated', ccap.ClientCapability)
+			conduit.end({ccap: ccap});
+		});
+	} else {
+		conduit.end({ccap: ccap});
 	}
 });
 

@@ -1,4 +1,5 @@
-var connected_clients = alchemy.shared('elric.clients'),
+var bcrypt = alchemy.use('bcrypt'),
+    connected_clients = alchemy.shared('elric.clients'),
     all_capabilities = alchemy.shared('Elric.capabilities');
 
 /**
@@ -23,7 +24,12 @@ var Client = Model.extend(function ClientModel(options) {
  */
 Client.constitute(function addFields() {
 
+	// The secret used for encryption
+	this.addField('secret', 'String');
+
+	// The key
 	this.addField('key', 'String');
+
 	this.addField('hostname', 'String');
 	this.addField('ip', 'String');
 
@@ -190,16 +196,103 @@ Client.setDocumentMethod(function getCapability(key) {
  */
 Client.setDocumentMethod(function authorize(callback) {
 
-	// Set the authorization to true
-	this.authorized = true;
+	var that = this,
+	    data;
+
 	this.enabled = true;
 
 	// Assign a key to the client
 	this.key = Crypto.uid();
+	this.secret = Crypto.uid();
 
-	// Update the database
-	this.update({authorized: true, enabled: true}, function updated(err) {
-		if (callback) callback();
+	data = {
+		authorized: true,
+		enabled: true,
+		secret: this.secret,
+		key: this.key,
+	};
+
+	// Send the new credentials first
+	this.submit('credentials', {secret: this.secret, key: this.key}, function done(err, response) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		// Set the authorization to true
+		that.authorized = true;
+
+		// Update the database
+		that.update(data, function updated(err) {
+
+			if (err) {
+				if (callback) callback(err);
+				return;
+			}
+
+			// Also authenticate
+			that.requestAuthentication();
+
+			if (callback) callback();
+		});
+	});
+});
+
+/**
+ * Send client server authentication
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Client.setDocumentMethod(function requestAuthentication(callback) {
+
+	var that = this;
+
+	if (!callback) {
+		callback = function(err) {
+			if (err) log.error(''+err);
+		}
+	}
+
+	if (!this.secret) {
+		return callback(new Error('No secret to send'));
+	}
+
+	bcrypt.hash(this.secret, 12, function gotHash(err, hash) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		that.submit('request-authentication', hash, function gotResponse(err, client_hash) {
+
+			if (err) {
+				log.error('Client refused to authenticate this server');
+				return callback(err);
+			}
+
+			bcrypt.compare(that.key, client_hash, function compared(err, result) {
+
+				if (err) {
+					return callback(err);
+				}
+
+				if (!result) {
+					log.error('Failed to authenticate client');
+					return callback(new Error('Failed to authenticate client'));
+				}
+
+				// Authentication complete!
+				that.authenticated = true;
+
+				log.info('Client "' + that.hostname + '" has been authenticated');
+
+				that.submit('authenticated');
+
+				callback();
+			});
+		});
 	});
 });
 
@@ -234,4 +327,15 @@ Client.setDocumentMethod(function attachConduit(conduit) {
 
 		alchemy.updateData(that._id, that.Client);
 	});
+});
+
+/**
+ * Send data to the client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Client.setDocumentMethod(function submit(type, data, stream, callback) {
+	return this.conduit.submit(type, data, stream, callback);
 });
