@@ -34,3 +34,6 @@ app/config/local.js
 
 # Ignore old backup files
 old/
+
+# Ignore test files
+scratch*

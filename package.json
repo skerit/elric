@@ -23,8 +23,7 @@
 		"randomstring": "1.0.x",
 		"base64js": "1.0.x",
 		"hawkejs": "0.0.2",
-		"mkdirp": "0.3.x",
-		"rfxcom": "0.5.x"
+		"mkdirp": "0.3.x"
 	},
 	"devDependencies": {
 		"benchmark": "1.0.x",
