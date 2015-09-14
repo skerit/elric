@@ -1,3 +1,5 @@
+var interfaces = alchemy.shared('elric.interface');
+
 /**
  * The Interface Model
  *
@@ -8,12 +10,7 @@
  * @version  1.0.0
  */
 var Interface = Model.extend(function InterfaceModel(options) {
-
 	InterfaceModel.super.call(this, options);
-
-	this.interface_types = alchemy.shared('Elric.interfaces');
-
-	this.icon = 'screenshot';
 });
 
 /**
@@ -28,7 +25,7 @@ Interface.constitute(function addFields() {
 	this.belongsTo('Client');
 
 	this.addField('title', 'String');
-	this.addField('interface_type', 'Enum');
+	this.addField('type', 'Enum', {values: alchemy.shared('elric.interface')});
 });
 
 /**
@@ -52,14 +49,14 @@ Interface.constitute(function chimeraConfig() {
 
 	list.addField('title');
 	list.addField('client_id');
-	list.addField('interface_type');
+	list.addField('type');
 
 	// Get the edit group
 	edit = this.chimera.getActionFields('edit');
 
 	edit.addField('title');
 	edit.addField('client_id');
-	edit.addField('interface_type');
+	edit.addField('type');
 });
 
 /**
@@ -78,4 +75,15 @@ Interface.setMethod(function prepareSave(recordset) {
 	}
 
 	return recordset;
+});
+
+/**
+ * Get an instance of the interface type
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Interface.setDocumentMethod(function createInstance() {
+	return new interfaces[this.type];
 });

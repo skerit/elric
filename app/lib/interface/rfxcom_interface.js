@@ -5,19 +5,11 @@
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-alchemy.create('Interface', function RfxcomInterface() {
+var Rfxcom = Function.inherits('Interface', function RfxcomInterface(interface_record) {});
 
-	/**
-	 * The pre constructor
-	 * 
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    0.0.1
-	 * @version  0.1.0
-	 */
-	this.preInit = function preInit() {
-		this.protocols = ['arc', 'x10rf'];
-	};
-
-});
+/**
+ * Set the supported protocols
+ */
+Rfxcom.setProperty('protocols', ['arc', 'x10rf']);

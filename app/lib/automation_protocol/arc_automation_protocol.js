@@ -7,46 +7,55 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var Arc = Function.inherits('AutomationProtocol', function ArcAutomationProtocol() {
+var Arc = Function.inherits('AutomationProtocol', function ArcAutomationProtocol() {});
 
-	ArcAutomationProtocol.super.call(this);
+/**
+ * Set properties
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    0.1.0
+ * @version  1.0.0
+ */
+Arc.constitute(function setProperties() {
 
-	this.schema.setEnumValues('house_code', this.house_codes);
-	this.schema.setEnumValues('unit_code', this.unit_codes);
+	var commands;
 
-	this.commands = {
-		on: {
-			name: 'on',
-			title: 'On',
-			description: 'Turn device on',
-			state: 1
-		},
+	commands = {
 		off: {
 			name: 'off',
 			title: 'Off',
-			description: 'Turn device off',
+			description: 'Command 0',
 			state: 0
 		},
-		all_on: {
-			name: 'all_on',
-			title: 'All On',
-			description: 'Turn all devices on',
+		on: {
+			name: 'on',
+			title: 'On',
+			description: 'Command 1',
 			state: 1
 		},
 		all_off: {
 			name: 'all_off',
 			title: 'All Off',
-			description: 'Turn all devices off',
+			description: 'Command 5',
 			state: 0
+		},
+		all_on: {
+			name: 'all_on',
+			title: 'All On',
+			description: 'Command 6',
+			state: 1
 		},
 		chime: {
 			name: 'chime',
 			title: 'Chime',
-			description: 'Makes a doorbell ring',
+			description: 'Command 7',
 			state: 1
 		}
 	};
+
+	this.setProperty('commands', commands);
 });
+
 
 /**
  * The correct title of this protocol

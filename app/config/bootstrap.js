@@ -10,6 +10,7 @@
  * @version     1.0.0
  * @license     GPL v3
  */
+alchemy.usePlugin('elro');
 alchemy.usePlugin('acl');
 alchemy.usePlugin('chimera', {title: 'Elric'});
 alchemy.usePlugin('web-components');

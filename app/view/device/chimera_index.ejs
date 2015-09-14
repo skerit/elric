@@ -1,0 +1,61 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+<% start('chimera-status') %>
+<% end('chimera-status') %>
+
+<% start('chimera-cage') %>
+<x-panel class="devices table-panel">
+	<x-panel-body>
+		<table class="table table-hover">
+			<thead><tr>
+				<th>Name</th>
+				<th>Type</th>
+				<th>Address</th>
+				<th>Interface</th>
+				<th>State</th>
+				<th>Device commands</th>
+				<th>Protocol commands</th>
+			</tr></thead>
+			<% for (i = 0; i < records.length; i++) {
+				record = records[i];
+				device = record.Device;
+				dtype = device.device || {}; %>
+				<tr>
+					<td><%= device.name %></td>
+					<td><%= dtype.title || device.device_type %></td>
+					<td><%= device.address %></td>
+					<td><%= record.Interface.title %></td>
+					<td>
+						<% live('device.state', function gotState(state) {
+							print(state.name);
+						}) %>
+					</td>
+					<td><%
+						for (cmd in dtype.commands) { %>
+							<button
+								class="btn btn-success"
+								data-server-event="devicecmd | <%= device._id %> | <%= cmd %>"
+								title="<%= dtype.commands[cmd].description %>"
+							>
+								<%= dtype.commands[cmd].title %>
+							</button>
+						<% }
+					%></td>
+					<td><%
+						for (cmd in device.protocol.commands) { %>
+							<button
+								class="btn btn-success"
+								data-server-event="protocolcmd | <%= device._id %> | <%= cmd %>"
+								title="<%= device.protocol.commands[cmd].description %>"
+							>
+								<%= device.protocol.commands[cmd].title %>
+							</button>
+						<% }
+					%></td>
+				</tr>
+			<% } %>
+		</table>
+	</x-panel-body>
+</x-panel>
+<% end('chimera-cage') %>

@@ -31,12 +31,25 @@ Capability.constitute(function register() {
 	this.setProperty('title', name.humanize());
 	this.setProperty('type_name', type_name);
 
-	capabilities[type_name] = this;
-
 	// Create a new schema
 	schema = new alchemy.classes.Schema(this);
 	this.schema = schema;
+
+	// Do not let the child inherit the extendonly setting
+	if (!this.prototype.hasOwnProperty('extend_only')) {
+		this.setProperty('extend_only', false);
+	}
+
+	// Register non-wrapper classes
+	if (!this.prototype.extend_only) {
+		capabilities[type_name] = this;
+	}
 });
+
+/**
+ * Extend_only does not get inherited, used for wrapper classes
+ */
+Capability.setProperty('extend_only', true);
 
 /**
  * The version of the client file

@@ -1,3 +1,5 @@
+var interfaces = alchemy.shared('elric.interface');
+
 /**
  * The Device Model
  *
@@ -27,13 +29,28 @@ var Device = Model.extend(function DeviceModel(options) {
  */
 Device.constitute(function addFields() {
 
+	var devices = alchemy.shared('elric.device_type');
+
 	this.belongsTo('Interface');
 
 	this.addField('name', 'String');
 	this.addField('device_type', 'Enum');
-	this.addField('automation_protocol', 'Enum');
 	this.addField('address', 'Object');
-	this.addField('interface_type', 'Enum');
+
+	// Information on the current state of the object
+	this.addField('state', 'Object');
+
+	// Return the device
+	this.Document.setFieldGetter('device', function getDevice() {
+		if (devices[this.device_type]) {
+			return new devices[this.device_type](this);
+		}
+	});
+
+	// Return the protocol
+	this.Document.setFieldGetter('protocol', function getProtocol() {
+		return this.device.protocol_instance;
+	});
 });
 
 /**
@@ -57,18 +74,208 @@ Device.constitute(function chimeraConfig() {
 
 	list.addField('name');
 	list.addField('device_type');
-	list.addField('automation_protocol');
 	list.addField('address');
-	list.addField('interface_type');
 	list.addField('interface_id');
+	list.addField('state');
 
 	// Get the edit group
 	edit = this.chimera.getActionFields('edit');
 
 	edit.addField('name');
 	edit.addField('device_type');
-	edit.addField('automation_protocol');
 	edit.addField('address');
-	edit.addField('interface_type');
 	edit.addField('interface_id');
+	edit.addField('interface_id');
+});
+
+/**
+ * Get the interface linked to this device
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Device.setDocumentMethod(function getInterface(callback) {
+
+	var that = this,
+	    interface;
+
+	Function.series(function getDeviceRecord(next) {
+
+		if (that.Interface) {
+			interface = that.Interface;
+			return next();
+		}
+
+		that.getModel('Interface').findById(that.interface_id, function gotDeviceRecord(err, interface_record) {
+
+			if (err || !interface_record || !interface_record.length) {
+				return next(err || new Error('Could not find interface record for device "' + that._id + '"'));
+			}
+
+			interface = interface_record;
+			next();
+		});
+	}, function done(err) {
+
+		if (err || !interface) {
+			return callback(err || new Error('Failed to get interface'));
+		}
+
+		callback(null, interface);
+	});
+});
+
+/**
+ * Get the command to send to the interface
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {String}   command_name   The device-specific command name
+ * @param    {Function} callback
+ */
+Device.setDocumentMethod(function getProtocolCommand(command_name, callback) {
+
+	var that = this,
+	    protocol_command,
+	    device_command;
+
+	// Device command settings
+	device_command = this.device.commands[command_name];
+
+	// Protocol command settings
+	protocol_command = this.device.protocol_instance.commands[device_command.protocol_command];
+
+	// @todo: toggle state handling goes here!
+
+	// Don't perform the same state twice
+	if (that.state && that.state.name == protocol_command.name) {
+		log.verbose('Skipping same state "' + that.state.name + '"');
+		return callback(null);
+	}
+
+	Blast.setImmediate(function() {
+		callback(null, protocol_command.name, protocol_command.state);
+	});
+});
+
+/**
+ * Execute a command, send it to the interface
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {String}   command_name   The device-specific command name
+ * @param    {Function} callback
+ */
+Device.setDocumentMethod(function doCommand(command_name, callback) {
+
+	var that = this;
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	// Get the command we need to send to the interface
+	that.getProtocolCommand(command_name, function gotCommand(err, protocol_command, new_state) {
+
+		var data;
+
+		if (err) {
+			return callback(err);
+		}
+
+		// If the command is false, that means nothing needs to happen
+		if (!protocol_command) {
+			return callback();
+		}
+
+		if (typeof new_state == 'number') {
+			data = {
+				name: protocol_command,
+				state: new_state
+			};
+		} else {
+			data = new_state;
+		}
+
+		that.sendProtoCommand(protocol_command, data, callback);
+	});
+});
+
+/**
+ * Execute a command, send it to the interface
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {String}   protocol_command   The protocol command to send
+ * @param    {Object}   new_state          The new state object to set
+ * @param    {Function} callback
+ */
+Device.setDocumentMethod(function sendProtoCommand(protocol_command, new_state, callback) {
+
+	var that = this,
+	    info;
+
+	if (typeof new_state == 'function') {
+		callback = new_state;
+		new_state = null;
+	}
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	if (!new_state && new_state !== false) {
+		// Get the protocol command info
+		info = this.device.protocol_instance.commands[protocol_command];
+
+		new_state = {
+			name: protocol_command,
+			state: info.state
+		};
+	}
+
+	// Get the interface
+	this.getInterface(function gotInterface(err, interface_document) {
+
+		var interface,
+		    address;
+
+		if (err) {
+			return callback(err);
+		}
+
+		// Create the interface instance
+		interface = interface_document.createInstance();
+
+		interface.sendCommand(interface_document.client_id, that.address, protocol_command, function done(err, response) {
+
+			if (err) {
+				return callback(err);
+			}
+
+			// If new_state is false, don't update the database
+			if (new_state === false) {
+				return callback(null);
+			}
+
+			// Store the new state
+			that.update({state: new_state}, function storedNewState(err, document) {
+
+				if (err) {
+					return callback(err);
+				}
+
+				// Send the device update
+				alchemy.updateData(that._id, that.Device);
+				callback(null, new_state);
+			});
+		});
+	});
 });

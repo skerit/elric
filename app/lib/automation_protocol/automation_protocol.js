@@ -1,22 +1,3 @@
-var Protocols = alchemy.shared('Elric.Protocols'),
-    Blast      = __Protoblast;
-
-Blast.on('extended', function(parent, child) {
-
-	var typeName,
-	    name;
-
-	if (parent.name.endsWith('AutomationProtocol')) {
-		name = child.name.beforeLast('AutomationProtocol') || 'AutomationProtocol';
-		typeName = name.underscore();
-
-		child.setProperty('title', name);
-		child.setProperty('typeName', typeName);
-
-		Protocols[typeName] = child;
-	}
-});
-
 /**
  * The Base Automation Protocol class
  *
@@ -26,10 +7,18 @@ Blast.on('extended', function(parent, child) {
  * @since    0.0.1
  * @version  0.1.0
  */
-var AProtocol = Function.inherits('Informer', function AutomationProtocol() {
+var AProtocol = Function.inherits('ElricWrapper', function AutomationProtocol() {});
 
-	this.addressSchema = new alchemy.classes.Schema(this);
-	this.schema = new alchemy.classes.Schema(this);
+/**
+ * Set properties
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    0.1.0
+ * @version  1.0.0
+ */
+AProtocol.constitute(function setProperties() {
+
+	var commands;
 
 	/**
 	 * The basic commands this protocol supports
@@ -39,7 +28,7 @@ var AProtocol = Function.inherits('Informer', function AutomationProtocol() {
 	 *          and "off" as expected, instead it toggles light when receiving
 	 *          the "off" command and it does a light dim-cycle on "on".
 	 */
-	this.commands = {
+	commands = {
 		on: {
 			name: 'on',
 			title: 'Switch On',
@@ -53,7 +42,19 @@ var AProtocol = Function.inherits('Informer', function AutomationProtocol() {
 			state: 0
 		}
 	};
+
+	this.setProperty('commands', commands);
 });
+
+/**
+ * This is a wrapper class
+ */
+AProtocol.setProperty('extend_only', true);
+
+/**
+ * This wrapper class starts a new group
+ */
+AProtocol.setProperty('starts_new_group', true);
 
 /**
  * The description of this protocol
@@ -61,3 +62,19 @@ var AProtocol = Function.inherits('Informer', function AutomationProtocol() {
  * @type   {String}
  */
 AProtocol.setProperty('description', '');
+
+/**
+ * Return the basic record for JSON
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+AProtocol.setMethod(function toJSON() {
+	return {
+		name: this.name,
+		title: this.title,
+		type_name: this.type_name,
+		commands: this.commands
+	};
+});
