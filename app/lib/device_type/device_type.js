@@ -29,17 +29,15 @@ DeviceType.constitute(function setProperties() {
 			name: 'on',
 			title: 'On',
 			description: 'Turn device on',
-			class: 'btn-success',
 			protocol_command: 'on',
-			state: 1
+			value: 1
 		},
 		off: {
 			name: 'off',
 			title: 'Off',
 			description: 'Turn device off',
-			class: 'btn-danger',
 			protocol_command: 'off',
-			state: 0
+			value: 0
 		}
 	};
 

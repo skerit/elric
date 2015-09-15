@@ -33,13 +33,13 @@ AProtocol.constitute(function setProperties() {
 			name: 'on',
 			title: 'Switch On',
 			description: 'Turn device on',
-			state: 1
+			value: 1
 		},
 		off: {
 			name: 'off',
 			title: 'Switch Off',
 			description: 'Turn device off',
-			state: 0
+			value: 0
 		}
 	};
 

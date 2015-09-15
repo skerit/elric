@@ -139,26 +139,44 @@ Device.setDocumentMethod(function getInterface(callback) {
 Device.setDocumentMethod(function getProtocolCommand(command_name, callback) {
 
 	var that = this,
-	    protocol_command,
-	    device_command;
+	    protoc,
+	    config,
+	    devc;
 
 	// Device command settings
-	device_command = this.device.commands[command_name];
+	devc = this.device.commands[command_name];
 
-	// Protocol command settings
-	protocol_command = this.device.protocol_instance.commands[device_command.protocol_command];
+	// The protocol command
+	protoc = devc.protocol_command;
 
-	// @todo: toggle state handling goes here!
-
-	// Don't perform the same state twice
-	if (that.state && that.state.name == protocol_command.name) {
-		log.verbose('Skipping same state "' + that.state.name + '"');
-		return callback(null);
+	if (typeof protoc == 'function') {
+		protoc.call(this.device, that, gotProtocolCommand);
+	} else {
+		config = this.device.protocol_instance.commands[protoc];
+		gotProtocolCommand(null, config.name);
 	}
 
-	Blast.setImmediate(function() {
-		callback(null, protocol_command.name, protocol_command.state);
-	});
+	function gotProtocolCommand(err, protocol_command, state_value, force) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		if (protocol_command === false) {
+			return callback(null);
+		}
+
+		if (state_value == null) {
+			state_value = devc.value;
+		}
+
+		// If can_repeat is explicitly false, the same device command won't be sent twice
+		if (!force && devc.can_repeat === false && (that.state && that.state.name == devc.name)) {
+			return callback(null);
+		}
+
+		callback(null, protocol_command, state_value);
+	}
 });
 
 /**
@@ -168,10 +186,10 @@ Device.setDocumentMethod(function getProtocolCommand(command_name, callback) {
  * @since    1.0.0
  * @version  1.0.0
  *
- * @param    {String}   command_name   The device-specific command name
+ * @param    {String}   device_command_name   The device-specific command name
  * @param    {Function} callback
  */
-Device.setDocumentMethod(function doCommand(command_name, callback) {
+Device.setDocumentMethod(function doCommand(device_command_name, callback) {
 
 	var that = this;
 
@@ -180,7 +198,7 @@ Device.setDocumentMethod(function doCommand(command_name, callback) {
 	}
 
 	// Get the command we need to send to the interface
-	that.getProtocolCommand(command_name, function gotCommand(err, protocol_command, new_state) {
+	that.getProtocolCommand(device_command_name, function gotCommand(err, protocol_command, state_value) {
 
 		var data;
 
@@ -193,13 +211,15 @@ Device.setDocumentMethod(function doCommand(command_name, callback) {
 			return callback();
 		}
 
-		if (typeof new_state == 'number') {
+		if (typeof state_value == 'number') {
 			data = {
-				name: protocol_command,
-				state: new_state
+				name: device_command_name,
+				last_sent: protocol_command,
+				value: state_value
 			};
 		} else {
-			data = new_state;
+			data = state_value;
+			data.name = device_command_name;
 		}
 
 		that.sendProtoCommand(protocol_command, data, callback);
@@ -236,8 +256,14 @@ Device.setDocumentMethod(function sendProtoCommand(protocol_command, new_state, 
 		info = this.device.protocol_instance.commands[protocol_command];
 
 		new_state = {
-			name: protocol_command,
-			state: info.state
+			// Last device command is unknown
+			name: null,
+
+			// The state value
+			value: info.state,
+
+			// Protocol command last sent
+			last_sent: protocol_command
 		};
 	}
 
@@ -264,6 +290,8 @@ Device.setDocumentMethod(function sendProtoCommand(protocol_command, new_state, 
 			if (new_state === false) {
 				return callback(null);
 			}
+
+			console.log('Updating state:', new_state);
 
 			// Store the new state
 			that.update({state: new_state}, function storedNewState(err, document) {
