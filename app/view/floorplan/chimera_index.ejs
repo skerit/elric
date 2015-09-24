@@ -1,0 +1,117 @@
+<%
+implement('layouts/chimera');
+
+start('chimera-status');
+end('chimera-status');
+
+script([
+	'//code.jquery.com/jquery-2.1.4.min.js',
+	'doek/jquery.mousewheel',
+	'doek/doek',
+	'doek/doek.canvas',
+	'doek/doek.layer',
+	'doek/doek.object',
+	'doek/doek.node',
+	'doek/doek.node.line',
+	'doek/doek.node.rectangle',
+	'doek/doek.event',
+	'doek/doek.action',
+	'doek.nodes',
+	'mainDoek',
+	'doek.actions'
+]);
+
+style('elric-chimera');
+
+/*emit('doekview', {urls: urls, rooms: rooms, elements: elements, elementTypes: elementTypes});*/
+
+start('chimera-cage') %>
+<div class="floorplan-sidebar">
+	<div class="selects elements">
+		<%
+
+			create_room_url = Router.routeUrl(
+				'chimera@ActionLink',
+				{controller: 'Floorplan', action: 'room'}
+			);
+
+			print(Form.select({
+				name: 'rooms',
+				elements: rooms,
+				null: ' -- Rooms -- ',
+				create: create_room_url,
+				create_text: ' -- Create new room -- '
+			}));
+
+			url = Router.routeUrl(
+				'chimera@ActionLink',
+				{controller: 'Floorplan', action: 'elements'}
+			);
+
+			print(Form.select({
+				name: 'elements',
+				elements: url,
+				depends_on: 'rooms',
+				null: ' -- Room Elements -- '
+			}))
+		%>
+	</div>
+	<div class="edit element">
+		<h4>Edit element</h4>
+		<form id="editElement">
+			<%= Form.input('_id', {type: 'hidden'}) %>
+			<%= Form.input('name', {placeholder: 'Name'}) %>
+			<%=
+				Form.select({
+					name: 'room_id',
+					elements: rooms,
+					label: false,
+					null: ' -- Room -- '
+				})
+			%>
+			<%= Form.input('element_type', {placeholder: 'Element Type'}) %>
+
+			<%= Form.select('type_external_id', {placeholder: ' -- External Id --'}) %>
+
+			<%= Form.input('x', {type: 'number', placeholder: 'X', prepend: 'X'}) %>
+			<%= Form.input('y', {type: 'number', placeholder: 'Y', prepend: 'Y'}) %>
+			<%= Form.input('dx', {type: 'number', placeholder: 'DX', prepend: 'DX'}) %>
+			<%= Form.input('dy', {type: 'number', placeholder: 'DY', prepend: 'DY'}) %>
+
+			<%= Form.input('width', {type: 'number', placeholder: 'Width', prepend: 'W', disabled: true}) %>
+			<%= Form.input('height', {type: 'number', placeholder: 'Height', prepend: 'H', disabled: true}) %>
+			<button
+				id="saveElement"
+				class="btn btn-success"
+				data-server-event="saveelement"
+				data-server-event-form
+			>
+				<%= Media.svg('chimera/floppy') %> Save
+			</button>
+		</form>
+	</div>
+</div>
+
+<div class="floorplan-editor">
+	<div class="floorplan-toolbar">
+		<x-button-group class="floorplan-mode" radio>
+			<button class="btn btn-default" value="select"><%= Media.svg('crosshair') %> Select</button>
+			<button class="btn btn-default" value="changesize"><%= Media.svg('move') %> Change Size</button>
+		</x-button-group>
+		<x-button-dropdown class="floorplan-elements" split>
+			<button class="btn btn-primary" value="wall"><%= Media.svg('plus') %> Add wall</button>
+			<% for (key in element_types) { %>
+				<% element = element_types[key] %>
+				<button value="<%= key %>"><%= element.title %></button>
+			<% } %>
+		</x-button-dropdown>
+
+		<button class="btn btn-success" id="savemap" ><%= Media.svg('chimera/floppy') %> Save all</button>
+
+		<input type="hidden" name="doek_mode" value="0" />
+		<div class="clear"></div>
+	</div>
+	<div class="clear"></div>
+	<div id="map" data-width=1000 data-height=500></div>
+</div>
+<% end('chimera-cage') %>

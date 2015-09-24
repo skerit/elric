@@ -23,12 +23,27 @@ var Room = Model.extend(function RoomModel(options) {
  */
 Room.constitute(function addFields() {
 
+	var element_schema = new alchemy.classes.Schema();
+
 	this.addField('name', 'String');
 	this.addField('x', 'Number');
 	this.addField('y', 'Number');
 	this.addField('z', 'Number');
 	this.addField('width', 'Number');
 	this.addField('height', 'Number');
+
+	element_schema.addField('_id', 'ObjectId');
+	element_schema.addField('name', 'String');
+	element_schema.addField('element_type', 'String');
+	element_schema.addField('type_external_id', 'ObjectId');
+	element_schema.addField('x', 'Number');
+	element_schema.addField('y', 'Number');
+	element_schema.addField('dx', 'Number');
+	element_schema.addField('dy', 'Number');
+	element_schema.addField('width', 'Number');
+	element_schema.addField('height', 'Number');
+
+	this.addField('elements', 'Schema', {array: true, schema: element_schema});
 });
 
 /**

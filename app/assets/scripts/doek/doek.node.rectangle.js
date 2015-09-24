@@ -1,12 +1,12 @@
 Doek.Rectangle = Doek.extend(Doek.Node, function(instructions, parentObject) {
-		this.init(instructions, parentObject);
-	});
+	this.init(instructions, parentObject);
+});
 
 Doek.Rectangle.prototype._calculate = function() {
 	
 	this.width = 0;
 	this.height = 0;
-	
+
 	// Instructions are always map based
 	var sx = this.instructions.sx;
 	var sy = this.instructions.sy;

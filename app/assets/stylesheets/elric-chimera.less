@@ -4,3 +4,31 @@
 	display: table !important;
 	margin: auto;
 }
+
+.chimera-cage[data-template="floorplan/chimera_index"] {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+}
+
+.floorplan {
+
+	&-editor,
+	&-sidebar {
+		background-color: #fff;
+		padding: 1rem;
+	}
+
+	&-sidebar {
+		flex: 0 1 auto;
+		margin-right: 1rem;
+	}
+
+	&-editor {
+		flex: 1 0 auto;
+	}
+}
+
+.floorplan-toolbar {
+	margin-bottom: 1rem;
+}

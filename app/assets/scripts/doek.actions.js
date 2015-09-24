@@ -22,7 +22,10 @@ var changeSize = new Doek.Action('changeSize');
  * @since    2012.12.28
  */
 changeSize.on('mousemoveDown', function (caller, payload) {
-	if (payload.originnode == Elric.doek.selectedNode) {
+
+	var floorplan = this.canvas.floorplan;
+
+	if (payload.originnode == floorplan.selected) {
 
 		var sp = payload.dragstartposition; // Start position
 		var cp = payload.position; // Current position
@@ -44,12 +47,12 @@ changeSize.on('mousemoveDown', function (caller, payload) {
 				changeSize.mmstuf.right = node.height - cy;
 			}
 		}
-		
+
 		if (node.roomElement.elementType.dimensions > 0) {
-			
+
 			var left = changeSize.mmstuf.left;
 			var right = changeSize.mmstuf.right;
-	
+
 			// We clicked the left side
 			if (left < 10) {
 				node.setBeginpoint(cp);
@@ -86,6 +89,9 @@ function registerNewActions(newdoek) {
 	
 	// Register our newly made actions
 	newdoek.d.registerAction(changeSize);
+
+	console.log('Register save actions');
+	return;
 	
 	Elric.saveElements = function (elements) {
 		

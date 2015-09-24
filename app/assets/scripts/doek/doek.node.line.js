@@ -81,6 +81,9 @@ Doek.Line.prototype._draw = function() {
 
 }
 
+/**
+ * Draw a line (tiled)
+ */
 Doek.Line.prototype._idrawLineBlock = function () {
 	var t = this._idrawn[this.activeStyle.name];
 
@@ -103,15 +106,17 @@ Doek.Line.prototype._idrawLineBlock = function () {
 	var coordinates = Doek.getLineCoordinates(begin, end);
 	
 	var ctx = t.ctx;
-	
+
 	ctx.lineWidth = this.activeStyle.properties.lineWidth;
 	ctx.strokeStyle = this.activeStyle.properties.strokeStyle;
+
+	// Use strokestyle as fillstyle for blocked lines
 	ctx.fillStyle = this.activeStyle.properties.strokeStyle;
-	
+
 	var size = this.canvas.settings.tileSize;
 	var id = '';
 	var count = 0;
-	
+
 	for (var key in coordinates) {
 		
 		var c = coordinates[key];
@@ -134,18 +139,21 @@ Doek.Line.prototype._idrawLineBlock = function () {
 
 }
 
+/**
+ * Draw a simple line (not tiled)
+ */
 Doek.Line.prototype._idrawLine = function () {
 	var t = this._idrawn[this.activeStyle.name];
 
 	t.element = document.createElement('canvas');
-	
+
 	t.ctx = t.element.getContext('2d');
-	
+
 	t.element.setAttribute('width', this.width);
 	t.element.setAttribute('height', this.height);
-	
+
 	var ctx = t.ctx;
-	
+
 	ctx.lineWidth = this.activeStyle.properties.lineWidth;
 	ctx.strokeStyle = this.activeStyle.properties.strokeStyle;
 	ctx.beginPath();

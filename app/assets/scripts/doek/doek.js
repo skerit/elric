@@ -329,12 +329,19 @@ Doek.getLineCoordinates = function(begin, end){
 	return coordinates;
 }
 
-Doek.extend = function (parent, enterfunction) {
-    var intermediateConstructor = enterfunction;
-	
-	for(var i in parent.prototype) {
-		intermediateConstructor.prototype[i] = parent.prototype[i];                  
-	}
-	
-    return intermediateConstructor;
-}
+/**
+ * Extend function
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    0.0.1
+ * @version  1.0.0
+ *
+ * @param    {Function}   parent
+ * @param    {Function}   child
+ *
+ * @return   {Function}
+ */
+Doek.extend = function extend(parent, child) {
+	child.prototype = Object.create(parent.prototype);
+	return child;
+};

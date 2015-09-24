@@ -5,25 +5,17 @@
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-alchemy.create('ElementType', function WallElementType() {
+var Wall = Function.inherits('ElementType', function WallElementType() {});
 
-	/**
-	 * The pre constructor
-	 * 
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    0.0.1
-	 * @version  0.1.0
-	 */
-	this.preInit = function preInit() {
+/**
+ * A wall is a straight line
+ */
+Wall.setProperty('dimensions', 1);
 
-		// A wall is a straight line
-		this.dimensions = 1;
-		
-		this.colourOri = '#BBCFCC';
-		this.colourHover = '#909090';
-		this.colourSelect = '#BBCCEE';
-	};
-
-});
+/**
+ * Colours
+ */
+Wall.setProperty('colour_original', '#BBCFCC');
+Wall.setProperty('colour_select', '#000000');

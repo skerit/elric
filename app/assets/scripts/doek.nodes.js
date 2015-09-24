@@ -13,80 +13,132 @@
  * @since    2013.01.05
  *
  */
-Doek.basicNodeEvents = function (node) {
-	
+Doek.basicNodeEvents = function basicNodeEvents(node) {
+
+	var floorplan = node.canvas.floorplan;
+
 	// Style events
 	node.on('mouseMove', function(caller, payload){
 		this.activateStyle('hover');
 	});
-	
+
 	node.on('mouseOut', function(caller, payload){
 		this.deactivateStyle('hover');
 	});
-	
+
 	node.on('mouseclick', function(caller, payload){
-		if (Elric.doek.mode == 'select') {
+		if (floorplan.mode == 'select') {
 			this.fire('select', this, payload);
 		}
 	});
-	
+
 	node.on('select', function(caller, payload){
-		
+
+		// Don't select the same item twice
+		if (floorplan.selected == this) {
+			return;
+		}
+
 		// Activate the select style
 		this.activateStyle('select');
-		
+
 		// Select the items in the html select element
-		Elric.doek.selectRoom(this.roomElement.room_id);
-		Elric.doek.selectElement(this.roomElement._id);
-		
-		if (Elric.doek.selectedNode) {
-			var oldSelect = Elric.doek.selectedNode;
+		//Elric.doek.selectRoom(this.roomElement.room_id);
+		//Elric.doek.selectElement(this.roomElement._id);
+
+		if (floorplan.selected) {
+			var oldSelect = floorplan.selected;
 			oldSelect.fire('unselect', this, payload);
 		}
-		
+
 		// Set the new selected node
-		Elric.doek.selectedNode = this;
-		
-		// Show the edit element form
-		var $ef = Elric.doek.html.editElement;
-		$ef.parent('div').show();
-		
-		this.fillEditForm();
+		floorplan.selected = this;
+
+		this.fillEditForm(true);
 	});
-	
+
 	node.on('propertychange', function(caller, payload){
 		if (this.fillEditForm !== undefined) {
-			if (Elric.doek.selectedNode == this) this.fillEditForm();
+			if (floorplan.selected == this) this.fillEditForm();
 		}
 	});
-	
+
 	node.on('unselect', function(caller, payload){
 		this.deactivateStyle('select');
-		
-		var $ef = Elric.doek.html.editElement;
-		$ef.parent('div').hide();
 	});
-}
-
-Doek.fillEditForm = function() {
-	var $ef = Elric.doek.html.editElement;
-	
-	// Unhide hidden elements
-	$(':hidden', $ef).show();
-}
+};
 
 /**
  * Extendable functions
  */
-Doek.Line.prototype.fillEditForm = function() {
-	Doek.fillEditForm();
-	this._fillEditForm();
-}
+Doek.Line.prototype.fillEditForm = function fillEditForm(selected) {
+	this._fillEditForm(selected);
+};
 
-Doek.Rectangle.prototype.fillEditForm = function() {
-	Doek.fillEditForm();
-	this._fillEditForm();
-}
+Doek.Rectangle.prototype.fillEditForm = function fillEditForm(selected) {
+	this._fillEditForm(selected);
+};
+
+/**
+ * Fill the sidebar of the floorplan
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    0.0.1
+ * @version  1.0.0
+ *
+ * @param    {Boolean}   selected   If this element was selected (true) or moved (false)
+ */
+Doek.Node.prototype._fillEditForm = function _fillEditForm(selected) {
+
+	var floorplan,
+	    html,
+	    n;
+
+	if (!this.elric_node) {
+		return;
+	}
+
+	floorplan = this.canvas.floorplan;
+	html = floorplan.html_elements;
+	n = this.roomElement;
+
+	// Only set these values on initial select
+	if (selected) {
+		html._id.value = n._id || '';
+		html.name.value = n.name || '';
+
+		console.log('Filling edit form of', this);
+
+		$('option:selected', html.room).removeAttr('selected');
+		$('option[value="' + n.room_id + '"]', html.room).attr('selected', 'selected');
+
+		html.element_type.value = n.element_type || '';
+
+		// @todo: disable?
+		html.external_id.value = '';
+	}
+
+	html.x.value = this.instructions.sx;
+	html.y.value = this.instructions.sy;
+
+	html.dx.value = this.instructions.dx;
+	html.dy.value = this.instructions.dy;
+
+	html.width.value = this.instructions.dx - this.instructions.sx + 10;
+	html.height.value = this.instructions.dy - this.instructions.sy + 10;
+};
+
+/**
+ * Set elric_node to true, so the sidebar edit form will be filled
+ * @type   {Boolean}
+ */
+Doek.Line.prototype.elric_node = true;
+
+/**
+ * Set elric_node to true, so the sidebar edit form will be filled
+ * @type   {Boolean}
+ */
+Doek.Rectangle.prototype.elric_node = true;
 
 /**
  * Create a new Doek Node class: Wall
@@ -98,63 +150,51 @@ Doek.Rectangle.prototype.fillEditForm = function() {
  * @param    {Doek.Object}  parentObject   The parent object
  * @param    {object}       roomElement    The raw roomElement
  */
-Doek.Wall = Doek.extend(Doek.Line, function(instructions, parentObject, roomElement) {
-	
+Doek.Wall = Doek.extend(Doek.Line, function Wall(instructions, parentObject, roomElement) {
+
+	var thisWall = this,
+	    element_types,
+	    selectStyle,
+	    hoverStyle,
+	    style;
+
+	console.log('Creating wall', this);
+
 	this.preInit();
-	
+
+	// Get the available element types
+	element_types = parentObject.canvas.floorplan.element_types;
+
 	this.roomElement = roomElement;
 	this.elricType = 'wall';
-	
-	if (instructions.override) this.elricType = instructions.override;
-	
+
+	if (instructions.override) {
+		this.elricType = instructions.override;
+	}
+
 	instructions.type = 'line';
-	
-	var thisWall = this;
-	
-	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = Elric.exposed.elementTypes[this.elricType].colourOri;
+
+	style = new Doek.Style('ori');
+	style.properties.strokeStyle = element_types[this.elricType].colour_original;
 	style.weight = 100;
-	
-	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = Elric.exposed.elementTypes[this.elricType].colourHover;
+
+	hoverStyle = new Doek.Style('hover');
+	hoverStyle.properties.strokeStyle = element_types[this.elricType].colour_hover;
 	hoverStyle.weight = 1000;
-	
-	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = Elric.exposed.elementTypes[this.elricType].colourSelect;
+
+	selectStyle = new Doek.Style('select');
+	selectStyle.properties.strokeStyle = element_types[this.elricType].colour_select;
 	selectStyle.weight = 10000;
-	
+
 	this.addStyle(style);
 	this.addStyle(hoverStyle);
 	this.addStyle(selectStyle);
-	
+
 	// Call the init function, the parent's constructor
 	this.init(instructions, parentObject);
-	
-	Doek.basicNodeEvents(this);
-	
-});
 
-/**
- * Extended function to fill the doek edit form
- * Wall type
- *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    2012.12.29
- */
-Doek.Wall.prototype._fillEditForm = function() {
-	var $ef = Elric.doek.html.editElement;
-	var n = this.roomElement;
-	
-	$('[name="data[_id]"]', $ef).val(n._id);
-	$('[name="data[name]"]', $ef).val(n.name);
-	$('[name="data[room_id]"]', $ef).val(n.room_id);
-	$('[name="data[element_type]"]', $ef).val(n.element_type);
-	$('[name="data[type_external_id]"]', $ef).hide();
-	$('[name="data[x]"]', $ef).val(this.instructions.sx);
-	$('[name="data[y]"]', $ef).val(this.instructions.sy);
-	$('[name="data[dx]"]', $ef).val(this.instructions.dx);
-	$('[name="data[dy]"]', $ef).val(this.instructions.dy);
-}
+	Doek.basicNodeEvents(this);
+});
 
 /**
  * Create a new Doek Node class: Camera
@@ -166,7 +206,7 @@ Doek.Wall.prototype._fillEditForm = function() {
  * @param    {Doek.Object}  parentObject   The parent object
  * @param    {object}       roomElement    The raw roomElement
  */
-Doek.Camera = Doek.extend(Doek.Rectangle, function(instructions, parentObject, roomElement) {
+Doek.Camera = Doek.extend(Doek.Rectangle, function Camera(instructions, parentObject, roomElement) {
 	
 	this.preInit();
 	
@@ -178,15 +218,15 @@ Doek.Camera = Doek.extend(Doek.Rectangle, function(instructions, parentObject, r
 	var thisWall = this;
 	
 	var style = new Doek.Style('ori');
-	style.properties.strokeStyle = Elric.exposed.elementTypes.camera.colourOri;
+	style.properties.strokeStyle = Elric.exposed.elementTypes.camera.colour_original;
 	style.weight = 100;
 	
 	var hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = Elric.exposed.elementTypes.camera.colourHover;
+	hoverStyle.properties.strokeStyle = Elric.exposed.elementTypes.camera.colour_hover;
 	hoverStyle.weight = 1000;
 	
 	var selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = Elric.exposed.elementTypes.camera.colourSelect;
+	selectStyle.properties.strokeStyle = Elric.exposed.elementTypes.camera.colour_select;
 	selectStyle.weight = 10000;
 	
 	this.addStyle(style);
@@ -208,24 +248,26 @@ Doek.Camera = Doek.extend(Doek.Rectangle, function(instructions, parentObject, r
  * @since    2013.01.05
  */
 Doek.Camera.prototype._fillEditForm = function() {
-	var $ef = Elric.doek.html.editElement;
-	var n = this.roomElement;
-	
-	$('[name="data[_id]"]', $ef).val(n._id);
-	$('[name="data[name]"]', $ef).val(n.name);
-	$('[name="data[room_id]"]', $ef).val(n.room_id);
-	$('[name="data[element_type]"]', $ef).val(n.element_type);
-	$('[name="data[type_external_id]"]', $ef).val(n.type_external_id);
-	$('[name="data[x]"]', $ef).val(this.instructions.sx);
-	$('[name="data[y]"]', $ef).val(this.instructions.sy);
-	$('[name="data[dx]"]', $ef).val(this.instructions.dx);
-	$('[name="data[dy]"]', $ef).val(this.instructions.dy);
-	/* We should hide these last 2, but that causes validation problems
-	$('[name="dx"]', $ef).hide();
-	$('[name="dx"]', $ef).siblings().hide(); // Hide prepended stuff
-	$('[name="dy"]', $ef).hide();
-	$('[name="dy"]', $ef).siblings().hide(); // Hide prepended stuff
-	*/
+	var floorplan = this.canvas.floorplan,
+	    html = floorplan.html_elements,
+	    n = this.roomElement;
+
+	html._id.value = n._id;
+	html.name.value = n.name;
+
+	// @todo: Set select correctly
+	html.room.value = n.room_id;
+
+	html.element_type.value = n.element_type;
+
+	// @todo: disable?
+	html.external_id.value = '';
+
+	html.x.value = this.instructions.sx;
+	html.y.value = this.instructions.sy;
+
+	html.dx.value = this.instructions.dx;
+	html.dy.value = this.instructions.dy;
 }
 
 /**
@@ -235,26 +277,63 @@ Doek.Camera.prototype._fillEditForm = function() {
  * @author   Jelle De Loecker <jelle@kipdola.be>
  * @since    2013.01.06
  *
- * @param	   {Object}	   roomElement
- * @param    {string}    type
- * @returns	 {Doek.Node}
+ * @param    {Object}    room_element
+ * @param    {string}    type_name
+ * @returns  {Doek.Node}
  */
-Doek.Object.prototype.addDefault = function(roomElement, type) {
-	var el = roomElement;
+Doek.Object.prototype.addNewType = function addNewType(room_element, type_name) {
 
-	var newWall = new Doek.Wall({
-		        override: type,
-						sx: el.x, sy: el.y,
-						dx: el.dx, dy: el.dy}, this, el);
-	
-	var index = this.nodes.push(newWall);
-	
-	el.node = newWall;
-	
+	var floorplan = this.canvas.floorplan,
+	    dimensions = room_element.elementType.dimensions,
+	    class_name,
+	    type_class,
+	    new_node,
+	    index,
+	    data;
+
+	class_name = String(type_name).classify();
+
+	data = {
+		override: type_name,
+		sx: room_element.x,
+		sy: room_element.y,
+		dx: room_element.dx,
+		dy: room_element.dy
+	};
+
+	if (data.sx == null) {
+		if (dimensions == 0) {
+			data.sx = data.sy = data.dx = data.dy = 300;
+		} else if (dimensions == 1) {
+			data.sx = data.dx = 10;
+			data.sy = 20;
+			data.dy = 40;
+		} else if (dimensions == 2) {
+			data.sx = 50;
+			data.sy = 50;
+			data.dx = 100;
+			data.dy = 100;
+		}
+	}
+
+	// Get the type class
+	if (Doek[class_name]) {
+		type_class = Doek[class_name];
+	} else {
+		type_class = Doek.Wall;
+	}
+
+	new_node = new type_class(data, this, room_element);
+	index = this.nodes.push(new_node);
+
+	room_element.node = new_node;
+
+	// Recalculate this object
 	this.calculate();
-	
-	return newWall;
-}
+
+	return new_node;
+};
+
 /**
  * Extend the doek object prototype
  * Add a camera node to this object

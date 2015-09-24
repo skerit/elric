@@ -1,74 +1,58 @@
-var elementTypes = alchemy.shared('elementTypes');
-
 /**
- * The Element Type class
+ * The ElementType class
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-alchemy.create(function ElementType() {
+var ElementType = Function.inherits('ElricWrapper', function ElementType() {});
 
-	/**
-	 * Set the title properties
-	 *
-	 * @author   Jelle De Loecker   <jelle@codedor.be>
-	 * @since    0.1.0
-	 * @version  0.1.0
-	 *
-	 * @param    {Function}   parent   The parent class
-	 * @param    {Function}   child    The (extended) child class
-	 */
-	this.__extended__ = function __extended__(parent, child) {
+/**
+ * This is a wrapper class
+ */
+ElementType.setProperty('extend_only', true);
 
-		// Extract the name
-		var name     = child.name.replace(/ElementType$/, ''),
-		    typeName = name.underscore(),
-		    title    = name.titleize();
+/**
+ * This wrapper class starts a new group
+ */
+ElementType.setProperty('starts_new_group', true);
 
-		child.prototype.typeName = typeName;
+/**
+ * The dimensions this element type has
+ * 0 = a single dot
+ * 1 = a line
+ * 2 = any
+ */
+ElementType.setProperty('dimensions', 2);
 
-		// Do not let the child inherit the extendonly setting
-		if (!child.prototype.hasOwnProperty('title')) {
-			child.prototype.title = title;
-		}
+/**
+ * Colours
+ */
+ElementType.setProperty('colour_original', '#000000');
+ElementType.setProperty('colour_hover', '#909090');
+ElementType.setProperty('colour_select', '#500000');
 
-		// Register this protocol
-		if (!child.prototype.extendonly) {
-			elementTypes[typeName] = new child();
-		}
-	};
+/**
+ * What model to use for selects
+ */
+ElementType.setProperty('model', false);
 
-	/**
-	 * The pre constructor
-	 * 
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    0.0.1
-	 * @version  0.1.0
-	 */
-	this.preInit = function preInit() {
-
-		/**
-		 * The dimensions this element type has
-		 * 0 = a single dot
-		 * 1 = a line
-		 * 2 = any
-		 */
-		this.dimensions = 2;
-		
-		/**
-		 * Colours
-		 */
-		this.colourOri = '#000000';
-		this.colourHover = '#909090';
-		this.colourSelect = '#500000';
-		
-		/**
-		 * What model to use for selects
-		 */
-		this.model = false;
-	};
-
+/**
+ * Return the basic record for JSON
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+ElementType.setMethod(function toJSON() {
+	return {
+		dimensions: this.dimensions,
+		colour_original: this.colour_original,
+		colour_hover: this.colour_hover,
+		colour_select: this.colour_select,
+		model: this.model,
+		title: this.title
+	}
 });

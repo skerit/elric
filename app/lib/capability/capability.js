@@ -73,7 +73,6 @@ Capability.setProperty('description', '');
  * @version  1.0.0
  */
 Capability.setMethod(function toJSON() {
-
 	return {
 		title: this.title,
 		type_name: this.type_name,
@@ -81,5 +80,4 @@ Capability.setMethod(function toJSON() {
 		description: this.description,
 		scema: this.constructor.schema
 	}
-
 });

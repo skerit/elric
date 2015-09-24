@@ -5,26 +5,16 @@
  *
  * @author   Jelle De Loecker   <jelle@kipdola.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-alchemy.create('ElementType', function ClientElementType() {
+var Client = Function.inherits('ElementType', function ClientElementType() {});
 
-	/**
-	 * The pre constructor
-	 * 
-	 * @author   Jelle De Loecker   <jelle@kipdola.be>
-	 * @since    0.0.1
-	 * @version  0.1.0
-	 */
-	this.preInit = function preInit() {
+// A client is a single point
+Client.setProperty('dimensions', 0);
 
-		this.dimensions = 0;
+Client.setProperty('colour_original', '#303030');
+Client.setProperty('colour_hover', '#572727');
+Client.setProperty('colour_select', '#A80000');
 
-		this.colourOri = '#303030';
-		this.colourHover = '#572727';
-		this.colourSelect = '#A80000';
-
-		this.model = 'Client';
-	};
-
-});
+// Use the client model for selects
+Client.setProperty('model', 'Client');

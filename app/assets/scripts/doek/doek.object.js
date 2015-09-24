@@ -6,6 +6,7 @@
 Doek.Object = function(parentLayer) {
 	
 	this.parentLayer = parentLayer;
+	this.canvas = parentLayer.parentCanvas;
 	this.nodes = new Doek.Collection();
 	
 	this._parent = parentLayer;
@@ -36,8 +37,7 @@ Doek.Object = function(parentLayer) {
 	this.on('hasCleared', function(caller){
 		this.drawn = false;
 	});
-	
-}
+};
 
 /**
  * Return an array of nodes on this position
@@ -186,11 +186,11 @@ Doek.Object.prototype.drawNode = function (index) {
  * Draw the entire object
  */
 Doek.Object.prototype.draw = function () {
-	
+
 	for (var key in this.nodes.storage) {
 		this.drawNode(key);
 	}
-	
+
 	this.drawn = true;
 }
 

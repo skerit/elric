@@ -140,10 +140,10 @@ Doek.Node.prototype._calculate = function() {
  * Draw the node with the active style
  */
 Doek.Node.prototype.draw = function() {
-	
+
 	// Recalculate
 	this.calculate();
-	
+
 	if (!this._visible) return false;
 	
 	// Create the internally drawn cache var for this version
@@ -154,19 +154,17 @@ Doek.Node.prototype.draw = function() {
 			ctx: false
 		}
 	}
-	
+
 	var o = this.instructions;
-	
+
 	if (!this._idrawn[this.activeStyle.name]['drawn']) {
 		this._draw();
 	}
-	
-	var ctx = this.parentObject.parentLayer.ctx;
-	
-	ctx.drawImage(this._idrawn[this.activeStyle.name]['element'], this.position.absX-1, this.position.absY-1);
-	
-	this.drawn = true;
 
+	var ctx = this.parentObject.parentLayer.ctx;
+
+	ctx.drawImage(this._idrawn[this.activeStyle.name]['element'], this.position.absX-1, this.position.absY-1);
+	this.drawn = true;
 }
 
 /**
@@ -213,7 +211,7 @@ Doek.Node.prototype.hide = function (preventRedraw) {
 
 Doek.Node.prototype._draw = function() {
 	// Function to be overwritten when extended
-}
+};
 
 /**
  * @param	{Doek.Position}		position
@@ -358,12 +356,12 @@ Doek.Node.prototype.addStyle = function(style, clone, overwrite) {
  * Apply a certain style
  */
 Doek.Node.prototype.applyStyle = function (stylename, requestRedraw) {
-	
+
 	if (requestRedraw === undefined) requestRedraw = true;
-	
+
 	if (this.styles[stylename] !== undefined) {
 		this.activeStyle = this.styles[stylename];
-		
+
 		if (requestRedraw) this.fire('requestredraw', this);
 	}
 }
@@ -372,12 +370,11 @@ Doek.Node.prototype.applyStyle = function (stylename, requestRedraw) {
  * Activate a certain style
  */
 Doek.Node.prototype.activateStyle = function (stylename, requestRedraw) {
-	
+
 	if (this.styles[stylename] !== undefined) {
 		this.activeStyles[stylename] = this.styles[stylename];
-		
+
 		this.determineStyle(requestRedraw);
-		
 	}
 }
 
