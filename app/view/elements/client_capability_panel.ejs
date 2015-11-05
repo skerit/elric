@@ -19,7 +19,6 @@ update_url(Router.routeUrl(
 		<% }) %>
 	</x-panel-actions>
 	<x-panel-body>
-		<p>Version <%= ccap.capability.version %></p>
-		<p><%= ccap.capability.description %></p>
+		<% implement([ccap.capability.config_element, 'elements/client_capability_default_content'], null, {config: ccap}) %>
 	</x-panel-body>
 </x-panel>

@@ -11,6 +11,7 @@
  * @license     GPL v3
  */
 alchemy.usePlugin('elro');
+alchemy.usePlugin('philips-hue');
 alchemy.usePlugin('acl');
 alchemy.usePlugin('chimera', {title: 'Elric'});
 alchemy.usePlugin('web-components');

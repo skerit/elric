@@ -188,6 +188,26 @@ Elric.setMethod(function registerClient(eclient) {
 	info = eclient.announcement;
 	log.info('Incoming client connection: ' + info.hostname);
 
+	// Listen for remote command requests
+	eclient.on('capability-command', function onCapabilityCommand(packet) {
+
+		var instance;
+
+		console.log('Got capability command:', packet);
+
+		if (alchemy.classes[packet.capability + 'Capability']) {
+			instance = new alchemy.classes[packet.capability + 'Capability'];
+
+			if (instance[packet.type]) {
+				instance[packet.type].apply(instance, packet.args);
+			} else {
+				console.error('Capability method "' + packet.type + '" not found, packet ignored', packet);
+			}
+		} else {
+			console.error('Could not find capability ' + packet.capability + ', packet ignored', packet);
+		}
+	});
+
 	Function.series(function findDocument(next) {
 
 		// Look for this hostname first

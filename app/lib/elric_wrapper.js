@@ -30,7 +30,7 @@ Wrapper.constitute(function setBasicBehaviour() {
 		// Do nothing further if this is meant to be extended only
 		if (this.prototype.extend_only) {
 
-			if (this.prototype.starts_new_group !== false) {
+			if (this.prototype.hasOwnProperty('starts_new_group') && this.prototype.starts_new_group !== false) {
 				// This wrapper starts a new group
 				this.setProperty('group_parent', this.name);
 

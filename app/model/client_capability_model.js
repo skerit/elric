@@ -64,3 +64,41 @@ ClientCapability.constitute(function chimeraConfig() {
 	edit.addField('name');
 	edit.addField('enabled');
 });
+
+/**
+ * Load base capability settings for the config view
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+ClientCapability.setDocumentMethod(function setupConfigView(controller, callback) {
+
+	var that = this,
+	    tasks = [],
+	    i;
+
+	this._records.forEach(function eachRecord(record) {
+
+		var instance,
+		    name = record.ClientCapability.name;
+
+		// Get the capability instance, if it isn't available do nothing
+		if (all_capabilities[name]) {
+			instance = new all_capabilities[name];
+		} else {
+			return;
+		}
+
+		// If this instance does not have a configurator for the view, do nothing
+		if (!instance.setupConfigView) {
+			return;
+		}
+
+		tasks.push(function processRecord(next) {
+			instance.setupConfigView(controller, record.ClientCapability, next);
+		});
+	});
+
+	Function.parallel(tasks, callback);
+});

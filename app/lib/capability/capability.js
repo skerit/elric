@@ -66,6 +66,24 @@ Capability.setProperty('version', '0.1.0');
 Capability.setProperty('description', '');
 
 /**
+ * The view element to use for the configuring panel
+ *
+ * @type   {String}
+ */
+Capability.setProperty('config_element', '');
+
+/**
+ * Capability view configurator
+ *
+ * @type   {Function}
+ *
+ * @param  {Controller} controller
+ * @param  {Object}     record
+ * @param  {Function}   next
+ */
+Capability.setProperty('setupConfigView', null);
+
+/**
  * Return the basic record for JSON
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -78,6 +96,7 @@ Capability.setMethod(function toJSON() {
 		type_name: this.type_name,
 		version: this.version,
 		description: this.description,
-		scema: this.constructor.schema
+		scema: this.constructor.schema,
+		config_element: this.config_element
 	}
 });

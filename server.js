@@ -14,7 +14,6 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 require('alchemymvc');
-
 alchemy.configureService('elric::master');
 
 alchemy.create = function(name, fnc){

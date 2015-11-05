@@ -40,8 +40,10 @@ Client.setMethod(function index(conduit) {
  */
 Client.setMethod(function configure(conduit) {
 
-	var client,
-	    id = conduit.param('id');
+	var that = this,
+	    client,
+	    id = conduit.param('id'),
+	    capabilities;
 
 	if (!id) {
 		return conduit.notFound();
@@ -51,10 +53,20 @@ Client.setMethod(function configure(conduit) {
 
 	this.set('pagetitle', client.hostname || client.ip);
 
-	this.set('client_capabilities', client.ClientCapability);
-	this.set('client', client.Client);
+	// Get a clone of the capabilities document
+	capabilities = client.ClientCapability.clone();
 
-	this.render('client/chimera_edit');
+	// The client config itself
+	that.set('client', client.Client);
+
+	// Add the required data for user configuration
+	capabilities.setupConfigView(this, function done() {
+
+		// The client capabilities
+		that.set('client_capabilities', capabilities);
+
+		that.render('client/chimera_edit');
+	});
 });
 
 /**
@@ -110,6 +122,45 @@ Client.setMethod(function capability(conduit) {
 	} else {
 		conduit.end({ccap: ccap});
 	}
+});
+
+/**
+ * Capability config
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Client.setMethod(function capconfig(conduit, capability_id, command) {
+
+	var that = this,
+	    Capability = this.getModel('ClientCapability'),
+	    args = [conduit, null],
+	    i;
+
+	for (i = 3; i < arguments.length; i++) {
+		args.push(arguments[i]);
+	}
+
+	Capability.findById(capability_id, function gotCapability(err, document) {
+
+		var capability;
+
+		if (err || !document.length) {
+			return that.error(err || new Error('Capability not found'));
+		}
+
+		args[1] = document;
+
+		// Get the capability instance
+		capability = document.capability;
+
+		if (capability[command]) {
+			capability[command].apply(capability, args);
+		}
+	});
 });
 
 // Add the dashboard to the menu deck

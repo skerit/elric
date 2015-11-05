@@ -1,0 +1,41 @@
+<% live('config', function hueConfig(config) {
+
+	if (!config.settings.registered) {
+		live_event('bridges', function gotBridgeSetup(setup) {
+
+			console.log('Config:', config)
+
+			if (gotBridgeSetup.initial) {
+				return print('<p style="text-align: center;">Looking for bridges, hang on ...');
+			}
+
+			if (setup.fail) {
+				return print('<p style="text-align: center;">' + setup.fail + '</p>');
+			}
+
+			if (setup.registering) {
+				return print('<p style="text-align: center;">The bridge is being registered. Don\'t forget to push the bridge button.');
+			}
+
+			if (!setup.bridges || !setup.bridges.length) {
+				print('<p style="text-align: center;">No bridges were found.</p>');
+			} else {
+				bridge = setup.bridges[0];
+				%>
+				<p style="text-align:center;">Bridge found at <%= bridge.ipaddress %><br>
+					Press the big round button on the bridge and then click here:<br>
+					<br>
+					<button
+						class="btn btn-primary"
+						data-server-event="capconfig | <%= config._id %> | register | <%= bridge.id %> | <%= bridge.ipaddress %>"
+					>
+						Register bridge
+					</button>
+				</p>
+				<%
+			}
+		});
+	} else { %>
+		<p style="text-align: center;">Bridge <%= config.settings.ip %> has been registered</p>
+	<% }
+}) %>
