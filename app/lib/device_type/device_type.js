@@ -49,6 +49,9 @@ DeviceType.constitute(function setProperties() {
 
 	// Add it to the category
 	categories[this.prototype.category].push(this);
+
+	// Add an empty features object
+	this.setProperty('features', {});
 });
 
 /**
@@ -88,6 +91,28 @@ DeviceType.setProperty(function protocol_instance() {
 	}
 
 	return this._protocol;
+});
+
+/**
+ * Add feature to this class
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+DeviceType.setStatic(function addFeature(name, configuration) {
+
+	var features = this.prototype.features;
+
+	if (configuration == null) {
+		configuration = {};
+	}
+
+	configuration.name = name;
+
+	features[name] = configuration;
+
+	return this;
 });
 
 /**

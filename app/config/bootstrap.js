@@ -10,6 +10,7 @@
  * @version     1.0.0
  * @license     GPL v3
  */
+alchemy.usePlugin('display');
 alchemy.usePlugin('elro');
 alchemy.usePlugin('philips-hue');
 alchemy.usePlugin('acl');

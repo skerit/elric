@@ -20,6 +20,13 @@ var Elric = Function.inherits('Informer', function Elric() {
 	this.init();
 });
 
+/**
+ * Init function that gets called by the constructor
+ *
+ * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
 Elric.setMethod(function init() {
 
 	var that = this;

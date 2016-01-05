@@ -1,5 +1,6 @@
 /**
- * The Lct007 Device Type
+ * The Lst002 Device Type
+ * Lightstrip
  *
  * @constructor
  *
@@ -7,7 +8,7 @@
  * @since    1.0.0
  * @version  1.0.0
  */
-var Lct007 = Function.inherits('HueDeviceType', function Lct007DeviceType(device_record) {});
+var Lst002 = Function.inherits('HueDeviceType', function Lst002DeviceType(device_record) {});
 
 /**
  * Set the title properties
@@ -16,7 +17,7 @@ var Lct007 = Function.inherits('HueDeviceType', function Lct007DeviceType(device
  * @since    1.0.0
  * @version  1.0.0
  */
-Lct007.constitute(function setProperties() {
+Lst002.constitute(function setProperties() {
 
 	// You can dim this device, change the brightness
 	this.addFeature('brightness');
@@ -30,14 +31,14 @@ Lct007.constitute(function setProperties() {
 /**
  * Set the full-caps title
  */
-Lct007.setProperty('title', 'LCT007');
+Lst002.setProperty('title', 'LST002');
 
 /**
  * Set the protcol
  */
-Lct007.setProperty('protocol', 'hue');
+Lst002.setProperty('protocol', 'hue');
 
 /**
  * Set the category
  */
-Lct007.setProperty('category', 'switch');
+Lst002.setProperty('category', 'switch');

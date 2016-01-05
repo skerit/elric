@@ -49,7 +49,13 @@ Device.constitute(function addFields() {
 
 	// Return the protocol
 	this.Document.setFieldGetter('protocol', function getProtocol() {
-		return this.device.protocol_instance;
+
+		if (this.device) {
+			return this.device.protocol_instance;
+		} else {
+			// Unknown device
+			return null;
+		}
 	});
 });
 

@@ -1,0 +1,43 @@
+<%
+// Expand using chimera_base, but settle for base if it's available
+expands(['layouts/chimera_base', 'layouts/base']);
+
+// Load the chimera stylesheet
+style('chimera/chimera');
+
+// Enable the svg webcomponent
+WebComponent.load('svg');
+WebComponent.load('panel');
+WebComponent.load('switch');
+WebComponent.load('button-group');
+
+// Load the chimera script
+/*script('chimera/chimera');*/
+
+// Start the body block
+start('body') %>
+<div class="enclosure">
+	<div class="page-topbar">
+		<%
+			assign('chimera-brand', {className: true});
+			brand_opts = {
+				content: '<h1>' + (project_title || 'Chimera') + '</h1>',
+				className: 'chimera-brand-anchor'
+			};
+
+			Router.printRoute('chimera@Dashboard', null, brand_opts);
+			assign_end('chimera-brand')
+		%>
+		<% assign('chimera-title', {className: true}) %>
+		<% assign('chimera-status', {className: true}) %>
+	</div>
+	<div class="page-container">
+		<%
+			assign('chimera-sidenav', {className: true});
+			print_element('chimera/sidebar');
+			assign_end('chimera-sidenav');
+		%>
+		<% assign('chimera-cage', {className: true}) %>
+	</div>
+</div>
+<% end('body') %>

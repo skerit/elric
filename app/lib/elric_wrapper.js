@@ -1,5 +1,6 @@
 /**
- * The Elric Wrapper class
+ * The Elric Wrapper class,
+ * basis for most special classes
  *
  * @constructor
  *
