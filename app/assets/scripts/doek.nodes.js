@@ -2,14 +2,14 @@
  * This javascript file adds new Doek nodes,
  * especially created for Elric
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2012.12.28
  */
 
 /**
  * Basic node events
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2013.01.05
  *
  */
@@ -82,7 +82,7 @@ Doek.Rectangle.prototype.fillEditForm = function fillEditForm(selected) {
 /**
  * Fill the sidebar of the floorplan
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  1.0.0
  *
@@ -143,7 +143,7 @@ Doek.Rectangle.prototype.elric_node = true;
 /**
  * Create a new Doek Node class: Wall
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2012.12.28
  *
  * @param    {object}       instructions   How to draw this thing
@@ -199,7 +199,7 @@ Doek.Wall = Doek.extend(Doek.Line, function Wall(instructions, parentObject, roo
 /**
  * Create a new Doek Node class: Camera
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2013.01.04
  *
  * @param    {object}       instructions   How to draw this thing
@@ -244,7 +244,7 @@ Doek.Camera = Doek.extend(Doek.Rectangle, function Camera(instructions, parentOb
  * Extended function to fill the doek edit form
  * Camera type
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2013.01.05
  */
 Doek.Camera.prototype._fillEditForm = function() {
@@ -274,7 +274,7 @@ Doek.Camera.prototype._fillEditForm = function() {
  * Extend the doek object prototype
  * Add a default node to this object
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2013.01.06
  *
  * @param    {Object}    room_element
@@ -338,7 +338,7 @@ Doek.Object.prototype.addNewType = function addNewType(room_element, type_name) 
  * Extend the doek object prototype
  * Add a camera node to this object
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2013.01.04
  *
  * @param	   {Object}	roomElement

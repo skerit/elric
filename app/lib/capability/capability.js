@@ -6,18 +6,18 @@ var capabilities = alchemy.shared('Elric.capabilities');
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  0.2.0
+ * @version  0.1.0
  */
 var Capability = Function.inherits('Informer', function Capability() {});
 
 /**
  * Register the capability and set the schema
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
- * @since    0.2.0
- * @version  0.2.0
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Capability.constitute(function register() {
 
@@ -87,8 +87,8 @@ Capability.setProperty('setupConfigView', null);
  * Return the basic record for JSON
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Capability.setMethod(function toJSON() {
 	return {

@@ -5,9 +5,9 @@ var interfaces = alchemy.shared('Elric.interfaces');
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@develry.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var Interface = Function.inherits('ElricWrapper', function Interface() {});
 
@@ -32,7 +32,7 @@ Interface.setProperty('protocols', []);
  * 
  * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  * 
  * @param    {String}   client_id          The id of the client to send it to
  * @param    {Object}   address            The address of the device

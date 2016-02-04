@@ -6,9 +6,9 @@ var categories  = alchemy.shared('device.categories'),
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@develry.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var DeviceType = Function.inherits('ElricWrapper', function DeviceType() {});
 
@@ -17,7 +17,7 @@ var DeviceType = Function.inherits('ElricWrapper', function DeviceType() {});
  *
  * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    0.1.0
- * @version  1.0.0
+ * @version  0.1.0
  */
 DeviceType.constitute(function setProperties() {
 
@@ -79,8 +79,8 @@ DeviceType.setProperty('protocol', false);
  * Return the protocol instance
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @type   {AutomationProtocol}
  */
@@ -97,8 +97,8 @@ DeviceType.setProperty(function protocol_instance() {
  * Add feature to this class
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 DeviceType.setStatic(function addFeature(name, configuration) {
 
@@ -119,8 +119,8 @@ DeviceType.setStatic(function addFeature(name, configuration) {
  * Return the basic record for JSON
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 DeviceType.setMethod(function toJSON() {
 	return {
@@ -137,8 +137,8 @@ DeviceType.setMethod(function toJSON() {
  * Create a protocol instance
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @return   {AutomationProtocol}
  */
@@ -150,8 +150,8 @@ DeviceType.setMethod(function createProtocolInstance() {
  * Turn a device command into an interface command
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {String}   command     Device specific command
  *

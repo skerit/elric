@@ -172,7 +172,7 @@ Doek.Node.prototype.draw = function() {
  * 
  * Event fired: show (if not previously visible)
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    2012.12.29
  */
 Doek.Node.prototype.show = function (preventRedraw) {
@@ -193,7 +193,7 @@ Doek.Node.prototype.show = function (preventRedraw) {
  *
  * Event fired: hide (if not previously hidden)
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    2012.12.29
  */
 Doek.Node.prototype.hide = function (preventRedraw) {

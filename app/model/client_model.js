@@ -8,9 +8,9 @@ var bcrypt = alchemy.use('bcrypt'),
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var Client = Model.extend(function ClientModel(options) {
 	ClientModel.super.call(this, options);
@@ -19,9 +19,9 @@ var Client = Model.extend(function ClientModel(options) {
 /**
  * Constitute the class wide schema
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.constitute(function addFields() {
 
@@ -54,8 +54,8 @@ Client.constitute(function addFields() {
  * Configure chimera for this model
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.constitute(function chimeraConfig() {
 
@@ -85,8 +85,8 @@ Client.constitute(function chimeraConfig() {
  * Get all clients
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setMethod(function getClients(callback) {
 
@@ -108,8 +108,8 @@ Client.setMethod(function getClients(callback) {
  * Load the capability data for these clients
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setDocumentMethod(function loadCapabilityData(callback) {
 
@@ -172,8 +172,8 @@ Client.setDocumentMethod(function loadCapabilityData(callback) {
  * Get a specific capability
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setDocumentMethod(function getCapability(key) {
 
@@ -192,8 +192,8 @@ Client.setDocumentMethod(function getCapability(key) {
  * Authorize the client and assign it a key
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setDocumentMethod(function authorize(callback) {
 
@@ -243,8 +243,8 @@ Client.setDocumentMethod(function authorize(callback) {
  * Send client server authentication
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setDocumentMethod(function requestAuthentication(callback) {
 
@@ -304,8 +304,8 @@ Client.setDocumentMethod(function requestAuthentication(callback) {
  * Send capability settings to the client
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setDocumentMethod(function sendCapabilities(callback) {
 
@@ -354,12 +354,14 @@ Client.setDocumentMethod(function sendCapabilities(callback) {
  * Attach the websocket connection
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setDocumentMethod(function attachConduit(conduit) {
 
 	var that = this;
+
+	console.log('Attaching conduit to', this, conduit)
 
 	this.conduit = conduit;
 	this.connected = true;
@@ -387,9 +389,35 @@ Client.setDocumentMethod(function attachConduit(conduit) {
  * Send data to the client
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Client.setDocumentMethod(function submit(type, data, stream, callback) {
 	return this.conduit.submit(type, data, stream, callback);
+});
+
+/**
+ * Linkup with the client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Client.setDocumentMethod(function linkup(type, data, cb) {
+	return this.conduit.linkup(type, data, cb);
+});
+
+/**
+ * Send a command to the client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Client.setDocumentMethod(function submitCommand(command_type, capability_type, data, stream, callback) {
+
+	data.command_type = command_type;
+	data.client_type = capability_type;
+
+	return this.conduit.submit('client-command', data, stream, callback);
 });

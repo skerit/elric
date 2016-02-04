@@ -3,9 +3,9 @@
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var Room = Model.extend(function RoomModel(options) {
 
@@ -17,9 +17,9 @@ var Room = Model.extend(function RoomModel(options) {
 /**
  * Constitute the class wide schema
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Room.constitute(function addFields() {
 
@@ -50,8 +50,8 @@ Room.constitute(function addFields() {
  * Configure chimera for this model
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Room.constitute(function chimeraConfig() {
 

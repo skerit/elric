@@ -2,14 +2,14 @@
  * This javascript file adds new Doek actions,
  * especially created for Elric
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2012.12.28
  */
 
 /**
  * Create an action to change the size of a wall
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2012.12.28
  */
 var changeSize = new Doek.Action('changeSize');
@@ -18,7 +18,7 @@ var changeSize = new Doek.Action('changeSize');
  * Change starting- & endpositions of something
  * when moving the mouse while clicking down
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2012.12.28
  */
 changeSize.on('mousemoveDown', function (caller, payload) {
@@ -70,7 +70,7 @@ changeSize.on('mousemoveDown', function (caller, payload) {
 /**
  * Reset some things when we release the mouse
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    2012.12.28
  */
 changeSize.on('mouseup', function (caller, payload) {
@@ -81,7 +81,7 @@ changeSize.on('mouseup', function (caller, payload) {
 /**
  * Add these new actions to a doek
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  0.1.0
  */

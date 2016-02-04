@@ -1,32 +1,18 @@
 {
 	"name": "elric",
 	"description": "The Elric server",
-	"version": "1.0.0",
+	"version": "0.1.0-alpha",
 	"dependencies": {
-		"alchemymvc": "1.0.x",
-		"alchemy-chimera": "1.0.x",
-
-		"alchemy-i18n": "0.1.x",
-		"alchemy-styleboost": "0.1.x",
-		"alchemy-jquery": "0.1.x",
-		"alchemy-jsoneditor": "0.1.x",
-		"alchemy-select2": "0.1.x",
-		"alchemy-acl": "0.1.x",
-		"alchemy-menu": "0.1.x",
-		"alchemy-pace": "0.1.x",
-		"alchemy-media": "0.1.x",
-
-		"socket.io": "0.9.x",
-		"swig": "0.12.x",
-		"moment": "1.7.2",
-		"email": "0.2.5",
-		"randomstring": "1.0.x",
-		"base64js": "1.0.x",
-		"hawkejs": "0.0.2",
-		"mkdirp": "0.3.x",
-		"node-hue-api": "~1.2.1"
+		"alchemymvc": "~1.0.0",
+		"alchemy-acl": "~1.0.0",
+		"alchemy-chimera": "~1.0.0",
+		"alchemy-i18n": "~1.0.0",
+		"alchemy-styleboost": "~1.0.0",
+		"alchemy-menu": "~1.0.0",
+		"alchemy-media": "~1.0.0"
 	},
 	"devDependencies": {
+		"alchemy-debugbar": "~1.0.0",
 		"benchmark": "1.0.x",
 		"microtime": "0.3.x",
 		"v8-profiler": "3.6.x",
@@ -34,6 +20,7 @@
 	},
 	"license": "GPLv3",
 	"engines": {
-		"node": ">=0.10"
-	}
+		"node": "~4.2.0"
+	},
+	"private": true
 }

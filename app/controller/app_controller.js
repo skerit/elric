@@ -4,10 +4,10 @@
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var AppController = Function.inherits('Controller', function AppController(conduit, options) {
-	Controller.call(this, conduit, options);
+	AppController.super.call(this, conduit, options);
 });

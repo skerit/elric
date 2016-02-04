@@ -4,18 +4,18 @@
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 var Wrapper = Function.inherits('Informer', function ElricWrapper() {});
 
 /**
  * Set basic behaviour
  *
- * @author   Jelle De Loecker   <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Wrapper.constitute(function setBasicBehaviour() {
 

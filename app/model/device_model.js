@@ -5,9 +5,9 @@ var interfaces = alchemy.shared('elric.interface');
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var Device = Model.extend(function DeviceModel(options) {
 
@@ -23,9 +23,9 @@ var Device = Model.extend(function DeviceModel(options) {
 /**
  * Constitute the class wide schema
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Device.constitute(function addFields() {
 
@@ -63,8 +63,8 @@ Device.constitute(function addFields() {
  * Configure chimera for this model
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Device.constitute(function chimeraConfig() {
 
@@ -98,8 +98,8 @@ Device.constitute(function chimeraConfig() {
  * Get the interface linked to this device
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Device.setDocumentMethod(function getInterface(callback) {
 
@@ -136,8 +136,8 @@ Device.setDocumentMethod(function getInterface(callback) {
  * Get the command to send to the interface
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {String}   command_name   The device-specific command name
  * @param    {Function} callback
@@ -189,8 +189,8 @@ Device.setDocumentMethod(function getProtocolCommand(command_name, callback) {
  * Execute a command, send it to the interface
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {String}   device_command_name   The device-specific command name
  * @param    {Function} callback
@@ -236,8 +236,8 @@ Device.setDocumentMethod(function doCommand(device_command_name, callback) {
  * Execute a command, send it to the interface
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {String}   protocol_command   The protocol command to send
  * @param    {Object}   new_state          The new state object to set

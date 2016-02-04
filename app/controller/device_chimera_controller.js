@@ -1,9 +1,9 @@
 /**
  * The Device Chimera Controller class
  *
- * @author        Jelle De Loecker   <jelle@develry.be>
- * @since         0.2.0
- * @version       0.2.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 var Device = Function.inherits('ChimeraController', function DeviceChimeraController(conduit, options) {
 	DeviceChimeraController.super.call(this, conduit, options);
@@ -13,8 +13,8 @@ var Device = Function.inherits('ChimeraController', function DeviceChimeraContro
  * Show all devices
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -40,8 +40,8 @@ Device.setMethod(function index(conduit) {
  * Execute a command on a device
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -61,8 +61,8 @@ Device.setMethod(function command(conduit, device_id, command) {
  * Send a protocol command to a device
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */

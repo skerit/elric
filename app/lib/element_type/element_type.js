@@ -3,9 +3,9 @@
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@develry.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var ElementType = Function.inherits('ElricWrapper', function ElementType() {});
 
@@ -43,8 +43,8 @@ ElementType.setProperty('model', false);
  * Return the basic record for JSON
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 ElementType.setMethod(function toJSON() {
 	return {

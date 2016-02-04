@@ -2,7 +2,7 @@
 /**
  * A wrapper class function for Doek's canvas
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  1.0.0
  *
@@ -117,7 +117,7 @@ var Floorplan = Function.inherits('Informer', function Floorplan(canvas_id) {
 /**
  * Add element types
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    1.0.0
  * @version  1.0.0
  *
@@ -130,7 +130,7 @@ Floorplan.setMethod(function addElementTypes(element_types) {
 /**
  * Get the currently selected room
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  1.0.0
  */
@@ -148,7 +148,7 @@ Floorplan.setMethod(function getSelectedRoom() {
 /**
  * Add rooms to the Doek Canvas and the Elric object
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  1.0.0
  *
@@ -229,7 +229,7 @@ Floorplan.setMethod(function addRooms(rooms) {
 /**
  * Add room elements to the Doek Canvas and the Elric room object
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  1.0.0
  *
@@ -267,7 +267,7 @@ Floorplan.setMethod(function addElements(elements, room) {
 /**
  * Add an element type function for default elements
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  1.0.0
  *
@@ -290,7 +290,7 @@ Floorplan.setMethod(function createNewElement(room_id, element, type_name) {
 /**
  * Only create a new Doek if the wrapper div exists
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  1.0.0
  */
@@ -334,7 +334,7 @@ hawkejs.scene.on('doekview', function (query, data){
 	/**
 	 * Select a room in the HTML select element
 	 *
-	 * @author   Jelle De Loecker <jelle@kipdola.be>
+	 * @author   Jelle De Loecker <jelle@develry.be>
 	 * @since    2012.12.28
 	 *
 	 * @param   {string}   id   The room id
@@ -352,7 +352,7 @@ hawkejs.scene.on('doekview', function (query, data){
 	/**
 	 * Get the selected room from the HTML select
 	 *
-	 * @author   Jelle De Loecker <jelle@kipdola.be>
+	 * @author   Jelle De Loecker <jelle@develry.be>
 	 * @since    2012.12.29
 	 */
 	Elric.doek.getSelectedRoom = function () {
@@ -364,7 +364,7 @@ hawkejs.scene.on('doekview', function (query, data){
 	 * Select a roomElement in the HTML select element
 	 * Should be called AFTER a selectRoom
 	 *
-	 * @author   Jelle De Loecker <jelle@kipdola.be>
+	 * @author   Jelle De Loecker <jelle@develry.be>
 	 * @since    2012.12.28
 	 *
 	 * @param   {string}   id   The roomElement id
@@ -383,7 +383,7 @@ hawkejs.scene.on('doekview', function (query, data){
 	/**
 	 * Add an element type function for default elements
 	 *
-	 * @author   Jelle De Loecker <jelle@kipdola.be>
+	 * @author   Jelle De Loecker <jelle@develry.be>
 	 * @since    2013.01.06
 	 *
 	 * @param    {object}   element   The element type element
@@ -410,7 +410,7 @@ hawkejs.scene.on('doekview', function (query, data){
 	/**
 	 * Add an element type function for adding a camera
 	 *
-	 * @author   Jelle De Loecker <jelle@kipdola.be>
+	 * @author   Jelle De Loecker <jelle@develry.be>
 	 * @since    2013.01.04
 	 *
 	 * @param    {object}   camera   Camera element type
@@ -432,7 +432,7 @@ hawkejs.scene.on('doekview', function (query, data){
 	 * Function that fires when the buttonGroup changes,
 	 * sets the Elric doek mode & fires certain actions
 	 *
-	 * @author   Jelle De Loecker <jelle@kipdola.be>
+	 * @author   Jelle De Loecker <jelle@develry.be>
 	 * @since    2012.12.28
 	 *
 	 * @param   {string}   newMode   The name of the new mode

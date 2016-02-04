@@ -3,7 +3,7 @@
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  0.1.0
  */
@@ -14,7 +14,7 @@ var Arc = Function.inherits('AutomationProtocol', function ArcAutomationProtocol
  *
  * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    0.1.0
- * @version  1.0.0
+ * @version  0.1.0
  */
 Arc.constitute(function setProperties() {
 

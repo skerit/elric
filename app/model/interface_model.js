@@ -5,9 +5,9 @@ var interfaces = alchemy.shared('elric.interface');
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var Interface = Model.extend(function InterfaceModel(options) {
 	InterfaceModel.super.call(this, options);
@@ -16,9 +16,9 @@ var Interface = Model.extend(function InterfaceModel(options) {
 /**
  * Constitute the class wide schema
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Interface.constitute(function addFields() {
 
@@ -32,8 +32,8 @@ Interface.constitute(function addFields() {
  * Configure chimera for this model
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Interface.constitute(function chimeraConfig() {
 
@@ -62,7 +62,7 @@ Interface.constitute(function chimeraConfig() {
 /**
  * Prepare the recordset before saving
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    0.0.1
  * @version  0.1.0
  */
@@ -81,8 +81,8 @@ Interface.setMethod(function prepareSave(recordset) {
  * Get an instance of the interface type
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Interface.setDocumentMethod(function createInstance() {
 	return new interfaces[this.type];

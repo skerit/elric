@@ -5,9 +5,9 @@ var all_capabilities = alchemy.shared('Elric.capabilities');
  *
  * @constructor
  *
- * @author   Jelle De Loecker   <jelle@kipdola.be>
+ * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  1.0.0
+ * @version  0.1.0
  */
 var ClientCapability = Model.extend(function ClientCapabilityModel(options) {
 	ClientCapabilityModel.super.call(this, options);
@@ -16,9 +16,9 @@ var ClientCapability = Model.extend(function ClientCapabilityModel(options) {
 /**
  * Constitute the class wide schema
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 ClientCapability.constitute(function addFields() {
 	this.addField('name', 'String'); // Enum?
@@ -38,8 +38,8 @@ ClientCapability.constitute(function addFields() {
  * Configure chimera for this model
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 ClientCapability.constitute(function chimeraConfig() {
 
@@ -69,8 +69,8 @@ ClientCapability.constitute(function chimeraConfig() {
  * Load base capability settings for the config view
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 ClientCapability.setDocumentMethod(function setupConfigView(controller, callback) {
 

@@ -15,8 +15,8 @@ var Client = Function.inherits('ChimeraController', function ClientChimeraContro
  * Show all registered & connected clients
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -26,6 +26,12 @@ Client.setMethod(function index(conduit) {
 
 	this.set('clients', elric.clients);
 
+	console.log(elric.clients);
+
+	console.log('Cloning...')
+	JSON.clone(elric.clients[1]);
+	console.log('Done Cloning...')
+
 	this.render('client/chimera_index');
 });
 
@@ -33,8 +39,8 @@ Client.setMethod(function index(conduit) {
  * Configure a client
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -73,8 +79,8 @@ Client.setMethod(function configure(conduit) {
  * Send client specific detail
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -99,8 +105,8 @@ Client.setMethod(function detail(conduit) {
  * Send client capability data
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -128,8 +134,8 @@ Client.setMethod(function capability(conduit) {
  * Capability config
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */

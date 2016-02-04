@@ -1,11 +1,12 @@
-var all_capabilities = alchemy.shared('Elric.capabilities');
+var all_capabilities = alchemy.shared('Elric.capabilities'),
+    fs = require('fs');
 
 /**
  * The Elric Singleton class
  *
- * @author   Jelle De Loecker   <jelle@develry.be>
- * @since    0.2.0
- * @version  0.2.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.0.1
+ * @version  0.1.0
  */
 var Elric = Function.inherits('Informer', function Elric() {
 
@@ -23,9 +24,9 @@ var Elric = Function.inherits('Informer', function Elric() {
 /**
  * Init function that gets called by the constructor
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Elric.setMethod(function init() {
 
@@ -48,9 +49,9 @@ Elric.setMethod(function init() {
 /**
  * Load all the clients from the database
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Elric.setMethod(function initClientList(callback) {
 
@@ -87,8 +88,8 @@ Elric.setMethod(function initClientList(callback) {
  * Get a client
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Elric.setMethod(function getClient(id) {
 
@@ -112,8 +113,8 @@ Elric.setMethod(function getClient(id) {
  * Get a ClientCapability record
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Elric.setMethod(function getClientCapability(client_capability_id) {
 
@@ -146,8 +147,8 @@ Elric.setMethod(function getClientCapability(client_capability_id) {
  * Get a client's capability
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Elric.setMethod(function getClientCapabilities(id, callback) {
 
@@ -166,15 +167,93 @@ Elric.setMethod(function getClientCapabilities(id, callback) {
 	}
 
 	client = this.getClient(id);
-
 });
+
+/**
+ * Play a sound
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function playSound(sound, callback) {
+
+	var CC = Model.get('ClientCapability');
+
+	console.log('Playing sound', sound);
+
+	CC.find('all', {conditions: {name: 'audio', enabled: true}}, function gotCapabilities(err, records) {
+
+		var tasks = [],
+		    links = [];
+
+		if (err) {
+			return callback(err);
+		}
+
+		records.forEach(function eachRecord(record) {
+
+			var client,
+			    id = record.Client._id;
+
+			client = elric.getClient(id);
+
+			if (!client.conduit) {
+				console.log('Client', client, 'has no connection, skipping this play');
+				return;
+			}
+
+			tasks.push(function sendStream(next) {
+
+				var link;
+
+				console.log('Creating audio link to client ' + id);
+
+				link = client.linkup('audio_stream', {test: true}, function ready(link) {
+					console.log('Link', link, 'is ready!');
+
+					// Submit the stream once a connection has been made
+					link.submit('stream', fs.createReadStream(sound));
+				});
+
+				link.on('loaded', next);
+
+				links.push(link);
+
+				return;
+
+				client.submitCommand('wav_stream', 'audio', {test:'wav'}, fs.createReadStream(sound), function playing(err, response) {
+
+					console.log('Id ' + id + ' is playing the sound', err, response);
+
+				});
+			});
+		});
+
+		Function.parallel(tasks, function allHaveLoaded(err) {
+
+			var i;
+
+			if (err) {
+				return console.error('Could not play: ' + err);
+			}
+
+			for (i = 0; i < links.length; i++) {
+				links[i].submit('play');
+			}
+
+			console.log('All clients should be playing the file', err);
+		});
+	});
+});
+
 
 /**
  * Register a client
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {ElricClientSocketConduit}   eclient
  */
@@ -293,9 +372,9 @@ Elric.setMethod(function registerClient(eclient) {
 /**
  * Get a client file
  *
- * @author   Jelle De Loecker <jelle@kipdola.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 Elric.setMethod(function getClientFile(capability, callback) {
 

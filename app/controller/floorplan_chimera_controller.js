@@ -1,9 +1,9 @@
 /**
  * The Floorplan Chimera Controller class
  *
- * @author        Jelle De Loecker   <jelle@develry.be>
- * @since         0.2.0
- * @version       0.2.0
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
  */
 var Floor = Function.inherits('ChimeraController', function FloorplanChimeraController(conduit, options) {
 	FloorplanChimeraController.super.call(this, conduit, options);
@@ -13,8 +13,8 @@ var Floor = Function.inherits('ChimeraController', function FloorplanChimeraCont
  * Show all devices
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -72,8 +72,8 @@ Floor.setMethod(function index(conduit) {
  * Get all the available elements for the given room
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -104,8 +104,8 @@ Floor.setMethod(function elements(conduit) {
  * Add a new element to a room
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
@@ -153,8 +153,8 @@ Floor.setMethod(function addRoomElement(conduit) {
  * Add a new element to a room
  *
  * @author   Jelle De Loecker <jelle@develry.be>
- * @since    1.0.0
- * @version  1.0.0
+ * @since    0.1.0
+ * @version  0.1.0
  *
  * @param    {Conduit}   conduit
  */
