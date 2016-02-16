@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var Hue = Function.inherits('Interface', function HueInterface(interface_record) {});
+var Hue = Function.inherits('Elric.Interface', function HueInterface(interface_record) {});
 
 /**
  * Set the supported protocols

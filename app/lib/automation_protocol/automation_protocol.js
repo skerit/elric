@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var AProtocol = Function.inherits('ElricWrapper', function AutomationProtocol() {});
+var AProtocol = Function.inherits('Elric.Wrapper', function AutomationProtocol() {});
 
 /**
  * Set properties

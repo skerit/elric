@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var Arc = Function.inherits('AutomationProtocol', function ArcAutomationProtocol() {});
+var Arc = Function.inherits('Elric.AutomationProtocol', function ArcAutomationProtocol() {});
 
 /**
  * Set properties

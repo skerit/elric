@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var ElementType = Function.inherits('ElricWrapper', function ElementType() {});
+var ElementType = Function.inherits('Elric.Wrapper', function ElementType() {});
 
 /**
  * This is a wrapper class

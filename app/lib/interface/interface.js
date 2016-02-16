@@ -9,7 +9,7 @@ var interfaces = alchemy.shared('Elric.interfaces');
  * @since    0.0.1
  * @version  0.1.0
  */
-var Interface = Function.inherits('ElricWrapper', function Interface() {});
+var Interface = Function.inherits('Elric.Wrapper', function Interface() {});
 
 /**
  * This is a wrapper class

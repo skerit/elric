@@ -10,7 +10,7 @@ var categories  = alchemy.shared('device.categories'),
  * @since    0.0.1
  * @version  0.1.0
  */
-var DeviceType = Function.inherits('ElricWrapper', function DeviceType() {});
+var DeviceType = Function.inherits('Elric.Wrapper', function DeviceType() {});
 
 /**
  * Set properties
