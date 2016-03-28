@@ -24,14 +24,14 @@ Event.constitute(function addFields() {
 
 	// Event type
 	// @TODO: Make Enum
-	this.addField('type', 'Event', {values: all_events});
+	this.addField('type', 'Enum', {values: all_events});
 
 	// The event data
 	this.addField('payload', 'Object');
 
 	this.Document.setFieldGetter('event', function getEvent() {
 		if (all_events[this.type]) {
-			return new all_events[this.type]();
+			return new all_events[this.type](this);
 		}
 	});
 });

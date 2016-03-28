@@ -1,5 +1,6 @@
 var all_capabilities = alchemy.shared('Elric.capabilities'),
     all_events = alchemy.shared('elric.event'),
+    all_actions = alchemy.shared('elric.action'),
     fs = require('fs');
 
 /**
@@ -48,6 +49,101 @@ Elric.setMethod(function init() {
 });
 
 /**
+ * Create a new action and return it,
+ * without executing it or saving to database
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {String}                  action_type
+ * @param    {ScenarioModelDocument}   scenario
+ * @param    {Event}                   event
+ */
+Elric.setMethod(function createAction(action_type, scenario, event) {
+
+	var constructor = all_actions[action_type],
+	    document,
+	    action,
+	    args;
+
+	if (!action_type || !constructor) {
+		throw new Error('Could not find "' + action_type + '" action constructor');
+	}
+
+	// Create the new database document
+	document = Model.get('Action').createDocument();
+
+	// Set the type
+	document.type = action_type;
+
+	args = [];
+
+	// Create the arguments
+	for (i = 2; i < arguments.length; i++) {
+		args[i-2] = arguments[i];
+	}
+
+	// Create & initialize the action
+	action = new constructor(document);
+
+	// Set the action scenario & event
+	action.setScenario(scenario);
+	action.setEvent(event);
+
+	return action;
+});
+
+/**
+ * Create and execute the action
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {String}   action_type
+ * @param    {Event}    event
+ */
+Elric.setMethod(function doAction(action_type, scenario, event, callback) {
+
+	var action;
+
+	if (typeof event == 'function') {
+		callback = event;
+		event = null;
+	}
+
+	if (typeof scenario == 'function') {
+		callback = scenario;
+		event = null;
+		scenario = null;
+	}
+
+	action = this.createAction(action_type, scenario, event);
+
+	// Start the execution
+	action.startExecution(function executed(err, result) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		// Callback with the result immediately
+		callback(null, result);
+
+		// Set the end time
+		action.setEndTime();
+
+		// Save the action document now
+		action.save(function saved(err) {
+			if (err) {
+				console.error('Failed to save action:', err);
+			}
+		});
+	});
+});
+
+/**
  * Create a new event and return it,
  * without firing it or saving to database
  *
@@ -64,12 +160,16 @@ Elric.setMethod(function createEvent(type) {
 	    args,
 	    i;
 
-	if (!type) {
+	if (!type || !constructor) {
 		throw new Error('Could not find "' + type + '" event constructor');
 	}
 
 	// Create the new database document
 	document = Model.get('Event').createDocument();
+
+	// Set the type
+	document.type = type;
+
 	args = [];
 
 	// Create the arguments
@@ -105,10 +205,51 @@ Elric.setMethod(function emitEvent(type) {
 	// Fire and save the event
 	if (event.initialized) {
 		console.log('Emitting event', event);
+
+		elric.applyEventToScenario(event);
+
+		event.save(function saved(err) {
+			if (err) console.error('Failed to save event:', err);
+		});
 	}
 
 	return event;
 });
+
+/**
+ * Apply event to scenario
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function applyEventToScenario(event) {
+
+	var Scenario = Model.get('Scenario'),
+	    scenarios;
+
+	Function.series(function getScenarios(next) {
+		// Just get all scenarios for now
+		Scenario.find('all', function gotScenarios(err, documents) {
+			scenarios = documents;
+			next(err);
+		});
+	}, function doScenarios(next) {
+		var tasks = [];
+
+		scenarios.forEach(function eachScenario(scenario) {
+			tasks.push(function doScenario(next) {
+				scenario.applyEvent(event, next);
+			});
+		});
+		Function.parallel(tasks, next);
+	}, function done(err) {
+		if (err) {
+			console.error('Error doing scenarios:', err);
+		}
+	});
+});
+
 /**
  * Load all the clients from the database
  *

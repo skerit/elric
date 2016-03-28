@@ -53,6 +53,15 @@ Event.setProperty(function schema() {
 });
 
 /**
+ * Return the id of the event
+ *
+ * @type   {Schema}
+ */
+Event.setProperty(function _id() {
+	return this.document._id;
+});
+
+/**
  * Set the event schema
  *
  * @author   Jelle De Loecker   <jelle@develry.be>
@@ -68,7 +77,7 @@ Event.constitute(function setSchema() {
 	this.schema = schema;
 
 	// Every event has a start and end property
-	schema.addField('start', 'Datetime');
+	schema.addField('start', 'Datetime', {'default': Date.create});
 	schema.addField('end', 'Datetime');
 });
 
