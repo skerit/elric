@@ -24,11 +24,13 @@ Device.setMethod(function index(conduit) {
 
 	this.set('pagetitle', 'Devices');
 
-	this.getModel('Device').find('all', function gotDevices(err, records) {
+	this.getModel('Device').find('all', {recursive: 2}, function gotDevices(err, records) {
 
 		if (err) {
 			return that.error(err);
 		}
+
+		console.log('Records:', records);
 
 		that.set('records', records)
 

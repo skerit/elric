@@ -16,3 +16,5 @@ alchemy.usePlugin('web-components');
 alchemy.usePlugin('styleboost');
 alchemy.usePlugin('media');
 alchemy.usePlugin('menu');
+alchemy.usePlugin('storywise');
+alchemy.usePlugin('elric-philips-hue');

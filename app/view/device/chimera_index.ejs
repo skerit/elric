@@ -28,7 +28,9 @@
 					<td><%= record.Interface.title %></td>
 					<td>
 						<% live('device.state', function gotState(state) {
-							print(state.name);
+							if (state) {
+								print(state.name);
+							}
 						}) %>
 					</td>
 					<td><%
@@ -43,15 +45,17 @@
 						<% }
 					%></td>
 					<td><%
-						for (cmd in device.protocol.commands) { %>
-							<button
-								class="btn btn-success"
-								data-server-event="protocolcmd | <%= device._id %> | <%= cmd %>"
-								title="<%= device.protocol.commands[cmd].description %>"
-							>
-								<%= device.protocol.commands[cmd].title %>
-							</button>
-						<% }
+						if (device.protocol) {
+							for (cmd in device.protocol.commands) { %>
+								<button
+									class="btn btn-success"
+									data-server-event="protocolcmd | <%= device._id %> | <%= cmd %>"
+									title="<%= device.protocol.commands[cmd].description %>"
+								>
+									<%= device.protocol.commands[cmd].title %>
+								</button>
+							<% }
+						}
 					%></td>
 				</tr>
 			<% } %>

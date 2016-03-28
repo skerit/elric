@@ -1,4 +1,5 @@
 var all_capabilities = alchemy.shared('Elric.capabilities'),
+    all_events = alchemy.shared('elric.event'),
     fs = require('fs');
 
 /**
@@ -46,6 +47,68 @@ Elric.setMethod(function init() {
 	});
 });
 
+/**
+ * Create a new event and return it,
+ * without firing it or saving to database
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function createEvent(type) {
+
+	var constructor = all_events[type],
+	    document,
+	    inited,
+	    event,
+	    args,
+	    i;
+
+	if (!type) {
+		throw new Error('Could not find "' + type + '" event constructor');
+	}
+
+	// Create the new database document
+	document = Model.get('Event').createDocument();
+	args = [];
+
+	// Create the arguments
+	for (i = 1; i < arguments.length; i++) {
+		args[i-1] = arguments[i];
+	}
+
+	// Create & initialize the event
+	event = new constructor(document);
+
+	inited = event.initialize.apply(event, args);
+
+	if (inited === false) {
+		event.initialized = false;
+	} else {
+		event.initialized = true;
+	}
+
+	return event;
+});
+
+/**
+ * Create and fire a new event
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function emitEvent(type) {
+
+	var event = this.createEvent.apply(this, arguments);
+
+	// Fire and save the event
+	if (event.initialized) {
+		console.log('Emitting event', event);
+	}
+
+	return event;
+});
 /**
  * Load all the clients from the database
  *
