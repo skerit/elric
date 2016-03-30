@@ -34,4 +34,13 @@
 		</table>
 	</x-panel-body>
 </x-panel>
+
+<% Router.printRoute('chimera@ActionLink', {
+	controller: 'Scenario',
+	action: 'create'
+}, {
+	className: 'btn btn-success',
+	title: 'Add',
+	content: 'Add'
+}) %>
 <% end('chimera-cage') %>

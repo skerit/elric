@@ -359,7 +359,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		this.title_span.innerText = block.title;
 
 		if (!options.id) {
-			options.id = 'b-' + Crypto.pseudoHex();
+			options.id = Blast.createObjectId();
 		}
 
 		// Store the options

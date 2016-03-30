@@ -128,10 +128,16 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 	var blocks = this.getSortedBlocks(),
 	    errors,
 	    block,
+	    key,
 	    end = false;
 
 	if (!blocks.start) {
 		return callback(new Error('No starting block was found'));
+	}
+
+	// This is the variables object that blocks can use
+	if (!this.variables) {
+		this.variables = {};
 	}
 
 	// Set the event
@@ -140,9 +146,18 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 	// Prepare the errors array
 	errors = [];
 
+	// Start the boot for all the blocks
+	for (key in blocks) {
+		block = blocks[key];
+
+		// Start booting the block
+		block.startBoot();
+	}
+
 	// Get the start block
 	block = blocks.start;
 
+	// Evaluate all the blocks, starting with the start block
 	this.doBlocks(block, event, null, function doneAllBlocks(err) {
 
 		if (err) {

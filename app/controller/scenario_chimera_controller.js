@@ -38,7 +38,43 @@ Scenario.setMethod(function index(conduit) {
 });
 
 /**
- * Configure a client
+ * Create a scenario
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Scenario.setMethod(function create(conduit) {
+
+	var that = this,
+	    Scenario = this.getModel('Scenario'),
+	    client,
+	    data,
+	    id;
+
+	data = Scenario.compose();
+	data.name = 'new-' + Date.now();
+
+	Scenario.save(data, function saved(err, record) {
+
+		if (err) {
+			return conduit.error(err);
+		}
+
+		if (!record.length) {
+			return conduit.notFound();
+		}
+
+		that.set('all_blocks', that.getBlockInfo());
+		that.set('scenario', record);
+		that.render('scenario/chimera_edit');
+	});
+});
+
+/**
+ * Edit a scenario
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -69,6 +105,57 @@ Scenario.setMethod(function edit(conduit) {
 		that.set('all_blocks', that.getBlockInfo());
 		that.set('scenario', record);
 		that.render('scenario/chimera_edit');
+	});
+});
+
+/**
+ * Save a scenario
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Scenario.setMethod(function save(conduit) {
+
+	var that = this,
+	    scenario = conduit.body.scenario,
+	    client,
+	    id = conduit.param('id');
+
+	if (!id) {
+		return conduit.error('No id given');
+	}
+
+	if (!scenario || !scenario.blocks) {
+		return conduit.error('No blocks given to save');
+	}
+
+	this.getModel('Scenario').findById(id, function gotScenario(err, record) {
+
+		if (err) {
+			return conduit.error(err);
+		}
+
+		if (!record.length) {
+			return conduit.notFound();
+		}
+
+		// Overwrite the blocks
+		record.blocks = scenario.blocks;
+
+		// Save the record
+		record.save(function saved(err) {
+
+			console.log('Saved?', err);
+
+			if (err) {
+				return conduit.error(err);
+			}
+
+			conduit.end({saved: true});
+		});
 	});
 });
 

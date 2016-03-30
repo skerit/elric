@@ -58,6 +58,13 @@ Block.setProperty('entrance_point', false);
 Block.setProperty('evaluation_count', 0);
 
 /**
+ * Has the booting started?
+ *
+ * @type {Boolean}
+ */
+Block.setProperty('booting', false);
+
+/**
  * Most blocks have an entrance
  * (So other blocks can point towards it)
  *
@@ -207,6 +214,51 @@ Block.constitute(function setSchema() {
 });
 
 /**
+ * Start the boot procedure
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}   callback
+ */
+Block.setMethod(function startBoot(callback) {
+
+	var that = this;
+
+	if (this.booting) {
+		return;
+	}
+
+	console.log('Booting block', this);
+
+	// Indicate we're booting
+	this.booting = true;
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	this.emit('booting', function afterBooting(err) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		that.boot(function booted(err) {
+
+			console.log('Booted block', that);
+
+			if (err) {
+				return callback(err);
+			}
+
+			that.emit('booted');
+		})
+	});
+});
+
+/**
  * This method starts the evaluation
  *
  * @author   Jelle De Loecker   <jelle@develry.be>
@@ -218,11 +270,17 @@ Block.constitute(function setSchema() {
  */
 Block.setMethod(function startEvaluation(from_block, callback) {
 
-	// Increase the evaluation counter
-	this.evaluation_count++;
+	var that = this;
 
-	// Do the actual evaluating
-	this.evaluate(from_block, callback);
+	// Only evaluate after the block has booted
+	this.after('booted', function booted() {
+
+		// Increase the evaluation counter
+		that.evaluation_count++;
+
+		// Do the actual evaluating
+		that.evaluate(from_block, callback);
+	});
 });
 
 /**
@@ -300,6 +358,82 @@ Block.setMethod(function getNextBlocks(value) {
 	return result;
 });
 
+/**
+ * Get a value out of the current scenario variables
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {String}        name
+ *
+ * @return   {Mixed}
+ */
+Block.setMethod(function get(name) {
+
+	var obj;
+
+	if (!this.scenario) {
+		return null;
+	}
+
+	if (!this.scenario.variables) {
+		return null;
+	}
+
+	// Get the variable object
+	obj = this.scenario.variables[name];
+
+	if (obj) {
+		return obj.value;
+	}
+});
+
+/**
+ * Set a value in the current scenario variables
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {String}        name    Name of the variable
+ * @param    {Mixed}         value   The actual value
+ * @param    {String}        type    The optional type
+ *
+ * @return   {Mixed}
+ */
+Block.setMethod(function set(name, value, type) {
+
+	if (!this.scenario) {
+		return false;
+	}
+
+	if (!this.scenario.variables) {
+		return false;
+	}
+
+	this.scenario.variables[name] = {
+		value : value,
+		type  : type
+	};
+
+	return true;
+});
+
+/**
+ * Bootup the block,
+ * is called as soon as the scenario starts.
+ * Evaluation will only happen after this has finished.
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}        callback
+ */
+Block.setMethod(function boot(callback) {
+	callback(null);
+});
 
 /**
  * Evaluate the block with the given data

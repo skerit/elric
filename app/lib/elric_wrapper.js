@@ -82,8 +82,8 @@ Wrapper.constitute(function setBasicBehaviour() {
 		this.setProperty('title', name.titleize());
 	}
 
-	// Set the title on the class itself
-	this.setStatic('title', this.prototype.title);
+	// Set the title on the class itself, don't let children inherit it
+	this.setStatic('title', this.prototype.title, false);
 
 	// Add this class to the shared group
 	shared_group[this.prototype.type_name] = this;
