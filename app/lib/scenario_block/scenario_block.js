@@ -31,13 +31,47 @@ var Block = Function.inherits('Elric.Wrapper', function ScenarioBlock(scenario_d
 
 /**
  * This is a wrapper class
+ *
+ * @type {Boolean}
  */
 Block.setProperty('extend_only', true);
 
 /**
  * This wrapper class starts a new group
+ *
+ * @type {Boolean}
  */
 Block.setProperty('starts_new_group', true);
+
+/**
+ * Only start blocks are entrance points
+ *
+ * @type {Boolean}
+ */
+Block.setProperty('entrance_point', false);
+
+/**
+ * Each block has a run counter
+ *
+ * @type {Number}
+ */
+Block.setProperty('evaluation_count', 0);
+
+/**
+ * Most blocks have an entrance
+ * (So other blocks can point towards it)
+ *
+ * @type {Boolean}
+ */
+Block.setProperty('has_entrance', true);
+
+/**
+ * Most blocks have 2 exits
+ *
+ * @type {Array}
+ */
+Block.setProperty('exit_names', ['true', 'false']);
+
 
 /**
  * Return the class-wide schema
@@ -97,6 +131,66 @@ Block.setProperty(function block_ids_when_false() {
 });
 
 /**
+ * Get the blocks pointing to this
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Block.setProperty(function entrance_block_ids() {
+
+	var scenario_blocks,
+	    exit_ids,
+	    block_ids,
+	    result = [],
+	    block,
+	    exit_id,
+	    temp,
+	    id,
+	    i;
+
+	if (this._entrance_block_ids) {
+		return this._entrance_block_ids;
+	}
+
+	// Get all the available scenario blocks 
+	scenario_blocks = this.scenario.getSortedBlocks();
+
+	for (id in scenario_blocks) {
+		block = scenario_blocks[id];
+
+		// Get all the exit ids
+		exit_ids = block.block_ids_when_true.concat(block.block_ids_when_false);
+
+		for (i = 0; i < exit_ids.length; i++) {
+
+			// Ignore falsy values
+			if (!exit_ids[i]) {
+				continue;
+			}
+
+			// Stringify the id
+			exit_id = String(exit_ids[i]);
+
+			// Compare to the id of this block
+			if (exit_id == this.id) {
+				// The ids match, so the block itself points here
+				temp = String(block.id);
+
+				// Make sure each id only gets added once
+				if (result.indexOf(temp) == -1) {
+					result.push(temp);
+				}
+			}
+		}
+	}
+
+	this._entrance_block_ids = result;
+
+	return result;
+});
+
+/**
  * Set the block schema
  *
  * @author   Jelle De Loecker   <jelle@develry.be>
@@ -118,9 +212,52 @@ Block.constitute(function setSchema() {
  * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    1.0.0
  * @version  1.0.0
+ *
+ * @param    {ScenarioBlock}   from_block   The referring block
+ * @param    {Function}        callback
  */
-Block.setMethod(function startEvaluation(callback) {
-	this.evaluate(callback);
+Block.setMethod(function startEvaluation(from_block, callback) {
+
+	// Increase the evaluation counter
+	this.evaluation_count++;
+
+	// Do the actual evaluating
+	this.evaluate(from_block, callback);
+});
+
+/**
+ * Get the blocks pointing to this
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Block.setMethod(function getEntranceBlocks() {
+
+	var entrance_block_ids = this.entrance_block_ids,
+	    scenario_blocks,
+	    result = [],
+	    block,
+	    id,
+	    i;
+
+	if (this._entrance_blocks) {
+		return this._entrance_blocks;
+	}
+
+	scenario_blocks = this.scenario.getSortedBlocks();
+
+	for (i = 0; i < entrance_block_ids.length; i++) {
+		id = entrance_block_ids[i];
+		block = scenario_blocks[id];
+
+		if (block) {
+			result.push(block);
+		}
+	}
+
+	this._entrance_blocks = result;
+	return result;
 });
 
 /**
@@ -170,7 +307,10 @@ Block.setMethod(function getNextBlocks(value) {
  * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    1.0.0
  * @version  1.0.0
+ *
+ * @param    {ScenarioBlock}   from_block   The referring block
+ * @param    {Function}        callback
  */
-Block.setMethod(function evaluate(callback) {
+Block.setMethod(function evaluate(from_block, callback) {
 	console.log('Should evaluate block', this);
 });

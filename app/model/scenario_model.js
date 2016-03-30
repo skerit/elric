@@ -143,7 +143,7 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 	// Get the start block
 	block = blocks.start;
 
-	this.doBlocks(block, event, function doneAllBlocks(err) {
+	this.doBlocks(block, event, null, function doneAllBlocks(err) {
 
 		if (err) {
 			// @todo: do something more with errors
@@ -164,7 +164,7 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
  * @param    {Array}      blocks
  * @param    {Function}   callback
  */
-Scenario.setDocumentMethod(function doBlocks(blocks, event, callback) {
+Scenario.setDocumentMethod(function doBlocks(blocks, event, from_block, callback) {
 
 	var that = this,
 	    tasks = [],
@@ -172,7 +172,13 @@ Scenario.setDocumentMethod(function doBlocks(blocks, event, callback) {
 
 	if (typeof event == 'function') {
 		callback = event;
+		from_block = null;
 		event = null;
+	}
+
+	if (typeof from_block == 'function') {
+		callback = from_block;
+		from_block = null;
 	}
 
 	blocks = Array.cast(blocks);
@@ -185,7 +191,7 @@ Scenario.setDocumentMethod(function doBlocks(blocks, event, callback) {
 			block.event = event;
 
 			// Start evaluating this block
-			block.startEvaluation(function evaluated(err, value) {
+			block.startEvaluation(from_block, function evaluated(err, value) {
 
 				var next_blocks;
 
@@ -197,7 +203,7 @@ Scenario.setDocumentMethod(function doBlocks(blocks, event, callback) {
 				next_blocks = block.getNextBlocks(value);
 
 				if (next_blocks && next_blocks.length) {
-					that.doBlocks(next_blocks, event, next);
+					that.doBlocks(next_blocks, event, block, next);
 				} else {
 					next();
 				}

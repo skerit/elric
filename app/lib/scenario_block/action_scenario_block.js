@@ -30,13 +30,16 @@ Action.constitute(function setSchema() {
  * @author   Jelle De Loecker   <jelle@develry.be>
  * @since    1.0.0
  * @version  1.0.0
+ *
+ * @param    {ScenarioBlock}   from_block   The referring block
+ * @param    {Function}        callback
  */
-Action.setMethod(function evaluate(callback) {
+Action.setMethod(function evaluate(from_block, callback) {
 
 	var that = this,
 	    action_type;
 
-	console.log('Evaluate action block', this);
+	console.log('Evaluate action block', this, 'coming from', from_block);
 
 	action_type = this.settings.action_type;
 
@@ -46,7 +49,7 @@ Action.setMethod(function evaluate(callback) {
 
 	elric.doAction(action_type, this.scenario, this.event, function didAction(err, result) {
 
-		console.log('Did action', that);
+		console.log('Did action', action_type, that, 'Result:', err, result);
 
 		callback(err, result);
 	});

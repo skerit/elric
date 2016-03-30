@@ -35,6 +35,6 @@ Console.constitute(function setSchema() {
  * @version  1.0.0
  */
 Console.setMethod(function execute(callback) {
-	console.log('Should execute', this,'?');
-	callback(null);
+	console.log('Console log:', this);
+	callback(null, true);
 });
