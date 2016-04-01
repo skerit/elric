@@ -45,6 +45,17 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 	});
 
 	/**
+	 * Get the parent's jsPlumb instance
+	 *
+	 * @author   Jelle De Loecker <jelle@develry.be>
+	 * @since    1.0.0
+	 * @version  1.0.0
+	 */
+	Block.setProperty(function jsPlumb() {
+		return this.parentElement.jsPlumb;
+	});
+
+	/**
 	 * Default block options
 	 *
 	 * @author   Jelle De Loecker <jelle@develry.be>
@@ -326,6 +337,9 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 						Object.merge(data, instance.getData(false));
 					});
 
+					// Overwrite the settings
+					that.options.settings = data;
+
 					// Post the config data
 					hawkejs.scene.fetch(update_url, {post: {data: data}}, function saved(err, result) {
 
@@ -359,7 +373,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 	 * @version  1.0.0
 	 */
 	Block.setMethod(function getEntranceNode() {
-		return jsPlumb.getEndpoint(this.id + '-entrance');
+		return this.jsPlumb.getEndpoint(this.id + '-entrance');
 	});
 
 	/**
@@ -395,7 +409,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		var name = this.getExitName(value),
 		    node;
 
-		node = jsPlumb.getEndpoint(this.id + '-' + name);
+		node = this.jsPlumb.getEndpoint(this.id + '-' + name);
 
 		return node;
 	});
@@ -471,7 +485,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 			uuid: this.id + '-' + name
 		};
 
-		endpoint = jsPlumb.addEndpoint(this.id, style, options);
+		endpoint = this.jsPlumb.addEndpoint(this.id, style, options);
 
 		this.endpoints.push(endpoint);
 	});
@@ -541,7 +555,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 			this.updateDescription();
 
 			// Make this block draggable
-			jsPlumb.draggable(this);
+			this.jsPlumb.draggable(this);
 		}
 	});
 
@@ -605,7 +619,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 			throw new Error('Could not find source exit node "' + !!source_value + '"');
 		}
 
-		jsPlumb.connect({
+		this.jsPlumb.connect({
 			source  : source,
 			target  : target
 		});

@@ -10,6 +10,9 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 	var ElricScenario = Function.inherits('Hawkejs.Element', function ElricScenario() {
 		ElricScenario.super.call(this);
 
+		// Get a jsPlumb istance
+		this.jsPlumb = jsPlumb.getInstance();
+
 		// Get the scenario buttons div
 		this.buttons_element = this.grab('div', 'scenariobuttons');
 	});
@@ -83,8 +86,6 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 
 			var value = this.value;
 
-			console.log('Select changed:', e, value);
-
 			if (value) {
 				that.addBlock(value);
 			}
@@ -137,8 +138,6 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 		data = {
 			blocks: this.getBlockData()
 		};
-
-		console.log('Saving scenario:', url, config, data);
 
 		hawkejs.scene.fetch(url, {post: {scenario: data}}, function gotResponse(err, res) {
 			if (err) {
@@ -244,12 +243,12 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 		}
 
 		// Listen for new connections
-		jsPlumb.bind('connection', function onConnection(connInfo, originalEvent) {
+		this.jsPlumb.bind('connection', function onConnection(connInfo, originalEvent) {
 			that.attachConnection(connInfo);
 		});
 
 		// Listen for deletec connections
-		jsPlumb.bind('connectionDetached', function onDetach(connInfo, originalEvent) { 
+		this.jsPlumb.bind('connectionDetached', function onDetach(connInfo, originalEvent) { 
 			that.detachConnection(connInfo);
 		});
 	});
@@ -300,7 +299,7 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 	 * @version  1.0.0
 	 */
 	ElricScenario.setMethod(function attachConnection(info) {
-		console.log('Attachment:', info);
+		//console.log('Attachment:', info);
 	});
 
 	/**
@@ -311,6 +310,6 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 	 * @version  1.0.0
 	 */
 	ElricScenario.setMethod(function detachConnection(info) {
-		console.log('Detachment:', info);
+		//console.log('Detachment:', info);
 	});
 };

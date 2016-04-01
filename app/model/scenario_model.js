@@ -77,6 +77,9 @@ Scenario.constitute(function addFields() {
 
 	// The events that trigger this scenario
 	this.addField('triggers', 'Enum', {array: true, values: {all_events}});
+
+	// Is this scenario enabled?
+	this.addField('enabled', 'Boolean', {default: false});
 });
 
 /**
@@ -100,12 +103,14 @@ Scenario.constitute(function chimeraConfig() {
 
 	list.addField('name');
 	list.addField('user_id');
+	list.addField('enabled');
 
 	// Get the edit group
 	edit = this.chimera.getActionFields('edit');
 
 	edit.addField('name');
 	edit.addField('user_id');
+	edit.addField('enabled');
 	edit.addField('blocks');
 });
 

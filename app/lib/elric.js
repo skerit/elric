@@ -230,7 +230,8 @@ Elric.setMethod(function applyEventToScenario(event) {
 
 		var options = {
 			conditions: {
-				triggers: event.type_name
+				triggers: event.type_name,
+				enabled: true
 			}
 		};
 
