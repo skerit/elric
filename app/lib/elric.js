@@ -204,8 +204,6 @@ Elric.setMethod(function emitEvent(type) {
 
 	// Fire and save the event
 	if (event.initialized) {
-		console.log('Emitting event', event);
-
 		elric.applyEventToScenario(event);
 
 		event.save(function saved(err) {
@@ -229,10 +227,23 @@ Elric.setMethod(function applyEventToScenario(event) {
 	    scenarios;
 
 	Function.series(function getScenarios(next) {
-		// Just get all scenarios for now
-		Scenario.find('all', function gotScenarios(err, documents) {
+
+		var options = {
+			conditions: {
+				triggers: event.type_name
+			}
+		};
+
+		// Look for all the scenarios that listen to this event trigger
+		Scenario.find('all', options, function gotScenarios(err, documents) {
+
+			if (err) {
+				return next(err);
+			}
+
 			scenarios = documents;
-			next(err);
+
+			next(null);
 		});
 	}, function doScenarios(next) {
 		var tasks = [];

@@ -368,9 +368,16 @@ Block.setMethod(function startBoot(callback) {
  * @param    {ScenarioBlock}   from_block   The referring block
  * @param    {Function}        callback
  */
-Block.setMethod(function startEvaluation(from_block, callback) {
+Block.setMethod(function startEvaluation(from_block, callback, special_callback) {
 
 	var that = this;
+
+	if (!callback) {
+		callback = Function.dummy;
+	}
+
+	// Make sure the callbacks gets called only once
+	callback = Function.regulate(callback, 1);
 
 	// Only evaluate after the block has booted
 	this.after('booted', function booted() {
@@ -379,7 +386,14 @@ Block.setMethod(function startEvaluation(from_block, callback) {
 		that.evaluation_count++;
 
 		// Do the actual evaluating
-		that.evaluate(from_block, callback);
+		that.evaluate(from_block, function evaluated() {
+
+			// Callback, pass along the arguments
+			callback.apply(that, arguments);
+
+			// Emit the executed event
+			that.emitOnce('evaluated');
+		}, special_callback);
 	});
 });
 
@@ -544,7 +558,9 @@ Block.setMethod(function boot(callback) {
  *
  * @param    {ScenarioBlock}   from_block   The referring block
  * @param    {Function}        callback
+ * @param    {Function}        command      A special callback to send commands to the scenario
+ *                                          When called without arguments, 'ignore' is used
  */
-Block.setMethod(function evaluate(from_block, callback) {
+Block.setMethod(function evaluate(from_block, callback, command) {
 	console.log('Should evaluate block', this);
 });

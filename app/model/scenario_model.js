@@ -295,6 +295,11 @@ Scenario.setDocumentMethod(function doBlocks(blocks, event, from_block, callback
 	blocks.forEach(function eachBlock(block, index) {
 		tasks.push(function doBlockTask(next) {
 
+			var ignored;
+
+			// Make sure next gets called only once
+			next = Function.regulate(next, 1);
+
 			// Set the event
 			block.event = event;
 
@@ -302,6 +307,12 @@ Scenario.setDocumentMethod(function doBlocks(blocks, event, from_block, callback
 			block.startEvaluation(from_block, function evaluated(err, value) {
 
 				var next_blocks;
+
+				// If this block has already emitted an ignored event,
+				// don't do anything
+				if (ignored) {
+					return;
+				}
 
 				if (err) {
 					return next(err);
@@ -313,6 +324,19 @@ Scenario.setDocumentMethod(function doBlocks(blocks, event, from_block, callback
 				if (next_blocks && next_blocks.length) {
 					that.doBlocks(next_blocks, event, block, next);
 				} else {
+					next();
+				}
+			}, function special(command) {
+
+				// Default to the 'ignore' command
+				if (command == null) {
+					command = 'ignore';
+				}
+
+				// When the 'ignore' command is received,
+				// don't call any next blocks, just call next
+				if (command == 'ignore') {
+					ignored = true;
 					next();
 				}
 			});

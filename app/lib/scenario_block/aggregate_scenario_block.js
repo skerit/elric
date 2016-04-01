@@ -61,9 +61,10 @@ Aggregate.setMethod(function getDescription(callback) {
  * @version  1.0.0
  *
  * @param    {ScenarioBlock}   from_block   The referring block
- * @param    {Function}        callback
+ * @param    {Function}        callback     Callback with values
+ * @param    {Function}        ignore       Ignore, don't call next blocks
  */
-Aggregate.setMethod(function evaluate(from_block, callback) {
+Aggregate.setMethod(function evaluate(from_block, callback, ignore) {
 
 	var that = this,
 	    entrance_block_ids = this.entrance_block_ids,
@@ -74,6 +75,7 @@ Aggregate.setMethod(function evaluate(from_block, callback) {
 
 	// Each aggregate block can finish only once
 	if (this.has_finished) {
+		ignore();
 		return;
 	}
 
@@ -85,13 +87,14 @@ Aggregate.setMethod(function evaluate(from_block, callback) {
 		req_id = entrance_block_ids[i];
 
 		if (this.seen_block_ids.indexOf(req_id) == -1) {
+			ignore();
 			return console.log('Not yet seen', req_id, 'so not completing aggregation')
 		}
 	}
 
 	this.has_finished = true;
 
-	console.log('All blocks have been seen!');
+	console.log('Aggregate: All blocks have been seen!');
 
 	// Make sure it happens asynchronously
 	setImmediate(function doCallback() {
