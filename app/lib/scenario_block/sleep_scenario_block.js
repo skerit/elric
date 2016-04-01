@@ -7,6 +7,9 @@
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
  * @version  0.1.0
+ *
+ * @param    {ScenarioDocument}   scenario    The scenario this block is in
+ * @param    {Object}             data        Scenario-specific block data
  */
 var Sleep = Function.inherits('Elric.ScenarioBlock', function SleepScenarioBlock(scenario, data) {
 	SleepScenarioBlock.super.call(this, scenario, data);
@@ -29,6 +32,29 @@ Sleep.setProperty('exit_names', ['done']);
 Sleep.constitute(function setSchema() {
 	// Set the sleep time
 	this.schema.addField('duration', 'Number');
+});
+
+/**
+ * Callback with a nice description to display in the scenario editor
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}   callback
+ */
+Sleep.setMethod(function getDescription(callback) {
+
+	// Start with the title 'Sleep'
+	var description = this.title;
+
+	if (this.settings && this.settings.duration != null) {
+		description += ' for ' + (this.settings.duration / 1000) + ' seconds';
+	} else {
+		description += ' (no duration)';
+	}
+
+	callback(null, description);
 });
 
 /**

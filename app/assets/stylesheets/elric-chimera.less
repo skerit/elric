@@ -32,3 +32,74 @@
 .floorplan-toolbar {
 	margin-bottom: 1rem;
 }
+
+[data-template="elements/block_config"].js-he-dialog {
+	padding: 1rem;
+	align-self: flex-start !important;
+
+	.block-configure {
+		background: white;
+		padding: 1.5rem 2rem 2rem;
+
+		.chimeraEditor-subschema {
+			h2 {
+				color: #646464;
+				font-weight: 600;
+				font-size: 1.5rem;
+				text-align: center;
+				padding-bottom: 0.5rem;
+				margin-bottom: 2rem;
+				border-bottom: 1px solid #646464;
+			}
+		}
+	}
+
+	.block-info {
+		h1 {
+			color: #646464;
+			font-weight: 600;
+			font-size: 1.5rem;
+			text-align: center;
+			padding-bottom: 0.5rem;
+			margin-bottom: 2rem;
+			border-bottom: 1px solid #646464;
+		}
+	}
+
+	.block-save {
+
+		// Hide default when doing something
+		&.saving,
+		&.saved,
+		&.error {
+			.default {
+				display: none;
+			}
+		}
+
+		// Hide special messages by default
+		.saving,
+		.saved,
+		.error {
+			display: none;
+		}
+
+		&.saving {
+			.saving {
+				display: block;
+			}
+		}
+
+		&.saved {
+			.saved {
+				display: block;
+			}
+		}
+
+		&.error {
+			.error {
+				display: block;
+			}
+		}
+	}
+}

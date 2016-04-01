@@ -7,6 +7,9 @@
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
  * @version  0.1.0
+ *
+ * @param    {ScenarioDocument}   scenario    The scenario this block is in
+ * @param    {Object}             data        Scenario-specific block data
  */
 var Aggregate = Function.inherits('Elric.ScenarioBlock', function AggregateScenarioBlock(scenario, data) {
 	AggregateScenarioBlock.super.call(this, scenario, data);
@@ -35,6 +38,19 @@ Aggregate.setProperty('exit_names', ['done', 'timeout']);
 Aggregate.constitute(function setSchema() {
 	// Set an optional timeout
 	this.schema.addField('timeout', 'Number');
+});
+
+/**
+ * Callback with a nice description to display in the scenario editor
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}   callback
+ */
+Aggregate.setMethod(function getDescription(callback) {
+	callback(null, 'Wait for ' + this.entrance_block_ids.length + ' blocks to finish');
 });
 
 /**

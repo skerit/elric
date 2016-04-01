@@ -7,20 +7,20 @@
  * @since    0.1.0
  * @version  0.1.0
  *
- * @param    {ScenarioDocument}   scenario_document
- * @param    {Object}             block_data
+ * @param    {ScenarioDocument}   scenario    The scenario this block is in
+ * @param    {Object}             data        Scenario-specific block data
  */
-var Block = Function.inherits('Elric.Wrapper', function ScenarioBlock(scenario_document, block_data) {
+var Block = Function.inherits('Elric.Wrapper', function ScenarioBlock(scenario, data) {
 
-	if (!scenario_document) {
+	if (!scenario) {
 		throw new Error('Scenario blocks require a scenario document');
 	}
 
 	// Store the scenario
-	this.scenario = scenario_document;
+	this.scenario = scenario;
 
 	// And the block data
-	this.data = block_data || {};
+	this.data = data || {};
 
 	// And the configuration
 	this.settings = this.data.settings || {};
@@ -73,6 +73,31 @@ Block.setProperty('booting', false);
 Block.setProperty('has_entrance', true);
 
 /**
+ * Certain blocks can have empty settings,
+ * mainly used for description getting
+ *
+ * @type {Boolean}
+ */
+Block.setProperty('has_settings', true);
+
+/**
+ * Static description,
+ * only set when this block should never use
+ * `getDescription`
+ *
+ * @type {Boolean}
+ */
+Block.setProperty('static_description', '');
+
+/**
+ * Always execute `getDescription`, even when
+ * there are no settings
+ *
+ * @type {Boolean}
+ */
+Block.setProperty('force_description_callback', false);
+
+/**
  * Most blocks have 2 exits
  *
  * @type {Array}
@@ -92,7 +117,7 @@ Block.setProperty(function schema() {
 /**
  * Return the truthy output block ids
  *
- * @type   {Schema}
+ * @type   {Array}
  */
 Block.setProperty(function block_ids_when_true() {
 
@@ -116,7 +141,7 @@ Block.setProperty(function block_ids_when_true() {
 /**
  * Return the falsy output block ids
  *
- * @type   {Schema}
+ * @type   {Array}
  */
 Block.setProperty(function block_ids_when_false() {
 
@@ -135,6 +160,15 @@ Block.setProperty(function block_ids_when_false() {
 	}
 
 	return result;
+});
+
+/**
+ * Return all exit block ids
+ *
+ * @type   {Array}
+ */
+Block.setProperty(function exit_block_ids() {
+	return this.block_ids_when_true.concat(this.block_ids_when_false);
 });
 
 /**
@@ -161,13 +195,13 @@ Block.setProperty(function entrance_block_ids() {
 	}
 
 	// Get all the available scenario blocks 
-	scenario_blocks = this.scenario.getSortedBlocks();
+	scenario_blocks = this.scenario.getSortedBlocks().all;
 
 	for (id in scenario_blocks) {
 		block = scenario_blocks[id];
 
 		// Get all the exit ids
-		exit_ids = block.block_ids_when_true.concat(block.block_ids_when_false);
+		exit_ids = (block.block_ids_when_true || []).concat(block.block_ids_when_false);
 
 		for (i = 0; i < exit_ids.length; i++) {
 
@@ -214,6 +248,76 @@ Block.constitute(function setSchema() {
 });
 
 /**
+ * Callback with a nice description to display in the scenario editor,
+ * check if the settings are set first
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}   callback
+ */
+Block.setMethod(function doGetDescription(callback) {
+
+	// If there is a static description, that should be returned
+	if (this.static_description && !this.force_description_callback) {
+		return callback(null, this.static_description);
+	}
+
+	// Get the description if the settings can be empty,
+	// the callback is forced or the settings object is not empty
+	if (!this.has_settings || this.force_description_callback || !Object.isEmpty(this.settings)) {
+		return this.getDescription(callback);
+	}
+
+	callback(null, this.title + ' (unconfigured)');
+});
+
+/**
+ * Callback with a nice description to display in the scenario editor
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}   callback
+ */
+Block.setMethod(function getDescription(callback) {
+	callback(null, this.title);
+});
+
+/**
+ * Call the savingScenario method if this block is enabled
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Object}   data      The raw scenario data
+ * @param    {Object}   options   The saving options
+ * @param    {Boolean}  creating  If this scenario is being created
+ */
+Block.setMethod(function doSavingScenario(data, options, creating) {
+	// @todo: check enabled
+	return this.savingScenario(data, options, creating);
+});
+
+/**
+ * Called when the scenario this block is in is being saved
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Object}   data      The raw scenario data
+ * @param    {Object}   options   The saving options
+ * @param    {Boolean}  creating  If this scenario is being created
+ */
+Block.setMethod(function savingScenario(data, options, creating) {
+	// Do some special stuff
+});
+
+/**
  * Start the boot procedure
  *
  * @author   Jelle De Loecker   <jelle@develry.be>
@@ -230,8 +334,6 @@ Block.setMethod(function startBoot(callback) {
 		return;
 	}
 
-	console.log('Booting block', this);
-
 	// Indicate we're booting
 	this.booting = true;
 
@@ -246,8 +348,6 @@ Block.setMethod(function startBoot(callback) {
 		}
 
 		that.boot(function booted(err) {
-
-			console.log('Booted block', that);
 
 			if (err) {
 				return callback(err);
@@ -303,7 +403,7 @@ Block.setMethod(function getEntranceBlocks() {
 		return this._entrance_blocks;
 	}
 
-	scenario_blocks = this.scenario.getSortedBlocks();
+	scenario_blocks = this.scenario.getSortedBlocks().all;
 
 	for (i = 0; i < entrance_block_ids.length; i++) {
 		id = entrance_block_ids[i];
@@ -342,7 +442,7 @@ Block.setMethod(function getNextBlocks(value) {
 
 	if (block_ids && block_ids.length) {
 		// Get all the blocks in the scenario
-		scenario_blocks = this.scenario.getSortedBlocks();
+		scenario_blocks = this.scenario.getSortedBlocks().all;
 
 		for (i = 0; i < block_ids.length; i++) {
 			id = block_ids[i];

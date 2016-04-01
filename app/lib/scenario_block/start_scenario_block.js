@@ -6,6 +6,9 @@
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
  * @version  0.1.0
+ *
+ * @param    {ScenarioDocument}   scenario    The scenario this block is in
+ * @param    {Object}             data        Scenario-specific block data
  */
 var Start = Function.inherits('Elric.ScenarioBlock', function StartScenarioBlock(scenario, data) {
 	StartScenarioBlock.super.call(this, scenario, data);
@@ -32,6 +35,13 @@ Start.setProperty('has_entrance', false);
  * @type {Array}
  */
 Start.setProperty('exit_names', ['throughput']);
+
+/**
+ * The start block has no settings
+ *
+ * @type {Boolean}
+ */
+Start.setProperty('has_settings', false);
 
 /**
  * Evaluate the block with the given data

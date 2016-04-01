@@ -1,0 +1,13 @@
+<% expands('layouts/body') %>
+
+<% start('main') %>
+<div style="color:black;">
+<b>This is the test page, outputting <%= cfields.length %> chimera fields</b><br>
+<hr>
+<% for (i = 0; i < cfields.length; i++) {
+	console.log('Cfield:', cfields[i]);
+	Chimera.printField(cfields[i]);
+} %>
+<hr>
+</div>
+<% end('main') %>

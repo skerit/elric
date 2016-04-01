@@ -1,4 +1,5 @@
-var all_blocks = alchemy.shared('elric.scenario_block');
+var all_blocks = alchemy.shared('elric.scenario_block'),
+    all_events = alchemy.shared('elric.event');
 
 /**
  * The Scenario Model
@@ -10,7 +11,38 @@ var all_blocks = alchemy.shared('elric.scenario_block');
  * @version  0.1.0
  */
 var Scenario = Model.extend(function ScenarioModel(options) {
+
+	var that = this;
+
 	ScenarioModel.super.call(this, options);
+
+	// Update triggers when saving
+	this.on('saving', function savingRecord(data, options, creating) {
+
+		var document,
+		    blocks,
+		    block,
+		    key,
+		    i;
+
+		// Always reset the triggers
+		data.triggers = [];
+
+		// Create a scenario document
+		document = that.createDocument(data);
+
+		// Get all the blocks
+		blocks = document.getSortedBlocks().all;
+
+		for (key in blocks) {
+			block = blocks[key];
+
+			// Call doSavingScenario,
+			// which (by default) will call savingScenario
+			// if the block is not disabled
+			block.doSavingScenario(data, options, creating);
+		}
+	});
 });
 
 /**
@@ -36,9 +68,15 @@ Scenario.constitute(function addFields() {
 	block_schema.addField('left', 'Number');
 	block_schema.addField('out_on_true', 'ObjectId', {array: true});
 	block_schema.addField('out_on_false', 'ObjectId', {array: true});
-	block_schema.addField('settings', 'Object');
 
+	// Another schema in the schema
+	block_schema.addField('settings', 'Schema', {schema: 'type'});
+
+	// All the blocks of this scenario
 	this.addField('blocks', 'Schema', {array: true, schema: block_schema});
+
+	// The events that trigger this scenario
+	this.addField('triggers', 'Enum', {array: true, values: {all_events}});
 });
 
 /**
@@ -72,6 +110,40 @@ Scenario.constitute(function chimeraConfig() {
 });
 
 /**
+ * Get block by its id
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Scenario.setDocumentMethod(function getBlock(id) {
+
+	// Get all blocks
+	var blocks = this.getSortedBlocks();
+
+	// Return by its id
+	return blocks.all[id];
+});
+
+/**
+ * Get a block's description
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Scenario.setDocumentMethod(function getBlockDescription(id, callback) {
+
+	var block = this.getBlock(id);
+
+	if (!block) {
+		return callback(new Error('Block "' + id + '" not found'));
+	}
+
+	block.getDescription(callback);
+});
+
+/**
  * Sort blocks
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -80,7 +152,7 @@ Scenario.constitute(function chimeraConfig() {
  */
 Scenario.setDocumentMethod(function getSortedBlocks() {
 
-	var result = {},
+	var result,
 	    block,
 	    data,
 	    i;
@@ -88,6 +160,13 @@ Scenario.setDocumentMethod(function getSortedBlocks() {
 	if (this.sorted_blocks) {
 		return this.sorted_blocks;
 	}
+
+	result = {
+		// Start blocks
+		start : [],
+		// All blocks
+		all   : {}
+	};
 
 	if (!this.blocks) {
 		console.log('No blocks found for', this);
@@ -102,13 +181,20 @@ Scenario.setDocumentMethod(function getSortedBlocks() {
 			continue;
 		}
 
+		// Create the block instance
 		block = new all_blocks[data.type](this, data);
 
+		// Set the block index
+		block.index = i;
+
+
+		// Entrance blocks should be added to the start array
 		if (block.entrance_point) {
-			result.start = block;
+			result.start.push(block);
 		}
 
-		result[block.id] = block;
+		// All blocks should be saved under their ids
+		result.all[block.id] = block;
 	}
 
 	this.sorted_blocks = result;
@@ -125,13 +211,16 @@ Scenario.setDocumentMethod(function getSortedBlocks() {
  */
 Scenario.setDocumentMethod(function applyEvent(event, callback) {
 
-	var blocks = this.getSortedBlocks(),
+	var that = this,
+	    blocks = this.getSortedBlocks(),
+	    duration,
+	    started,
 	    errors,
 	    block,
 	    key,
 	    end = false;
 
-	if (!blocks.start) {
+	if (!blocks.start.length) {
 		return callback(new Error('No starting block was found'));
 	}
 
@@ -146,19 +235,23 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 	// Prepare the errors array
 	errors = [];
 
+	// Start the timer
+	started = Date.now();
+
 	// Start the boot for all the blocks
-	for (key in blocks) {
-		block = blocks[key];
+	for (key in blocks.all) {
+		block = blocks.all[key];
 
 		// Start booting the block
 		block.startBoot();
 	}
 
-	// Get the start block
-	block = blocks.start;
-
 	// Evaluate all the blocks, starting with the start block
-	this.doBlocks(block, event, null, function doneAllBlocks(err) {
+	this.doBlocks(blocks.start, event, null, function doneAllBlocks(err) {
+
+		duration = Date.now() - started;
+
+		console.log('Scenario', that, 'took', duration, 'ms');
 
 		if (err) {
 			// @todo: do something more with errors

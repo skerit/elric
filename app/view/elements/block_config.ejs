@@ -1,0 +1,21 @@
+<% makeDialog() %>
+
+<div class="block-configure">
+	<div class="block-info">
+		<h1>Editing <span class="title"><%= block.title %></span> block</h1>
+	</div>
+	<div class="block-fields">
+		<% for (i = 0; i < cfields.length; i++) {
+			Chimera.printField(cfields[i]);
+		} %>
+		<div style="clear:both;"></div>
+	</div>
+	<div class="block-actions">
+		<button class="btn btn-primary block-save" title="Save">
+			<span class="default">Save</span>
+			<span class="saving">Saving</span>
+			<span class="saved">Saved</span>
+			<span class="error">Error</span>
+		</button>
+	</div>
+</div>

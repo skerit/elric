@@ -8,6 +8,9 @@
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
  * @version  0.1.0
+ *
+ * @param    {ScenarioDocument}   scenario    The scenario this block is in
+ * @param    {Object}             data        Scenario-specific block data
  */
 var Gate = Function.inherits('Elric.AggregateScenarioBlock', function LogicGateScenarioBlock(scenario, data) {
 	LogicGateScenarioBlock.super.call(this, scenario, data);

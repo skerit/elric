@@ -27,6 +27,9 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 	 * @version  1.0.0
 	 */
 	var Block = Function.inherits('Hawkejs.Element', function ScenarioBlock() {
+
+		var that = this;
+
 		ScenarioBlock.super.call(this);
 
 		// Endpoints will be stored here
@@ -34,6 +37,11 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 
 		// Grab the title span
 		this.title_span = this.grab('span', 'title');
+
+		// Listen for doubleclicks
+		this.addEventListener('dblclick', function onDblclick(e) {
+			that.configure();
+		});
 	});
 
 	/**
@@ -65,9 +73,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		maxConnections: -1,
 		dropOptions: {hoverClass: 'hover', activeClass: 'active'},
 		isTarget: true,
-		overlays: [
-			['Label', {location: [0.5, -0.5], label: 'In', cssClass: 'targetLabelIn'}]
-		]
+		overlays: []
 	});
 
 	/**
@@ -203,6 +209,146 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 				cssClass: "endpointLabelTimeout" 
 			}]
 		]
+	});
+
+	/**
+	 * Open configuration
+	 *
+	 * @author   Jelle De Loecker <jelle@develry.be>
+	 * @since    1.0.0
+	 * @version  1.0.0
+	 */
+	Block.setMethod(function configure() {
+
+		var that = this,
+		    update_config,
+		    update_url,
+		    config,
+		    data,
+		    url;
+
+		// URL config for edit dialog
+		config = {
+			controller: 'Scenario',
+			action: 'configure_block',
+
+			// Supply the scenario id
+			id: this.parentElement.id,
+
+			// And the block id
+			block_id: this.id
+		};
+
+		// Construct the url to save to
+		url = hawkejs.scene.helpers.Router.routeUrl('chimera@IdActionLink', config);
+
+		// URL config for update
+		update_config = {
+			controller: 'Scenario',
+			action: 'configure_block',
+			id: config.id,
+			block_id: config.block_id
+		};
+
+		// Construct the update url
+		update_url = hawkejs.scene.helpers.Router.routeUrl('chimera@IdActionLink', update_config);
+
+		// Get the block settings values
+		hawkejs.scene.fetch(url, function gotBlockData(err, cfields) {
+
+			var variables;
+
+			if (err) {
+				return console.error('Failed to get configuration:', err);
+			}
+
+			variables = {
+				cfields: cfields,
+				block: that.type_config
+			};
+
+			// Render the block
+			hawkejs.scene.render('elements/block_config', variables, function rendered(err, result) {
+
+				var $intakes,
+				    $editor,
+				    saving,
+				    $save;
+
+				// Get the "editor", the config dialog we just opened
+				$editor = $('.js-he-dialog[data-template="elements/block_config"]').last();
+
+				// Get the save button
+				$save = $('.block-save', $editor);
+
+				// Bind to the save button
+				$save.on('click', function onClick(e) {
+
+					var data;
+
+					if (saving) {
+						return console.log('Already saving ...');
+					}
+
+					// Indicate we're already saving
+					saving = true;
+
+					// Add the saving class
+					$save.addClass('saving');
+					$save.addClass('btn-primary');
+
+					// Remove optional class
+					$save.removeClass('error');
+					$save.removeClass('btn-danger');
+					$save.removeClass('btn-success');
+					$save.removeClass('saved');
+
+					data = {};
+
+					e.preventDefault();
+
+					// Get all the intake fields
+					$intakes = $('.chimeraField-intake', $editor);
+
+					// Get the modified fields
+					$intakes.each(function eachIntake() {
+
+						var $wrapper = $(this),
+						    instance = this.CFWrapper;
+
+						// Skip nested wrappers,
+						// this could mess up the data
+						if (instance.nested_in) {
+							return;
+						}
+
+						// Get ALL the data (not just updates)
+						Object.merge(data, instance.getData(false));
+					});
+
+					// Post the config data
+					hawkejs.scene.fetch(update_url, {post: {data: data}}, function saved(err, result) {
+
+						$save.removeClass('btn-primary');
+						$save.removeClass('saving');
+						saving = false;
+
+						if (err) {
+							$save.addClass('error');
+							$save.addClass('btn-danger');
+							return console.error('Save failed!', err);
+						}
+
+						$save.addClass('saved');
+						$save.addClass('btn-success');
+
+						// Update the description
+						that.updateDescription();
+					});
+				});
+			});
+		});
+
 	});
 
 	/**
@@ -391,6 +537,9 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		if (!this._initialized) {
 			this._initialized = true;
 
+			// Set the description
+			this.updateDescription();
+
 			// Make this block draggable
 			jsPlumb.draggable(this);
 		}
@@ -459,6 +608,75 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		jsPlumb.connect({
 			source  : source,
 			target  : target
+		});
+	});
+
+	/**
+	 * Update the block description
+	 *
+	 * @author   Jelle De Loecker <jelle@develry.be>
+	 * @since    1.0.0
+	 * @version  1.0.0
+	 *
+	 * @param    {Function}   callback
+	 */
+	Block.setMethod(function updateDescription(callback) {
+
+		var that = this;
+
+		this.getDescription(function gotDescription(err, description) {
+
+			if (err) {
+				if (callback) {
+					callback(err);
+				}
+				return;
+			}
+
+			that.innerText = description;
+
+			if (callback) {
+				callback(null, description);
+			}
+		});
+	});
+
+	/**
+	 * Get the block description
+	 *
+	 * @author   Jelle De Loecker <jelle@develry.be>
+	 * @since    1.0.0
+	 * @version  1.0.0
+	 *
+	 * @param    {Function}   callback
+	 */
+	Block.setMethod(function getDescription(callback) {
+
+		var that = this,
+		    config,
+		    url;
+
+		config = {
+			controller: 'Scenario',
+			action: 'block_description',
+			id: this.parentElement.id,
+			block_id: this.id
+		};
+
+		// Construct the url to save to
+		url = hawkejs.scene.helpers.Router.routeUrl('chimera@IdActionLink', config);
+
+		hawkejs.scene.fetch(url, function gotResponse(err, res) {
+
+			if (err) {
+				return callback(err);
+			}
+
+			if (!res || typeof res.description == 'undefined') {
+				return callback(new Error('No description given'));
+			}
+
+			callback(null, res.description);
 		});
 	});
 

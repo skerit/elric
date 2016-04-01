@@ -6,10 +6,22 @@
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
  * @version  0.1.0
+ *
+ * @param    {ScenarioDocument}   scenario    The scenario this block is in
+ * @param    {Object}             data        Scenario-specific block data
  */
 var Script = Function.inherits('Elric.ScenarioBlock', function ScriptScenarioBlock(scenario, data) {
 	ScriptScenarioBlock.super.call(this, scenario, data);
 });
+
+/**
+ * Static description,
+ * only set when this block should never use
+ * `getDescription`
+ *
+ * @type {Boolean}
+ */
+Script.setProperty('static_description', 'Evaluate JavaScript');
 
 /**
  * Set the block schema
