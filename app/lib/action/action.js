@@ -44,6 +44,31 @@ Action.setProperty('extend_only', true);
 Action.setProperty('starts_new_group', true);
 
 /**
+ * Certain blocks can have empty settings,
+ * mainly used for description getting
+ *
+ * @type {Boolean}
+ */
+Action.setProperty('has_settings', true);
+
+/**
+ * Static description,
+ * only set when this block should never use
+ * `getDescription`
+ *
+ * @type {Boolean}
+ */
+Action.setProperty('static_description', '');
+
+/**
+ * Always execute `getDescription`, even when
+ * there are no settings
+ *
+ * @type {Boolean}
+ */
+Action.setProperty('force_description_callback', false);
+
+/**
  * Return the class-wide schema
  *
  * @type   {Schema}
@@ -73,6 +98,45 @@ Action.constitute(function setSchema() {
 });
 
 /**
+ * Callback with a nice description to display in the scenario editor,
+ * check if the settings are set first
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}   callback
+ */
+Action.setMethod(function doGetDescription(callback) {
+
+	// If there is a static description, that should be returned
+	if (this.static_description && !this.force_description_callback) {
+		return callback(null, this.static_description);
+	}
+
+	// Get the description if the settings can be empty,
+	// the callback is forced or the settings object is not empty
+	if (!this.has_settings || this.force_description_callback || !Object.isEmpty(this.payload)) {
+		return this.getDescription(callback);
+	}
+
+	callback(null, this.title + ' (unconfigured)');
+});
+
+/**
+ * Callback with a nice description to display in the scenario editor
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Function}   callback
+ */
+Action.setMethod(function getDescription(callback) {
+	callback(null, this.title);
+});
+
+/**
  * Set the originating event
  *
  * @author   Jelle De Loecker   <jelle@develry.be>
@@ -92,6 +156,16 @@ Action.setMethod(function setEvent(event) {
 	this.document.from_event_id = event._id;
 });
 
+/**
+ * Inject given payload into document payload
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Action.setMethod(function setPayload(payload) {
+	Object.assign(this.payload, payload);
+});
 /**
  * Set the originating scenario
  *
@@ -121,6 +195,7 @@ Action.setMethod(function setScenario(scenario) {
  */
 Action.setMethod(function startExecution(callback) {
 
+	// Start the timer
 	this.setStartTime();
 
 	this.execute(callback);

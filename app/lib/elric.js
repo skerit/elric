@@ -1,6 +1,8 @@
 var all_capabilities = alchemy.shared('Elric.capabilities'),
     all_events = alchemy.shared('elric.event'),
     all_actions = alchemy.shared('elric.action'),
+    persisted = alchemy.shared('elric.persisted_shares'),
+    cron = alchemy.use('node-cron'),
     fs = require('fs');
 
 /**
@@ -17,6 +19,10 @@ var Elric = Function.inherits('Informer', function Elric() {
 		return global.elric;
 	}
 
+	// The scheduled cron jobs
+	this.cron_jobs = [];
+
+	// The connected clients
 	this.clients = [];
 
 	// Load all the clients
@@ -44,8 +50,175 @@ Elric.setMethod(function init() {
 		// Wait for model compositions and such
 		Blast.loaded(function() {
 			that.initClientList(done);
+			that.loadCron();
 		})
 	});
+});
+
+/**
+ * Get a persisted share
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function persistedShare(name) {
+
+	var value,
+	    path;
+
+	if (!persisted[name]) {
+
+		// Try getting it from the temp folder
+		path = PATH_TEMP + '/' + name + '.json';
+
+		// Get the file
+		try {
+			value = fs.readFileSync(path) + '';
+			value = JSON.undry(value);
+		} catch (err) {
+			console.log('Error: ' + err);
+			value = {};
+		}
+
+		persisted[name] = value;
+	}
+
+	return persisted[name];
+});
+
+/**
+ * Store persisted shares
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Boolean}   sync   Store the shares synchronously
+ */
+Elric.setMethod(function persistShares(sync) {
+
+	var write_method,
+	    path,
+	    val,
+	    key;
+
+	if (sync) {
+		write_method = fs.writeFileSync;
+	} else {
+		write_method = fs.writeFile;
+	}
+
+	for (key in persisted) {
+		path = PATH_TEMP + '/' + key + '.json';
+
+		write_method(path, JSON.dry(persisted[key]));
+	}
+
+});
+
+process.on('exit', function onExit() {
+	elric.persistShares(true);
+});
+
+process.on('SIGINT', function onSigint() {
+	elric.persistShares(true);
+});
+
+// Asynchronously persist the shares every 2 minutes
+setInterval(function saveShares() {
+	elric.persistShares();
+}, 120000);
+
+/**
+ * Load cron
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function loadCron() {
+
+	var Scenario = Model.get('Scenario'),
+	    options,
+	    task,
+	    i;
+
+	console.log('Loading cron...');
+
+	// Destroy all existing tasks
+	for (i = 0; i < this.cron_jobs.length; i++) {
+		task = this.cron_jobs[i];
+		task.destroy();
+	}
+
+	// Empty the array
+	this.cron_jobs.length = 0;
+
+	options = {
+		conditions: {
+			triggers: 'cron'
+		}
+	};
+
+	// Get all scenarios with cron triggers
+	Scenario.find('all', options, function gotAllScenarios(err, scenarios) {
+
+		if (err) {
+			throw err;
+		}
+
+		console.log('Got scenarios:', scenarios);
+
+		// Iterate over the scenarios
+		scenarios.forEach(function eachScenario(scenario) {
+
+			var blocks = scenario.blocks;
+
+			if (!blocks || !blocks.length) {
+				return;
+			}
+
+			blocks.forEach(function eachBlock(block) {
+
+				// Make sure it's a cron block
+				if (block.type != 'cron') {
+					return;
+				}
+
+				// Make sure the cron expression is set
+				if (!block.settings.expression) {
+					return;
+				}
+
+				elric.schedule(block.settings.expression, function fireScenario() {
+
+					console.log('Should fire scenario:', scenario);
+
+					// Get a new Scenario document
+					Scenario.findById(scenario._id, function gotScenarioAgain(err, document) {
+						document.applyEvent('cron');
+					});
+				});
+			});
+		});
+	});
+});
+
+/**
+ * Schedule a cron job
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function schedule(syntax, callback) {
+
+	var task;
+
+	task = cron.schedule(syntax, callback);
+
+	this.cron_jobs.push(task);
 });
 
 /**
@@ -59,13 +232,13 @@ Elric.setMethod(function init() {
  * @param    {String}                  action_type
  * @param    {ScenarioModelDocument}   scenario
  * @param    {Event}                   event
+ * @param    {Array}                   args
  */
-Elric.setMethod(function createAction(action_type, scenario, event) {
+Elric.setMethod(function createAction(action_type, scenario, event, action_settings) {
 
 	var constructor = all_actions[action_type],
 	    document,
-	    action,
-	    args;
+	    action;
 
 	if (!action_type || !constructor) {
 		throw new Error('Could not find "' + action_type + '" action constructor');
@@ -77,19 +250,20 @@ Elric.setMethod(function createAction(action_type, scenario, event) {
 	// Set the type
 	document.type = action_type;
 
-	args = [];
-
-	// Create the arguments
-	for (i = 2; i < arguments.length; i++) {
-		args[i-2] = arguments[i];
-	}
-
 	// Create & initialize the action
 	action = new constructor(document);
 
-	// Set the action scenario & event
-	action.setScenario(scenario);
-	action.setEvent(event);
+	if (scenario) {
+		action.setScenario(scenario);
+	}
+
+	if (event) {
+		action.setEvent(event);
+	}
+
+	if (action_settings) {
+		action.setPayload(action_settings);
+	}
 
 	return action;
 });
@@ -104,22 +278,23 @@ Elric.setMethod(function createAction(action_type, scenario, event) {
  * @param    {String}   action_type
  * @param    {Event}    event
  */
-Elric.setMethod(function doAction(action_type, scenario, event, callback) {
+Elric.setMethod(function doAction(action_type, scenario, event, action_settings, callback) {
 
 	var action;
 
-	if (typeof event == 'function') {
+	if (typeof action_settings == 'function') {
+		callback = args;
+		args = null;
+	} else if (typeof event == 'function') {
 		callback = event;
 		event = null;
-	}
-
-	if (typeof scenario == 'function') {
+	} else if (typeof scenario == 'function') {
 		callback = scenario;
 		event = null;
 		scenario = null;
 	}
 
-	action = this.createAction(action_type, scenario, event);
+	action = this.createAction(action_type, scenario, event, action_settings);
 
 	// Start the execution
 	action.startExecution(function executed(err, result) {
@@ -214,6 +389,56 @@ Elric.setMethod(function emitEvent(type) {
 	return event;
 });
 
+global.dt = function dt() {
+	elric.testScenario('dev');
+}
+
+/**
+ * Test a scenario
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Elric.setMethod(function testScenario(id, callback) {
+
+	var Scenario = Model.get('Scenario'),
+	    options,
+	    event;
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	options = {
+		conditions: {
+			$or: [
+				{_id: id},
+				{name: id}
+			]
+		}
+	};
+
+	// Get the wanted scenario
+	Scenario.find('first', options, function gotScenario(err, scenario) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		if (!scenario.length) {
+			return callback(new Error('Scenario "' + id + '" not found'));
+		}
+
+		// Create an event
+		event = elric.createEvent('test');
+
+		scenario.applyEvent(event, function done(err) {
+			console.log('Applied test event', event, 'to', scenario, err);
+		});
+	});
+});
+
 /**
  * Apply event to scenario
  *
@@ -221,7 +446,7 @@ Elric.setMethod(function emitEvent(type) {
  * @since    0.1.0
  * @version  0.1.0
  */
-Elric.setMethod(function applyEventToScenario(event) {
+Elric.setMethod(function applyEventToScenario(event, callback) {
 
 	var Scenario = Model.get('Scenario'),
 	    scenarios;
@@ -257,8 +482,12 @@ Elric.setMethod(function applyEventToScenario(event) {
 		Function.parallel(tasks, next);
 	}, function done(err) {
 		if (err) {
+			if (callback) callback(err);
 			console.error('Error doing scenarios:', err);
+			return;
 		}
+
+		if (callback) callback(null);
 	});
 });
 

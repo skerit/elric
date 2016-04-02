@@ -571,8 +571,6 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		var id,
 		    i;
 
-		// @TODO: use options.out_on_false and out_on_true
-		// which are IDs
 		for (i = 0; i < this.options.out_on_true.length; i++) {
 			id = this.options.out_on_true[i];
 
@@ -581,6 +579,16 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 			}
 
 			this.connect(id, true);
+		}
+
+		for (i = 0; i < this.options.out_on_false.length; i++) {
+			id = this.options.out_on_false[i];
+
+			if (!id) {
+				continue;
+			}
+
+			this.connect(id, false);
 		}
 	});
 

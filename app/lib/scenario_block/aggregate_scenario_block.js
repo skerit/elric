@@ -83,21 +83,44 @@ Aggregate.setMethod(function evaluate(from_block, callback, ignore) {
 		this.seen_block_ids.push(String(from_block.id));
 	}
 
-	for (i = 0; i < entrance_block_ids.length; i++) {
-		req_id = entrance_block_ids[i];
-
-		if (this.seen_block_ids.indexOf(req_id) == -1) {
-			ignore();
-			return console.log('Not yet seen', req_id, 'so not completing aggregation')
-		}
+	if (!this.seenAll()) {
+		ignore();
+		return console.log('Not yet seen', req_id, 'so not completing aggregation')
 	}
 
 	this.has_finished = true;
-
-	console.log('Aggregate: All blocks have been seen!');
 
 	// Make sure it happens asynchronously
 	setImmediate(function doCallback() {
 		callback(null, true);
 	});
+});
+
+/**
+ * Have we seen all input blocks?
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {ScenarioBlock}   from_block   The referring block
+ * @param    {Function}        callback     Callback with values
+ * @param    {Function}        ignore       Ignore, don't call next blocks
+ */
+Aggregate.setMethod(function seenAll() {
+
+	var entrance_block_ids = this.entrance_block_ids,
+	    seen_id,
+	    req_id,
+	    i;
+
+	for (i = 0; i < entrance_block_ids.length; i++) {
+		req_id = entrance_block_ids[i];
+
+		if (this.seen_block_ids.indexOf(req_id) == -1) {
+			return false;
+		}
+	}
+
+	return true;
 });

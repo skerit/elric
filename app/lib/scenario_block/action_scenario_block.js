@@ -44,13 +44,37 @@ Action.constitute(function setSchema() {
 Action.setMethod(function getDescription(callback) {
 
 	// Start with the title 'Sleep'
-	var description;
+	var constructor,
+	    description,
+	    document,
+	    action;
+
+	console.log('Action block:', this)
 
 	if (!this.settings.action_type) {
 		return callback(null, 'Action (none set)');
 	}
 
-	return callback(null, 'Perform ' + this.settings.action_type + ' action');
+	constructor = all_actions[this.settings.action_type];
+
+	if (!constructor) {
+		return callback(null, 'Unknown "' + this.settings.action_type + '" action');
+	}
+
+	// Create a dummy action document
+	document = Model.get('Action').createDocument();
+
+	// Set the action type
+	document.type = this.settings.action_type;
+
+	// Create & initialize the action
+	action = new constructor(document);
+
+	if (this.settings.action_settings) {
+		action.setPayload(this.settings.action_settings);
+	}
+
+	action.getDescription(callback);
 });
 
 /**
@@ -66,20 +90,20 @@ Action.setMethod(function getDescription(callback) {
 Action.setMethod(function evaluate(from_block, callback) {
 
 	var that = this,
-	    action_type;
+	    action_type,
+	    action_settings;
 
-	console.log('Evaluate action block', this, 'coming from', from_block);
-
+	// Get the action type
 	action_type = this.settings.action_type;
 
 	if (!action_type) {
 		return callback(new Error('No action type was defined'));
 	}
 
-	elric.doAction(action_type, this.scenario, this.event, function didAction(err, result) {
+	// Get the action settings
+	action_settings = this.settings.action_settings;
 
-		console.log('Did action', action_type, that, 'Result:', err, result);
-
+	elric.doAction(action_type, this.scenario, this.event, action_settings, function didAction(err, result) {
 		callback(err, result);
 	});
 });

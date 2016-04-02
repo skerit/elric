@@ -9,7 +9,9 @@
 		"alchemy-i18n": "~1.0.0",
 		"alchemy-styleboost": "~1.0.0",
 		"alchemy-menu": "~1.0.0",
-		"alchemy-media": "~1.0.0"
+		"alchemy-media": "~1.0.0",
+		"node-cron": "1.1.1",
+		"ping": "0.1.10"
 	},
 	"devDependencies": {
 		"alchemy-debugbar": "~1.0.0",

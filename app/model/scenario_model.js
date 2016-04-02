@@ -225,6 +225,10 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 	    key,
 	    end = false;
 
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
 	if (!blocks.start.length) {
 		return callback(new Error('No starting block was found'));
 	}

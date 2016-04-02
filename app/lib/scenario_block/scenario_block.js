@@ -27,6 +27,9 @@ var Block = Function.inherits('Elric.Wrapper', function ScenarioBlock(scenario, 
 
 	// Store the id
 	this.id = this.data.id;
+
+	// The blocks that have been seen, that have called this block
+	this.seen_blocks = [];
 });
 
 /**
@@ -379,21 +382,33 @@ Block.setMethod(function startEvaluation(from_block, callback, special_callback)
 	// Make sure the callbacks gets called only once
 	callback = Function.regulate(callback, 1);
 
+	// Push the referring block to the seen_blocks array
+	this.seen_blocks.push(from_block);
+
 	// Only evaluate after the block has booted
 	this.after('booted', function booted() {
 
 		// Increase the evaluation counter
 		that.evaluation_count++;
 
-		// Do the actual evaluating
-		that.evaluate(from_block, function evaluated() {
+		try {
+			// Do the actual evaluating
+			that.evaluate(from_block, function evaluated(err, value) {
 
-			// Callback, pass along the arguments
-			callback.apply(that, arguments);
+				// Store the value on this block
+				that.result_err = err;
+				that.result_value = value;
 
-			// Emit the executed event
-			that.emitOnce('evaluated');
-		}, special_callback);
+				// Callback, pass along the arguments
+				callback.apply(that, arguments);
+
+				// Emit the executed event
+				that.emitOnce('evaluated');
+			}, special_callback);
+		} catch (err) {
+			console.log('Got block evaluation error:', err);
+			callback(err);
+		}
 	});
 });
 
