@@ -262,6 +262,8 @@ Block.constitute(function setSchema() {
  */
 Block.setMethod(function doGetDescription(callback) {
 
+	console.log('Getting description of', this);
+
 	// If there is a static description, that should be returned
 	if (this.static_description && !this.force_description_callback) {
 		return callback(null, this.static_description);

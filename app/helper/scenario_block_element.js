@@ -52,7 +52,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 	 * @version  1.0.0
 	 */
 	Block.setProperty(function jsPlumb() {
-		return this.parentElement.jsPlumb;
+		return this.parentElement && this.parentElement.jsPlumb;
 	});
 
 	/**
@@ -283,6 +283,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 
 				var $intakes,
 				    $editor,
+				    $delete,
 				    saving,
 				    $save;
 
@@ -291,6 +292,9 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 
 				// Get the save button
 				$save = $('.block-save', $editor);
+
+				// Get the delete button
+				$delete = $('.block-delete', $editor);
 
 				// Bind to the save button
 				$save.on('click', function onClick(e) {
@@ -359,6 +363,12 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 						// Update the description
 						that.updateDescription();
 					});
+				});
+
+				$delete.on('click', function onClick(e) {
+					e.preventDefault();
+					that.remove();
+					$editor.parent().remove();
 				});
 			});
 		});
@@ -443,14 +453,24 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 
 		var connections = this.getExitConnections(value),
 		    result = [],
+		    block,
 		    conn,
 		    i;
+
+		if (!this.parentElement) {
+			return result;
+		}
 
 		for (i = 0; i < connections.length; i++) {
 			conn = connections[i];
 
 			if (conn.targetId) {
-				result.push(conn.targetId);
+				// Make sure this target block exists
+				block = this.parentElement.getBlock(conn.targetId);
+
+				if (block) {
+					result.push(conn.targetId);
+				}
 			}
 		}
 
@@ -508,6 +528,12 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 
 		// Get the block definition
 		block = blocks[options.type];
+
+		if (!block) {
+			// Block type has been removed
+			// @TODO: handle this?
+			return;
+		}
 
 		// Store the type config
 		this.type_config = block;
@@ -610,6 +636,8 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		target_block = this.parentElement.getBlock(block_id);
 
 		if (!target_block) {
+			// @TODO: block has probably been removed
+			return false;
 			throw new Error('Could not find block "' + block_id + '"');
 		}
 
@@ -634,6 +662,30 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 	});
 
 	/**
+	 * Delete this block
+	 *
+	 * @author   Jelle De Loecker <jelle@develry.be>
+	 * @since    1.0.0
+	 * @version  1.0.0
+	 */
+	Block.setMethod(function remove() {
+		// Indicate this block has been removed
+		this.removed = true;
+
+		// @todo: remove connections
+
+		// Repaint jsplumb
+		if (this.parentElement && this.parentElement.jsPlumb) {
+			this.parentElement.jsPlumb.repaintEverything();
+		} else {
+			console.error('Parent', this.parentElement, 'has no jsplumb instance');
+		}
+
+		// Actually remove the element from the dom
+		remove.super.call(this);
+	});
+
+	/**
 	 * Update the block description
 	 *
 	 * @author   Jelle De Loecker <jelle@develry.be>
@@ -648,6 +700,8 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 
 		this.getDescription(function gotDescription(err, description) {
 
+			var span;
+
 			if (err) {
 				if (callback) {
 					callback(err);
@@ -655,7 +709,14 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 				return;
 			}
 
-			that.innerText = description;
+			// Clear out the HTML
+			that.innerHTML = '';
+
+			// Create a new span
+			span = Hawkejs.createElement('span');
+			span.innerText = description;
+
+			that.appendChild(span);
 
 			if (callback) {
 				callback(null, description);

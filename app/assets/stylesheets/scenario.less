@@ -17,21 +17,27 @@ elric-scenario {
 		box-shadow: 0px 0px 18px 0px rgba(200,200,200,0.4);
 		border-radius: 2px;
 		opacity: 0.8;
-		width: 100px;
-		height: 80px;
+		width: 155px;
+		min-height: 85px;
 		text-align: center;
 		z-index: 20;
 		position: absolute;
 		background-color: #eeeeef;
 		color: black;
 		font-family: helvetica;
-		padding: 10px;
+		padding: 14px 10px 10px;
 		font-size: 0.9em;
 		cursor: pointer;
+		display: flex;
+		justify-content: center;
 
 		&:hover {
 			box-shadow: 0px 0px 18px 0px #444;
 			opacity: 0.6;
+		}
+
+		> span {
+			align-self: center;
 		}
 	}
 

@@ -55,7 +55,7 @@ Script.setMethod(function evaluate(from_block, callback) {
 
 	console.log('Evaluate script block', this, 'coming from', from_block);
 
-	fnc = new Function('callback', this.settings.source);
+	fnc = new Function('from_block', 'callback', this.settings.source);
 
-	fnc.call(this, callback);
+	fnc.call(this, from_block, callback);
 });

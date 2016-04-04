@@ -189,6 +189,11 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 		for (i = 0; i < blocks.length; i++) {
 			block = blocks[i];
 
+			// Ignore removed blocks
+			if (block.removed) {
+				continue;
+			}
+
 			data = {
 				id           : block.id,
 				type         : block.type,
