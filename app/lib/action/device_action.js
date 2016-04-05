@@ -86,7 +86,14 @@ Device.setMethod(function execute(callback) {
 	var that = this,
 	    commands = this.payload.commands || [],
 	    Device = this.getModel('Device'),
-	    tasks = [];
+	    tasks = [],
+	    bomb;
+
+	// Create a bomb to callback after a while
+	bomb = Function.timebomb(3000, function doCallBack() {
+		console.log('Device action', that, 'did not call back');
+		callback(null, null);
+	});
 
 	commands.forEach(function eachCommand(entry) {
 		tasks.push(function doCommand(next) {
@@ -123,6 +130,9 @@ Device.setMethod(function execute(callback) {
 	console.log('Execute device action:', this);
 
 	Function.parallel(tasks, function tasksDone(err) {
+
+		bomb.defuse();
+
 		if (err) {
 			return callback(null, false);
 		} else {

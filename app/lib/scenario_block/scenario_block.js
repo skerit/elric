@@ -383,6 +383,7 @@ Block.setMethod(function startEvaluation(from_block, callback, special_callback)
 
 	// Make sure the callbacks gets called only once
 	callback = Function.regulate(callback, 1);
+	special_callback = Function.regulate(special_callback, 1);
 
 	// Push the referring block to the seen_blocks array
 	this.seen_blocks.push(from_block);
@@ -398,20 +399,116 @@ Block.setMethod(function startEvaluation(from_block, callback, special_callback)
 			that.evaluate(from_block, function evaluated(err, value) {
 
 				// Store the value on this block
-				that.result_err = err;
-				that.result_value = value;
+				that.setResultValue(err, value);
 
 				// Callback, pass along the arguments
 				callback.apply(that, arguments);
 
 				// Emit the executed event
 				that.emitOnce('evaluated');
-			}, special_callback);
+			}, function specialised(command, silent_value) {
+
+				// We might not call any exit blocks,
+				// this block's value still needs to change (silently)
+				if (typeof silent_value != 'undefined') {
+					that.setResultValue(null, silent_value, true);
+				}
+
+				special_callback(command, silent_value);
+			});
 		} catch (err) {
 			console.log('Got block evaluation error:', err);
 			callback(err);
 		}
 	});
+});
+
+/**
+ * Get this block's current result object
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {String}   scope_name   The scopename to use,
+ *                                   defaults to currently set name
+ *
+ * @return   {Object}   Return the value object
+ */
+Block.setMethod(function getCurrentResult(scope_name) {
+
+	var result = this.scenario.touchPersistedBlockValue(this, scope_name);
+
+	return result;
+});
+
+/**
+ * Get this block's result object from the previous scenario run
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {String}   scope_name   The scopename to use,
+ *                                   defaults to currently set name
+ *
+ * @return   {Object}   Return the value object
+ */
+Block.setMethod(function getPreviousResult(scope_name) {
+
+	var values,
+	    result;
+
+	if (!scope_name) {
+		scope_name = this.scenario.scope_name;
+	}
+
+	// If the previous result clone object doesn't exist,
+	// just return the current values
+	if (!this.scenario.previous_result_clone) {
+		result = this.getCurrentResult(scope_name);
+	} else {
+
+		if (!this.scenario.previous_result_clone[scope_name]) {
+			this.scenario.previous_result_clone[scope_name] = {};
+		}
+
+		values = this.scenario.previous_result_clone[scope_name];
+
+		result = values[this.id] || {};
+	}
+
+	return result;
+});
+
+/**
+ * Set this block's result values
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ *
+ * @param    {Object}   err        The error if there was one, or null
+ * @param    {Mixed}    value      The value
+ * @param    {Boolean}  silently   If this is a silent value
+ */
+Block.setMethod(function setResultValue(err, value, silently) {
+
+	// Indicate this block as a new result value
+	this.has_result_value = true;
+
+	// Indicate this value was set silently
+	this.has_silent_value = !!silently;
+
+	// Store the value on the block,
+	// so next blocks inside this scenario can use it
+	this.result_value = value;
+
+	// Also store the error, just in case
+	this.result_err = err;
+
+	// Persist the block value
+	this.scenario.persistBlockValue(this);
 });
 
 /**

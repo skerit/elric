@@ -193,8 +193,6 @@ Elric.setMethod(function loadCron() {
 
 				elric.schedule(block.settings.expression, function fireScenario() {
 
-					console.log('Should fire scenario:', scenario);
-
 					// Get a new Scenario document
 					Scenario.findById(scenario._id, function gotScenarioAgain(err, document) {
 						document.applyEvent('cron');

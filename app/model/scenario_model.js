@@ -1,5 +1,6 @@
 var all_blocks = alchemy.shared('elric.scenario_block'),
-    all_events = alchemy.shared('elric.event');
+    all_events = alchemy.shared('elric.event'),
+    persisted  = elric.persistedShare('scenario_block_values');
 
 /**
  * The Scenario Model
@@ -113,6 +114,15 @@ Scenario.constitute(function chimeraConfig() {
 	edit.addField('enabled');
 	edit.addField('blocks');
 });
+
+/**
+ * Set default scenario scope name
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Scenario.setDocumentProperty('scope_name', 'default');
 
 /**
  * Get block by its id
@@ -233,6 +243,12 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 		return callback(new Error('No starting block was found'));
 	}
 
+	if (this._has_already_started) {
+		return callback(new Error("Can't start the same scenario document twice!"));
+	}
+
+	this._has_already_started = true;
+
 	// This is the variables object that blocks can use
 	if (!this.variables) {
 		this.variables = {};
@@ -246,6 +262,9 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 
 	// Start the timer
 	started = Date.now();
+
+	// Get a clone of the current persisted values
+	this.previous_result_clone = JSON.clone(this.getPersistedValues());
 
 	// Start the boot for all the blocks
 	for (key in blocks.all) {
@@ -269,6 +288,138 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 
 		callback(null);
 	});
+});
+
+/**
+ * Get the persisted entries for this scenario
+ * as they are now
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @return   {Object}
+ */
+Scenario.setDocumentMethod(function getPersistedValues() {
+
+	// Ensure the entry for this scenario exists
+	if (!persisted[this._id]) {
+		persisted[this._id] = {};
+	}
+
+	return persisted[this._id];
+});
+
+/**
+ * Get the persisted scope values as they are now
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @return   {Object}
+ */
+Scenario.setDocumentMethod(function getScopeValues(scope_name) {
+
+	var values = this.getPersistedValues();
+
+	if (!scope_name) {
+		scope_name = this.scope_name;
+	}
+
+	if (!values[scope_name]) {
+		values[scope_name] = {};
+	}
+
+	return values[scope_name];
+});
+
+/**
+ * Touch the block entry in the persisted value and return it
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Block}      block
+ */
+Scenario.setDocumentMethod(function touchPersistedBlockValue(block, scope_name, new_object) {
+
+	var scope_values,
+	    block_value,
+	    donew;
+
+	if (!block) {
+		return false;
+	}
+
+	// If no scope name is given,
+	// see if the second argument is actually the new_object
+	if (scope_name && typeof scope_name == 'object') {
+		new_object = scope_name;
+		scope_name = null;
+	}
+
+	scope_values = this.getScopeValues(scope_name);
+
+	if (new_object) {
+		scope_values[block.id] = new_object;
+
+		// Add the updated time
+		new_object.updated = Date.now();
+	} else if (!scope_values[block.id]) {
+		scope_values[block.id] = {};
+	}
+
+	block_value = scope_values[block.id];
+
+	return block_value;
+});
+
+/**
+ * Persist the value of the given block
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Block}      block
+ */
+Scenario.setDocumentMethod(function persistBlockValue(block) {
+
+	var block_value,
+	    new_value,
+	    donew;
+
+	if (!block) {
+		return false;
+	}
+
+	new_value = block.result_value;
+
+	// Get the block value object
+	block_value = this.touchPersistedBlockValue(block);
+
+	if (block_value.count == null) {
+		donew = true;
+	} else if (!Object.alike(block_value.value, new_value)) {
+		donew = true;
+	}
+
+	if (donew) {
+		block_value = {
+			value: new_value,
+			count: 1
+		};
+	} else {
+		// Increase the counter
+		block_value.count++;
+	}
+
+	// Overwrite the block value
+	this.touchPersistedBlockValue(block, block_value);
+
+	return true;
 });
 
 /**
