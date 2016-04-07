@@ -78,7 +78,23 @@ Interface.setMethod(function prepareSave(recordset) {
 });
 
 /**
- * Get an instance of the interface type
+ * The interface instance property
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Interface.setDocumentProperty(function instance() {
+
+	if (!this._instance) {
+		this._instance = this.createInstance();
+	}
+
+	return this._instance;
+});
+
+/**
+ * Create a new instance of this interface type
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -86,4 +102,35 @@ Interface.setMethod(function prepareSave(recordset) {
  */
 Interface.setDocumentMethod(function createInstance() {
 	return new interfaces[this.type];
+});
+
+/**
+ * Send a command to this interface
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Object}   address   The address of the device
+ * @param    {Object}   options
+ * @param    {Function} callback
+ */
+Interface.setDocumentMethod(function sendCommand(address, options, callback) {
+
+	var that = this;
+
+	if (typeof options == 'function') {
+		callback = options;
+		options = {};
+	}
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	if (!this.client_id) {
+		return callback(new Error("Can't send command to interface when client id is not set"));
+	}
+
+	this.instance.sendCommand(this.client_id, address, options, callback);
 });

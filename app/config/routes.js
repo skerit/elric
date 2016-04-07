@@ -3,6 +3,7 @@ Router.get('Test', '/test', 'Static#test');
 
 Router.socket('ClientChimera#capconfig', 'capconfig');
 Router.socket('DeviceChimera#command', 'devicecmd');
+Router.socket('DeviceChimera#feature', 'devicefeature');
 Router.socket('DeviceChimera#protocommand', 'protocolcmd');
 Router.socket('FloorplanChimera#saveElement', 'saveelement');
 

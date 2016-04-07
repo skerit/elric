@@ -52,6 +52,30 @@ DeviceType.constitute(function setProperties() {
 
 	// Add an empty features object
 	this.setProperty('features', {});
+
+	// Add the 'on' feature
+	this.addFeature('on', {
+
+		// The title of this feature, used on buttons
+		// If not set, the name will be titleized instead
+		title: 'On',
+
+		// The description of this feature
+		description: 'Turn device on',
+
+		// The protocol command it sends
+		command: 'on',
+
+		// The optional state value it should set
+		state: 1
+	});
+
+	// Add the 'off' feature
+	this.addFeature('off', {
+		description: 'Turn device off',
+		command: 'off',
+		state: 0
+	});
 });
 
 /**
@@ -104,11 +128,20 @@ DeviceType.setStatic(function addFeature(name, configuration) {
 
 	var features = this.prototype.features;
 
+	// Make sure the name is lowercase
+	name = String(name).toLowerCase();
+
 	if (configuration == null) {
 		configuration = {};
 	}
 
+	// Make sure the name is set
 	configuration.name = name;
+
+	// Make sure there is a title
+	if (!configuration.title) {
+		configuration.title = name.titleize();
+	}
 
 	features[name] = configuration;
 
@@ -129,7 +162,8 @@ DeviceType.setMethod(function toJSON() {
 		type_name: this.type_name,
 		category: this.category,
 		protocol: this.protocol,
-		commands: this.commands
+		commands: this.commands,
+		features: this.getFeatures()
 	};
 });
 
@@ -164,4 +198,92 @@ DeviceType.setMethod(function getInterfaceCommand(command) {
 	}
 
 	return command.protocol_command;
+});
+
+/**
+ * Get a feature's configuration
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+DeviceType.setMethod(function getFeature(name) {
+	return this.features[String(name).toLowerCase()];
+});
+
+/**
+ * Return all features
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+DeviceType.setMethod(function getFeatures() {
+	return this.features;
+});
+
+/**
+ * Execute a device feature
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {DeviceDocument}  record    The device record
+ * @param    {String|Object}   feature   The feature name or object
+ * @param    {Function}        callback  The function to call with data
+ */
+DeviceType.setMethod(function doFeature(record, feature, callback) {
+
+	var that = this,
+	    name;
+
+	if (typeof feature == 'string') {
+		name = feature;
+		feature = this.getFeature(feature);
+	}
+
+	if (typeof callback != 'function') {
+		callback = Function.thrower;
+	}
+
+	if (!feature) {
+		return callback(new Error('Feature "' + name + '" could not be found'));
+	}
+
+	console.log('Got feature definition:', feature);
+
+	if (feature.command) {
+		record.sendProtocolCommand(feature.command, function gotResponse(err, result) {
+
+			var new_state;
+
+			if (err) {
+				return callback(err);
+			}
+
+			// If the feature has a state, set it
+			if (feature.state != null) {
+
+				if (typeof feature.state == 'object') {
+					new_state = Object.assign({}, feature.state);
+				} else {
+					new_state = {value: feature.state};
+				}
+
+				// Always override the feature name
+				new_state.feature = feature.name;
+
+				// Always override the commands that sent this
+				new_state.command = feature.command;
+
+				console.log('Updating state:', new_state);
+
+				// Update the state, but don't wait for it to callback
+				record.updateState(new_state);
+			}
+
+			callback(null, result);
+		});
+	}
 });

@@ -393,6 +393,20 @@ Client.setDocumentMethod(function attachConduit(conduit) {
  * @version  0.1.0
  */
 Client.setDocumentMethod(function submit(type, data, stream, callback) {
+
+	if (!this.conduit) {
+
+		if (typeof stream == 'function') {
+			callback = stream;
+		}
+
+		if (typeof stream != 'function') {
+			callback = Function.thrower;
+		}
+
+		return callback(new Error('Could not submit "' + type + '" data, is client connected?'));
+	}
+
 	return this.conduit.submit(type, data, stream, callback);
 });
 

@@ -14,8 +14,8 @@
 				<th>Address</th>
 				<th>Interface</th>
 				<th>State</th>
-				<th>Device commands</th>
-				<th>Protocol commands</th>
+				<th>Features</th>
+				<th>Protocommands</th>
 			</tr></thead>
 			<% for (i = 0; i < records.length; i++) {
 				record = records[i];
@@ -33,7 +33,7 @@
 							}
 						}) %>
 					</td>
-					<td><%
+					<!--<td><%
 						for (cmd in dtype.commands) { %>
 							<button
 								class="btn btn-success"
@@ -41,6 +41,17 @@
 								title="<%= dtype.commands[cmd].description %>"
 							>
 								<%= dtype.commands[cmd].title %>
+							</button>
+						<% }
+					%></td>-->
+					<td><%
+						for (feat in dtype.features) { %>
+							<button
+								class="btn btn-success"
+								data-server-event="devicefeature | <%= device._id %> | <%= feat %>"
+								title="<%= dtype.features[feat].description %>"
+							>
+								<%= dtype.features[feat].title %>
 							</button>
 						<% }
 					%></td>

@@ -18,6 +18,26 @@ var AProtocol = Function.inherits('Elric.Wrapper', function AutomationProtocol()
  */
 AProtocol.constitute(function setProperties() {
 
+	// Set commands on the class itself
+	this.commands = {};
+
+	// Add the on command
+	this.addCommand('on', {
+		title        : 'Switch on',
+		description  : 'Turn device on',
+		value        : 1
+	});
+
+	// Add the off command
+	this.addCommand('off', {
+		title        : 'Switch off',
+		description  : 'Turn device off',
+		value        : 0
+	});
+
+	///////////////////////////////
+	// Old prototype command object
+
 	var commands;
 
 	/**
@@ -64,6 +84,45 @@ AProtocol.setProperty('starts_new_group', true);
 AProtocol.setProperty('description', '');
 
 /**
+ * Add a command this protocol is capable of
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+AProtocol.setStatic(function addCommand(name, options) {
+
+	options = Object.assign({}, options);
+	options.name = name;
+
+	this.commands[name] = options;
+
+	return this.commands[name];
+});
+
+/**
+ * Remove a command this protocol is capable of
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+AProtocol.setStatic(function removeCommand(name) {
+	delete this.commands[name];
+});
+
+/**
+ * Get a command configuration
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+AProtocol.setStatic(function getCommand(name) {
+	return this.commands[name];
+});
+
+/**
  * Return the basic record for JSON
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -77,4 +136,15 @@ AProtocol.setMethod(function toJSON() {
 		type_name: this.type_name,
 		commands: this.commands
 	};
+});
+
+/**
+ * Get a command configuration
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+AProtocol.setMethod(function getCommand(name) {
+	return this.constructor.getCommand(name);
 });

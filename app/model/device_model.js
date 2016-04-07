@@ -133,6 +133,29 @@ Device.setDocumentMethod(function getInterface(callback) {
 });
 
 /**
+ * Get the device's current state.
+ * If the protocol allows it, the state is actively queried
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Function} callback
+ */
+Device.setDocumentMethod(function getDeviceState(callback) {
+
+	var feature = this.device.getFeature('statequery');
+
+	if (feature) {
+
+	}
+
+
+
+
+});
+
+/**
  * Get the command to send to the interface
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -186,7 +209,28 @@ Device.setDocumentMethod(function getProtocolCommand(command_name, callback) {
 });
 
 /**
- * Execute a command, send it to the interface
+ * Execute a device feature
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {String}   feature    The device-specific feature
+ * @param    {Function} callback
+ */
+Device.setDocumentMethod(function doFeature(feature, callback) {
+
+	var that = this;
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	this.device.doFeature(this, feature, callback);
+});
+
+/**
+ * Execute a device command by sending it to the interface
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -228,40 +272,107 @@ Device.setDocumentMethod(function doCommand(device_command_name, callback) {
 			data.name = device_command_name;
 		}
 
-		that.sendProtoCommand(protocol_command, data, callback);
+		// Send the protocol command to the device, update the state later
+		that.sendProtocolCommand(protocol_command, function sendCommand(err, result) {
+
+			if (err) {
+				return callback(err);
+			}
+
+			// Now update the device state
+			that.updateState(data, function updatedState(err) {
+
+				if (err) {
+					// We couldn't save the state, but that's not such a big deal
+
+					if (DEBUG) {
+						that.debug('Could not save state for device "' + (that.name || that._id) + '": ' + err);
+					}
+
+					return callback(null, result);
+				}
+			});
+		});
 	});
 });
 
 /**
- * Execute a command, send it to the interface
+ * Execute a protocol command by sending it to the interface
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
  * @version  0.1.0
  *
- * @param    {String}   protocol_command   The protocol command to send
- * @param    {Object}   new_state          The new state object to set
- * @param    {Function} callback
+ * @param    {Object|String}   options     The protocol command to send
+ * @param    {Function}        callback
  */
-Device.setDocumentMethod(function sendProtoCommand(protocol_command, new_state, callback) {
+Device.setDocumentMethod(function sendProtocolCommand(options, callback) {
 
 	var that = this,
+	    protocol_command,
 	    info;
 
-	if (typeof new_state == 'function') {
-		callback = new_state;
-		new_state = null;
+	if (typeof options == 'string') {
+		protocol_command = options;
+		options = {
+			command: protocol_command
+		};
+	} else {
+		protocol_command = options.command;
 	}
 
 	if (!callback) {
 		callback = Function.thrower;
 	}
 
-	if (!new_state && new_state !== false) {
-		// Get the protocol command info
-		info = this.device.protocol_instance.commands[protocol_command];
+	if (!protocol_command) {
+		return callback(new Error('No protocol command was given'));
+	}
 
-		new_state = {
+	// Get the interface to control this device
+	this.getInterface(function gotInterface(err, interface) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		if (!interface.length) {
+			return callback(new Error('Could not find interface for device "' + (that.name || that._id) + '"'));
+		}
+
+		if (DEBUG) {
+			that.debug('Sending "' + options.command + '" to device "' + (that.name || that._id) + '"');
+		}
+
+		interface.sendCommand(that.address, options, callback);
+	});
+});
+
+/**
+ * Update the device state
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Object|String}   new_state   The new device state object, or command
+ * @param    {Function}        callback
+ */
+Device.setDocumentMethod(function updateState(new_state, callback) {
+
+	var that = this,
+	    state,
+	    info;
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	if (typeof new_state == 'string') {
+		// Get the protocol command info
+		info = this.device.protocol_instance.commands[new_state];
+
+		state = {
 			// Last device command is unknown
 			name: null,
 
@@ -271,45 +382,20 @@ Device.setDocumentMethod(function sendProtoCommand(protocol_command, new_state, 
 			// Protocol command last sent
 			last_sent: protocol_command
 		};
+	} else {
+		state = new_state;
 	}
 
-	// Get the interface
-	this.getInterface(function gotInterface(err, interface_document) {
-
-		var interface,
-		    address;
+	// Update this record with this new state information
+	this.update({state: state}, function storedNewState(err) {
 
 		if (err) {
 			return callback(err);
 		}
 
-		// Create the interface instance
-		interface = interface_document.createInstance();
+		// Notify browsers and whatnot about this new device state
+		alchemy.updateData(that._id, that.Device);
 
-		interface.sendCommand(interface_document.client_id, that.address, protocol_command, function done(err, response) {
-
-			if (err) {
-				return callback(err);
-			}
-
-			// If new_state is false, don't update the database
-			if (new_state === false) {
-				return callback(null);
-			}
-
-			console.log('Updating state:', new_state);
-
-			// Store the new state
-			that.update({state: new_state}, function storedNewState(err, document) {
-
-				if (err) {
-					return callback(err);
-				}
-
-				// Send the device update
-				alchemy.updateData(that._id, that.Device);
-				callback(null, new_state);
-			});
-		});
+		callback(null, state);
 	});
 });

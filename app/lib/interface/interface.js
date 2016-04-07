@@ -36,9 +36,9 @@ Interface.setProperty('protocols', []);
  * 
  * @param    {String}   client_id          The id of the client to send it to
  * @param    {Object}   address            The address of the device
- * @param    {String}   protocol_command   The protocol command to send
+ * @param    {Object}   options            The protocol command to send
  */
-Interface.setMethod(function sendCommand(client_id, address, protocol_command, callback) {
+Interface.setMethod(function sendCommand(client_id, address, options, callback) {
 
 	var that = this,
 	    client = elric.getClient(client_id),
@@ -56,9 +56,22 @@ Interface.setMethod(function sendCommand(client_id, address, protocol_command, c
 
 		// Payload needed to complete command
 		device_address: address,
-		protocol_command: protocol_command
+
+		// Protocol command name
+		protocol_command: options.command,
+
+		// Protocol command options
+		options: options
 	};
 
+	if (!client) {
+		return callback(new Error('Client "' + client_id + '" is not connected'));
+	}
+
+	console.log('Sending interface command:', data, 'to', client);
+
+	// Actually send the data to the client,
+	// where the interface files are executed
 	client.submit('client-command', data, function gotResponse(err, result) {
 		callback(err, result);
 	});

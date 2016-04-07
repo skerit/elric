@@ -279,7 +279,7 @@ Scenario.setDocumentMethod(function applyEvent(event, callback) {
 
 		duration = Date.now() - started;
 
-		console.log('Scenario', that, 'took', duration, 'ms');
+		//console.log('Scenario', that, 'took', duration, 'ms');
 
 		if (err) {
 			// @todo: do something more with errors

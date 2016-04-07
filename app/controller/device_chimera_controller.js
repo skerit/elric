@@ -60,6 +60,27 @@ Device.setMethod(function command(conduit, device_id, command) {
 });
 
 /**
+ * Execute a feature on a device
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Device.setMethod(function feature(conduit, device_id, feature) {
+
+	this.getModel('Device').findById(device_id, function gotDevice(err, record) {
+
+		if (err || !record || !record.length) {
+			return log.error('Could not find device ' + device_id + ': ' + err);
+		}
+
+		record.doFeature(feature);
+	});
+});
+
+/**
  * Send a protocol command to a device
  *
  * @author   Jelle De Loecker <jelle@develry.be>
