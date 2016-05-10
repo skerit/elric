@@ -143,6 +143,27 @@ DeviceType.setStatic(function addFeature(name, configuration) {
 		configuration.title = name.titleize();
 	}
 
+	// See if the configuration element entry is a string
+	if (typeof configuration.control == 'string') {
+		configuration.control = {
+			element: configuration.control
+		};
+	}
+
+	if (!configuration.control) {
+		configuration.control = {};
+	}
+
+	// The default element is a button
+	if (!configuration.control.element) {
+		configuration.control.element = 'button';
+	}
+
+	// See if there is a readFeature method available
+	if (typeof this.prototype['read' + configuration.title + 'Feature'] == 'function') {
+		configuration.control.has_read_feature = true;
+	}
+
 	features[name] = configuration;
 
 	return this;
@@ -223,7 +244,7 @@ DeviceType.setMethod(function getFeatures() {
 });
 
 /**
- * Execute a device feature
+ * Read a feature's state
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -233,9 +254,10 @@ DeviceType.setMethod(function getFeatures() {
  * @param    {String|Object}   feature   The feature name or object
  * @param    {Function}        callback  The function to call with data
  */
-DeviceType.setMethod(function doFeature(record, feature, callback) {
+DeviceType.setMethod(function readFeature(record, feature, callback) {
 
 	var that = this,
+	    method,
 	    name;
 
 	if (typeof feature == 'string') {
@@ -251,39 +273,165 @@ DeviceType.setMethod(function doFeature(record, feature, callback) {
 		return callback(new Error('Feature "' + name + '" could not be found'));
 	}
 
-	console.log('Got feature definition:', feature);
+	// Construct the possible method name
+	method = 'read' + feature.title + 'Feature';
+
+	if (typeof this[method] == 'function') {
+		this[method](record, feature, callback);
+	} else {
+		return callback(new Error('Could not read status of feature "' + name + '"'));
+	}
+});
+
+/**
+ * Execute a device feature
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {DeviceDocument}  record    The device record
+ * @param    {String|Object}   feature   The feature name or object
+ * @param    {Object}          data      Optional data to send with the feature
+ * @param    {Function}        callback  The function to call with data
+ */
+DeviceType.setMethod(function doFeature(record, feature, data, callback) {
+
+	var that = this,
+	    sendCommand,
+	    throttle_id,
+	    options,
+	    q_opts,
+	    queue,
+	    name;
+
+	if (typeof feature == 'string') {
+		name = feature;
+		feature = this.getFeature(feature);
+	}
+
+	if (typeof data == 'function') {
+		callback = data;
+		data = null;
+	}
+
+	if (typeof callback != 'function') {
+		callback = Function.thrower;
+	}
+
+	if (!feature) {
+		return callback(new Error('Feature "' + name + '" could not be found'));
+	}
 
 	if (feature.command) {
-		record.sendProtocolCommand(feature.command, function gotResponse(err, result) {
 
-			var new_state;
+		// Create the function to actually send the command
+		sendCommand = function sendCommand() {
+			options = {
+				command: feature.command,
+				data: data
+			};
 
-			if (err) {
-				return callback(err);
-			}
+			record.sendProtocolCommand(options, function gotResponse(err, result) {
 
-			// If the feature has a state, set it
-			if (feature.state != null) {
+				var new_state,
+				    do_update,
+				    val;
 
-				if (typeof feature.state == 'object') {
-					new_state = Object.assign({}, feature.state);
-				} else {
-					new_state = {value: feature.state};
+				if (err) {
+					return callback(err);
 				}
 
-				// Always override the feature name
-				new_state.feature = feature.name;
+				// If the feature has a state, set it
+				if (feature.state != null) {
 
-				// Always override the commands that sent this
-				new_state.command = feature.command;
+					if (typeof feature.state == 'object') {
+						new_state = Object.assign({}, feature.state);
+					} else {
+						new_state = {value: feature.state};
+					}
 
-				console.log('Updating state:', new_state);
+					// Always override the feature name
+					new_state.feature = feature.name;
 
-				// Update the state, but don't wait for it to callback
-				record.updateState(new_state);
+					// Always override the commands that sent this
+					new_state.command = feature.command;
+
+					do_update = true;
+				}
+
+				// If the feature has a state_path, set that too in the device_data
+				if (feature.state_path) {
+
+					if (!new_state) {
+						new_state = {};
+					}
+
+					if (data && typeof data.value != 'undefined') {
+						val = data.value;
+					} else {
+						val = data;
+					}
+
+					Object.setPath(new_state, 'device_data.' + feature.state_path, val);
+
+					do_update = true;
+				}
+
+				if (do_update) {
+					// Update the state, but don't wait for it to callback
+					record.updateState(new_state);
+				}
+
+				callback(null, result);
+			});
+		};
+
+		// See if this feature needs to be throttled
+		if (feature.throttle) {
+
+			// Construct a throttle id for this device/feature combo
+			throttle_id = record._id + '_' + feature.name;
+
+			if (!this._throttles) {
+				this._throttles = {};
 			}
 
-			callback(null, result);
-		});
+			if (!this._throttles[throttle_id]) {
+
+				q_opts = {
+					// Enable the queue immediately
+					enabled    : true,
+
+					// Set the throttle amount
+					throttle   : feature.throttle
+				};
+
+				// Set the maximum number of items allowed in the queue
+				if (feature.queue_drop == null) {
+					q_opts.queue_drop = 5;
+				} else {
+					q_opts.queue_drop = feature.queue_drop;
+				}
+
+				queue = Function.createQueue(q_opts);
+				this._throttles[throttle_id] = queue;
+			} else {
+				queue = this._throttles[throttle_id];
+			}
+
+			queue.add(function ready(done) {
+
+				// Send the command
+				sendCommand();
+
+				// Don't wait for the response
+				done();
+			});
+		} else {
+			sendCommand();
+		}
+	} else {
+		return callback(new Error('Feature "' + feature.name + '" has no command associated with it'));
 	}
 });

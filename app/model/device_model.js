@@ -42,9 +42,12 @@ Device.constitute(function addFields() {
 
 	// Return the device
 	this.Document.setFieldGetter('device', function getDevice() {
-		if (devices[this.device_type]) {
-			return new devices[this.device_type](this);
+
+		if (!this._device_type_instance && devices[this.device_type]) {
+			this._device_type_instance = new devices[this.device_type](this);
 		}
+
+		return this._device_type_instance;
 	});
 
 	// Return the protocol
@@ -95,6 +98,42 @@ Device.constitute(function chimeraConfig() {
 });
 
 /**
+ * Get a device record and cache it in the user session
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Device.setMethod(function findAndCache(device_id, callback) {
+
+	var that = this,
+	    session;
+
+	if (this.conduit) {
+		session = this.conduit.session();
+
+		if (session.device_cache == null) {
+			session.device_cache = {};
+		} else if (session.device_cache[device_id]) {
+			return callback(null, session.device_cache[device_id]);
+		}
+	}
+
+	this.findById(device_id, function gotDevice(err, record) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		if (session) {
+			session.device_cache[device_id] = record;
+		}
+
+		callback(null, record);
+	});
+});
+
+/**
  * Get the interface linked to this device
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -103,32 +142,22 @@ Device.constitute(function chimeraConfig() {
  */
 Device.setDocumentMethod(function getInterface(callback) {
 
-	var that = this,
-	    interface;
+	var that = this;
 
-	Function.series(function getDeviceRecord(next) {
+	if (this.Interface) {
+		return callback(null, this.Interface);
+	}
 
-		if (that.Interface) {
-			interface = that.Interface;
-			return next();
+	this.getModel('Interface').findById(this.interface_id, function gotDeviceRecord(err, interface_record) {
+
+		if (err || !interface_record || !interface_record.length) {
+			return callback(err || new Error('Could not find interface record for device "' + that._id + '"'));
 		}
 
-		that.getModel('Interface').findById(that.interface_id, function gotDeviceRecord(err, interface_record) {
+		// Store the interface in the record, for possible later use
+		that.Interface = interface_record;
 
-			if (err || !interface_record || !interface_record.length) {
-				return next(err || new Error('Could not find interface record for device "' + that._id + '"'));
-			}
-
-			interface = interface_record;
-			next();
-		});
-	}, function done(err) {
-
-		if (err || !interface) {
-			return callback(err || new Error('Failed to get interface'));
-		}
-
-		callback(null, interface);
+		callback(null, interface_record);
 	});
 });
 
@@ -140,19 +169,57 @@ Device.setDocumentMethod(function getInterface(callback) {
  * @since    0.1.0
  * @version  0.1.0
  *
+ * @param    {Boolean}  force_refresh   If true, state is queried from device (if possible)
  * @param    {Function} callback
  */
-Device.setDocumentMethod(function getDeviceState(callback) {
+Device.setDocumentMethod(function getDeviceState(force_refresh, callback) {
 
-	var feature = this.device.getFeature('statequery');
+	var that = this,
+	    state_feature = this.device.getFeature('statequery');
 
-	if (feature) {
-
+	if (typeof force_refresh == 'function') {
+		callback = force_refresh;
+		force_refresh = false;
 	}
 
+	// If no state data is available, force a refresh
+	if (!this.state || !this.state.device_data) {
+		force_refresh = true;
+	}
 
+	if (!that.state) {
+		that.state = {};
+	}
 
+	// If the device has the statequery feature,
+	// and a refresh is forced, do so
+	if (state_feature && force_refresh) {
+		this.device.doFeature(this, state_feature, function gotState(err, result) {
 
+			var result;
+
+			console.log('Got device state:', err, result);
+
+			if (err) {
+				return callback(err);
+			}
+
+			that.state.device_data = result;
+
+			// Already call back
+			callback(null, that.state);
+
+			// Save the document, too
+			that.save(function doSave(err) {
+				if (err) {
+					console.error('Failed to save device state: ' + err);
+				}
+			});
+		});
+	} else {
+		// @todo: return document values
+		callback(null, this.state || {});
+	}
 });
 
 /**
@@ -218,7 +285,33 @@ Device.setDocumentMethod(function getProtocolCommand(command_name, callback) {
  * @param    {String}   feature    The device-specific feature
  * @param    {Function} callback
  */
-Device.setDocumentMethod(function doFeature(feature, callback) {
+Device.setDocumentMethod(function doFeature(feature, data, callback) {
+
+	var that = this;
+
+	if (typeof data == 'function') {
+		callback = data;
+		data = null;
+	}
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	this.device.doFeature(this, feature, data, callback);
+});
+
+/**
+ * Read a device's feature state
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {String}   feature    The device-specific feature
+ * @param    {Function} callback
+ */
+Device.setDocumentMethod(function readFeature(feature, callback) {
 
 	var that = this;
 
@@ -226,8 +319,9 @@ Device.setDocumentMethod(function doFeature(feature, callback) {
 		callback = Function.thrower;
 	}
 
-	this.device.doFeature(this, feature, callback);
+	this.device.readFeature(this, feature, callback);
 });
+
 
 /**
  * Execute a device command by sending it to the interface
@@ -297,7 +391,8 @@ Device.setDocumentMethod(function doCommand(device_command_name, callback) {
 });
 
 /**
- * Execute a protocol command by sending it to the interface
+ * Execute a protocol command by sending it to the interface.
+ * There is no throttling here.
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -340,11 +435,14 @@ Device.setDocumentMethod(function sendProtocolCommand(options, callback) {
 			return callback(new Error('Could not find interface for device "' + (that.name || that._id) + '"'));
 		}
 
-		if (DEBUG) {
-			that.debug('Sending "' + options.command + '" to device "' + (that.name || that._id) + '"');
-		}
+		interface.sendCommand(that.address, options, function gotInterfaceResponse(err, response) {
 
-		interface.sendCommand(that.address, options, callback);
+			if (err) {
+				return callback(err);
+			}
+
+			return callback(null, response);
+		});
 	});
 });
 
@@ -385,6 +483,9 @@ Device.setDocumentMethod(function updateState(new_state, callback) {
 	} else {
 		state = new_state;
 	}
+
+	// Merge the new object into the old one
+	state = Object.merge({}, this.state, state);
 
 	// Update this record with this new state information
 	this.update({state: state}, function storedNewState(err) {

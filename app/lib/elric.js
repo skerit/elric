@@ -139,12 +139,18 @@ setInterval(function saveShares() {
  */
 Elric.setMethod(function loadCron() {
 
-	var Scenario = Model.get('Scenario'),
+	var Scenario,
 	    options,
 	    task,
 	    i;
 
-	console.log('Loading cron...');
+	if (alchemy.settings.elric.cron === false) {
+		return console.log('Elric\'s cron has been DISABLED');
+	} else {
+		console.log('Loading Elric\'s cron...');
+	}
+
+	Scenario = Model.get('Scenario');
 
 	// Destroy all existing tasks
 	for (i = 0; i < this.cron_jobs.length; i++) {
@@ -618,6 +624,9 @@ Elric.setMethod(function getClientCapabilities(id, callback) {
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
  * @version  0.1.0
+ *
+ * @param    {String}   sound      The sound to play
+ * @param    {Function} callback   Executed when everything has started playing the sound
  */
 Elric.setMethod(function playSound(sound, callback) {
 
@@ -686,6 +695,7 @@ Elric.setMethod(function playSound(sound, callback) {
 			}
 
 			console.log('All clients should be playing the file', err);
+			callback(null);
 		});
 	});
 });

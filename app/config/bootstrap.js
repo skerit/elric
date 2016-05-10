@@ -18,3 +18,7 @@ alchemy.usePlugin('media');
 alchemy.usePlugin('menu');
 alchemy.usePlugin('storywise');
 alchemy.usePlugin('elric-philips-hue');
+
+// Define your own plugins in here
+// alchemy.usePlugin('elric-display');
+// alchemy.usePlugin('elric-play');

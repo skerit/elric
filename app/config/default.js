@@ -73,6 +73,9 @@ module.exports = {
 	// Kill the process when a file changes
 	kill_on_file_change: false,
 
+	// Do an extensive and expensive search for modules
+	search_for_modules: false,
+
 	// Override kill extensions
 	// kill_extensions: ['js'],
 
@@ -90,5 +93,12 @@ module.exports = {
 	toobusy: 70,
 
 	// Enable websockets
-	websockets: false
+	websockets: false,
+
+	// Elric settings
+	elric: {
+
+		// Enable cron
+		cron: true
+	}
 };

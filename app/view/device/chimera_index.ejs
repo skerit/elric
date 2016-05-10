@@ -46,13 +46,7 @@
 					%></td>-->
 					<td><%
 						for (feat in dtype.features) { %>
-							<button
-								class="btn btn-success"
-								data-server-event="devicefeature | <%= device._id %> | <%= feat %>"
-								title="<%= dtype.features[feat].description %>"
-							>
-								<%= dtype.features[feat].title %>
-							</button>
+							<%= Elric.getFeatureControl(dtype.features[feat], device) %>
 						<% }
 					%></td>
 					<td><%

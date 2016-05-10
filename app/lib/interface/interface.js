@@ -68,8 +68,6 @@ Interface.setMethod(function sendCommand(client_id, address, options, callback) 
 		return callback(new Error('Client "' + client_id + '" is not connected'));
 	}
 
-	console.log('Sending interface command:', data, 'to', client);
-
 	// Actually send the data to the client,
 	// where the interface files are executed
 	client.submit('client-command', data, function gotResponse(err, result) {

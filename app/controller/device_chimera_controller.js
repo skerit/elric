@@ -30,8 +30,6 @@ Device.setMethod(function index(conduit) {
 			return that.error(err);
 		}
 
-		console.log('Records:', records);
-
 		that.set('records', records)
 
 		that.render('device/chimera_index');
@@ -49,7 +47,7 @@ Device.setMethod(function index(conduit) {
  */
 Device.setMethod(function command(conduit, device_id, command) {
 
-	this.getModel('Device').findById(device_id, function gotDevice(err, record) {
+	this.getModel('Device').findAndCache(device_id, function gotDevice(err, record) {
 
 		if (err || !record || !record.length) {
 			return log.error('Could not find device ' + device_id + ': ' + err);
@@ -68,7 +66,31 @@ Device.setMethod(function command(conduit, device_id, command) {
  *
  * @param    {Conduit}   conduit
  */
-Device.setMethod(function feature(conduit, device_id, feature) {
+Device.setMethod(function feature(conduit, device_id, feature, data) {
+
+	this.getModel('Device').findAndCache(device_id, function gotDevice(err, record) {
+
+		if (err || !record || !record.length) {
+			return log.error('Could not find device ' + device_id + ': ' + err);
+		}
+
+		record.doFeature(feature, data);
+	});
+});
+
+/**
+ * Read the state of a feature of a device
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Device.setMethod(function readFeature(conduit, data, callback) {
+
+	var device_id = data.device_id,
+	    feature = data.feature;
 
 	this.getModel('Device').findById(device_id, function gotDevice(err, record) {
 
@@ -76,7 +98,9 @@ Device.setMethod(function feature(conduit, device_id, feature) {
 			return log.error('Could not find device ' + device_id + ': ' + err);
 		}
 
-		record.doFeature(feature);
+		record.readFeature(feature, function gotStatus(err, result) {
+			callback(err, result);
+		});
 	});
 });
 

@@ -1,0 +1,22 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+<% start('chimera-status') %>
+<% end('chimera-status') %>
+
+<% start('chimera-cage') %>
+<% for (i = 0; i < records.length; i++) { %>
+	<% camera = records[i].Camera %>
+	<% print_element('elements/camera_panel', {client: client}) %>
+<% } %>
+
+<br><br>
+<% Router.printRoute('chimera@ActionLink', {
+	controller: 'Camera',
+	action: 'create'
+}, {
+	className: 'btn btn-success',
+	title: 'Add',
+	content: 'Add'
+}) %>
+<% end('chimera-cage') %>

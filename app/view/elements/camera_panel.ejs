@@ -1,0 +1,28 @@
+<% update_url(Router.routeUrl('chimera@ActionLink', {controller: 'Camera', action: 'detail'}, {get: {id: ''+camera._id}})) %>
+
+<x-panel class="panel-third camera-panel">
+	<!--<x-panel-overlay>TEST</x-panel-overlay>-->
+	<x-panel-header><%= camera.name %></x-panel-header>
+	<x-panel-actions>
+		<% Router.printRoute('chimera@IdActionLink', {
+			controller: 'Camera',
+			action: 'edit',
+			id: camera._id
+		}, {
+			className: 'btn btn-success',
+			title: 'Edit',
+			content: 'Edit'
+		}) %>
+	</x-panel-actions>
+	<x-panel-body>
+		<%
+			al_video = create_element('al-video');
+			print(al_video);
+
+			al_video.attach('link_config', {
+				linkup    : 'cameralink',
+				camera_id : camera._id 
+			});
+		%>
+	</x-panel-body>
+</x-panel>
