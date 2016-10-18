@@ -37,5 +37,11 @@
 		});
 	} else { %>
 		<p style="text-align: center;">Bridge <%= config.settings.ip %> has been registered</p>
+		<button
+			class="btn btn-danger"
+			data-server-event="capconfig | <%= config._id %> | unregister | <%= config.settings.id %> | <%= config.settings.ip %>"
+		>
+			Disconnect bridges
+		</button>
 	<% }
 }) %>

@@ -23,7 +23,7 @@ var Camera = Model.extend(function CameraModel(options) {
  */
 Camera.constitute(function addFields() {
 
-	var camera_types = alchemy.shared('elric.camera_type');
+	var camera_types = alchemy.getClassGroup('elric_camera_type');
 
 	this.belongsTo('Client');
 
@@ -82,42 +82,51 @@ Camera.setDocumentMethod(function getStream(callback) {
 
 	var that = this,
 	    id = this._id,
+	    hinder,
 	    cached;
 
 	if (!callback) {
 		callback = Function.thrower;
 	}
 
-	Function.series(false, function getCache(next) {
+	// If the cached stream has been destroyed, create a new one
+	if (stream_cache[id] && stream_cache[id].stream && stream_cache[id].stream.destroyed) {
+		stream_cache[id] = null;
+	}
 
-		// If a stream multiplier already exists,
-		// create a new fork and pause it
-		if (stream_cache[id]) {
-			cached = stream_cache[id];
+	if (!stream_cache[id]) {
+		hinder = Function.hinder(function createHinderedStream(done) {
 
-			// If the multiplier is still active, use that
-			if (!cached.destroyed) {
-				return next();
-			}
-		}
+			// Get the actual stream
+			that.camera.getStream(function gotStream(err, stream) {
 
-		that.camera.getStream(function gotStream(err, stream) {
+				if (err) {
+					// @TODO: fix this shit with the errors and the hinders
+					stream_cache[id] = null;
+					return done(err);
+				}
 
-			if (err) {
-				return next(err);
-			}
+				hinder.stream = new Classes.Develry.StreamMultiplier(stream, 'NormalizedCamera');
 
-			cached = new alchemy.classes.Develry.StreamMultiplier(stream);
-			stream_cache[id] = cached;
-
-			next();
+				done(null);
+			});
 		});
-	}, function done(err) {
+
+		stream_cache[id] = hinder;
+	} else {
+		hinder = stream_cache[id];
+	}
+
+	// Wait for a single stream to return
+	hinder.push(function createFork(err) {
 
 		if (err) {
+			// @TODO: fix this shit with the errors and the hinders
+			stream_cache[id] = null;
+
 			return callback(err);
 		}
 
-		callback(null, cached.createStream());
+		return callback(null, hinder.stream.createStream());
 	});
 });

@@ -1,0 +1,28 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+
+<%
+page_title = 'Configuring client "' + (client.hostname || client.ip || client._id) + '"';
+
+Router.setBreadcrumb([
+	{title: __('chimera', 'Dashboard'), route: 'chimera@Dashboard'},
+	{title: 'Clients', route: 'chimera@ActionLink', parameters: {action: 'index', controller: 'client'}},
+	{title: page_title, route: 'chimera@IdActionLink', parameters: {action: 'configure', controller: 'client', id: client._id}}
+]);
+
+Chimera.setTitle(page_title);
+%>
+
+
+<% start('chimera-status') %>
+<% implement('elements/client_info', {wrapper: false}) %>
+<% end('chimera-status') %>
+
+<% start('chimera-cage') %>
+<div class="chimera-client-capabilities flex-row">
+<% client_capabilities.forEach(function eachcc(cc) {
+	implement('elements/client_capability_panel', null, {ccap: cc});
+}) %>
+</div>
+<% end('chimera-cage') %>

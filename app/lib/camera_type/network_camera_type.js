@@ -1,6 +1,6 @@
 var MediaConversion = alchemy.use('mediaconversion'),
-    network_protocols = alchemy.shared('elric.network_camera_protocols'),
-    media_types = alchemy.shared('elric.camera_media_types');
+    network_protocols = alchemy.getClassGroup('elric_network_camera_protocols'),
+    media_types = alchemy.getClassGroup('elric_camera_media_types');
 
 // Default network protocols
 network_protocols.http = 'HTTP';
@@ -81,7 +81,7 @@ NetworkCameraType.setMethod(function getRawStream(callback) {
 
 	if (settings.use_request) {
 		// Create a new request
-		req = new alchemy.classes.Develry.Request();
+		req = new Classes.Develry.Request();
 
 		// Set the url
 		req.setUrl(this.settings.host);

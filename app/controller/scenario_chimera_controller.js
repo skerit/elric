@@ -1,4 +1,4 @@
-var all_blocks = alchemy.shared('elric.scenario_block');
+var all_blocks = alchemy.getClassGroup('elric_scenario_block');
 
 /**
  * The Device Chimera Controller class
@@ -7,7 +7,7 @@ var all_blocks = alchemy.shared('elric.scenario_block');
  * @since    0.1.0
  * @version  0.1.0
  */
-var Scenario = Function.inherits('ChimeraController', function ScenarioChimeraController(conduit, options) {
+var Scenario = Function.inherits('Alchemy.ChimeraController', function ScenarioChimeraController(conduit, options) {
 	ScenarioChimeraController.super.call(this, conduit, options);
 });
 
@@ -406,7 +406,7 @@ alchemy.plugins.chimera.menu.set('scenarios', {
 	title: 'Scenarios',
 	route: 'chimera@ActionLink',
 	parameters: {
-		controller: 'Scenario',
+		controller: 'scenario',
 		action: 'index'
 	},
 	icon: {svg: 'connection'}

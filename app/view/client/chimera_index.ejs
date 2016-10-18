@@ -5,8 +5,10 @@
 <% end('chimera-status') %>
 
 <% start('chimera-cage') %>
+<div class="chimera-client-index">
 <% for (i = 0; i < clients.length; i++) { %>
 	<% client = clients[i].Client %>
 	<% print_element('elements/client_panel', {client: client}) %>
 <% } %>
+</div>
 <% end('chimera-cage') %>

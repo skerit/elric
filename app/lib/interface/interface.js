@@ -1,4 +1,4 @@
-var interfaces = alchemy.shared('Elric.interfaces');
+var interfaces = alchemy.getClassGroup('elric_interface');
 
 /**
  * The Interface class
@@ -14,7 +14,7 @@ var Interface = Function.inherits('Elric.Wrapper', function Interface() {});
 /**
  * This is a wrapper class
  */
-Interface.setProperty('extend_only', true);
+Interface.setProperty('is_abstract_class', true);
 
 /**
  * This wrapper class starts a new group

@@ -1,5 +1,5 @@
 var categories  = alchemy.shared('device.categories'),
-    protocols   = alchemy.shared('elric.automation_protocol');
+    protocols   = alchemy.getClassGroup('elric_automation_protocol');
 
 /**
  * The Device Type class
@@ -81,7 +81,7 @@ DeviceType.constitute(function setProperties() {
 /**
  * This is a wrapper class
  */
-DeviceType.setProperty('extend_only', true);
+DeviceType.setProperty('is_abstract_class', true);
 
 /**
  * This wrapper class starts a new group
@@ -323,6 +323,8 @@ DeviceType.setMethod(function doFeature(record, feature, data, callback) {
 		return callback(new Error('Feature "' + name + '" could not be found'));
 	}
 
+	console.log('Sending feature', feature, record, data);
+
 	if (feature.command) {
 
 		// Create the function to actually send the command
@@ -337,6 +339,8 @@ DeviceType.setMethod(function doFeature(record, feature, data, callback) {
 				var new_state,
 				    do_update,
 				    val;
+
+				console.log('Response:', err, result)
 
 				if (err) {
 					return callback(err);

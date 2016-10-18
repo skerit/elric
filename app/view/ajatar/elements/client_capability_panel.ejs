@@ -1,0 +1,42 @@
+<%
+// Get the main document
+if (ccap.ClientCapability) {
+	ccap = ccap.ClientCapability;
+}
+
+// Set this block's update url
+update_url(Router.routeUrl(
+	'chimera@ActionLink',
+	{controller: 'Client', action: 'capability'},
+	{get: {id: ''+ccap._id}})
+);
+
+console.log(ccap);
+
+add_class('flex-col col-md-4');
+%>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title">
+			<% if (ccap.capability) { %>
+				<%= ccap.capability.title %>
+			<% } else { %>
+				<%= ccap.name %>
+			<% } %>
+		</h3>
+		<div class="panel-actions">
+			<% if (!ccap.capability || !ccap.capability.always_enabled) { %>
+				<% live('ccap.enabled', function gotVal(enabled) { %>
+					<al-switch data-update-request="post" name="enable" title="Toggle capability" <% if (ccap.enabled) print('checked') %>></al-switch>
+				<% }) %>
+			<% } %>
+		</div>
+	</div>
+	<div class="panel-body">
+		<% if (ccap.capability) { %>
+			<% implement([ccap.capability.config_element, 'elements/client_capability_default_content'], null, {config: ccap}) %>
+		<% } else { %>
+			<p>This capability appears to have been disabled.</p>
+		<% } %>
+	</div>
+</div>

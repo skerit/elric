@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var SC = Function.inherits('Capability', function ScpCapability() {
+var SC = Function.inherits('Elric.Capability', function ScpCapability() {
 	ScpCapability.super.call(this);
 });
 

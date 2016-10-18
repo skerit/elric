@@ -7,7 +7,7 @@ var clients = alchemy.shared('elric.clients');
  * @since    0.2.0
  * @version  0.2.0
  */
-var ElricClient = Function.inherits('SocketConduit', function ElricClientSocketConduit(socket, data) {
+var ElricClient = Function.inherits('Alchemy.SocketConduit', function ElricClientSocketConduit(socket, data) {
 
 	// Call the parent constructor
 	ElricClientSocketConduit.super.call(this, socket, data);

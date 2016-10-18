@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var Wall = Function.inherits('ElementType', function WallElementType() {});
+var Wall = Function.inherits('Elric.ElementType', function WallElementType() {});
 
 /**
  * A wall is a straight line

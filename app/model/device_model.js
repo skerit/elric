@@ -1,5 +1,3 @@
-var interfaces = alchemy.shared('elric.interface');
-
 /**
  * The Device Model
  *
@@ -15,7 +13,7 @@ var Device = Model.extend(function DeviceModel(options) {
 
 	this.device_types = alchemy.shared('device.Types');
 	this.automation_protocols = alchemy.shared('AutomationProtocols');
-	this.interface_types = alchemy.shared('Elric.interfaces');
+	this.interface_types = alchemy.getClassGroup('elric_interface');
 
 	this.icon = 'lightbulb';
 });
@@ -29,12 +27,12 @@ var Device = Model.extend(function DeviceModel(options) {
  */
 Device.constitute(function addFields() {
 
-	var devices = alchemy.shared('elric.device_type');
+	var devices = alchemy.getClassGroup('elric_device_type');
 
 	this.belongsTo('Interface');
 
 	this.addField('name', 'String');
-	this.addField('device_type', 'Enum');
+	this.addField('device_type', 'Enum', {values: devices});
 	this.addField('address', 'Object');
 
 	// Information on the current state of the object
@@ -71,21 +69,81 @@ Device.constitute(function addFields() {
  */
 Device.constitute(function chimeraConfig() {
 
-	var list,
-	    edit;
+	var addressActionValue,
+	    stateActionValue,
+	    list,
+	    edit,
+	    peek;
 
 	if (!this.chimera) {
 		return;
 	}
+
+	/**
+	 * Return display values for `address` object in list action
+	 *
+	 * @author   Jelle De Loecker <jelle@develry.be>
+	 * @since    0.1.0
+	 * @version  0.1.0
+	 */
+	addressActionValue = function addressActionValue(action, record, callback) {
+
+		var result,
+		    value;
+
+		if (action != 'list') {
+			return addressActionValue.super.call(this, action, record, callback);
+		}
+
+		value = this.getRecordValue(record);
+
+		// @TODO: pass this along to the device type class
+		if (value) {
+			if (value.house_code) {
+				// Hard coded ARC resolving
+				result = value.house_code + value.unit_code;
+			} else if (value.uniqueid) {
+				// Hard coded HUE resolving
+				result = value.uniqueid;
+			}
+		}
+
+		callback(null, result || '');
+	};
+
+	/**
+	 * Return display values for `state` object in list action
+	 *
+	 * @author   Jelle De Loecker <jelle@develry.be>
+	 * @since    0.1.0
+	 * @version  0.1.0
+	 */
+	stateActionValue = function stateActionValue(action, record, callback) {
+		var result,
+		    value;
+
+		if (action != 'list') {
+			return addressActionValue.super.call(this, action, record, callback);
+		}
+
+		value = this.getRecordValue(record);
+
+		// @TODO: pass this along to the device type class
+		if (value) {
+			result = value.state || value.feature;
+		}
+
+		callback(null, result || '');
+	};
 
 	// Get the list group
 	list = this.chimera.getActionFields('list');
 
 	list.addField('name');
 	list.addField('device_type');
-	list.addField('address');
+	list.addField('address', {actionValue: addressActionValue});
 	list.addField('interface_id');
-	list.addField('state');
+	list.addField('state', {actionValue: stateActionValue});
 
 	// Get the edit group
 	edit = this.chimera.getActionFields('edit');
@@ -94,8 +152,22 @@ Device.constitute(function chimeraConfig() {
 	edit.addField('device_type');
 	edit.addField('address');
 	edit.addField('interface_id');
-	edit.addField('interface_id');
+
+	// Get the peek group
+	peek = this.chimera.getActionFields('peek');
+
+	peek.addField('name');
+	peek.addField('device_type');
 });
+
+/**
+ * Use "name" as display field
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Device.setProperty('displayField', 'name');
 
 /**
  * Get a device record and cache it in the user session
@@ -435,7 +507,11 @@ Device.setDocumentMethod(function sendProtocolCommand(options, callback) {
 			return callback(new Error('Could not find interface for device "' + (that.name || that._id) + '"'));
 		}
 
+		console.log('Sending command', that.address, options)
+
 		interface.sendCommand(that.address, options, function gotInterfaceResponse(err, response) {
+
+			console.log('Interface response:', err, response);
 
 			if (err) {
 				return callback(err);

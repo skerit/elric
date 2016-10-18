@@ -1,5 +1,5 @@
-var all_blocks = alchemy.shared('elric.scenario_block'),
-    all_events = alchemy.shared('elric.event'),
+var all_blocks = alchemy.getClassGroup('elric_scenario_block'),
+    all_events = alchemy.getClassGroup('elric_event'),
     persisted  = elric.persistedShare('scenario_block_values');
 
 /**
@@ -55,7 +55,7 @@ var Scenario = Model.extend(function ScenarioModel(options) {
  */
 Scenario.constitute(function addFields() {
 
-	var block_schema = new alchemy.classes.Schema();
+	var block_schema = new Classes.Alchemy.Schema();
 
 	// Each scenario is created by 1 user
 	this.belongsTo('User');

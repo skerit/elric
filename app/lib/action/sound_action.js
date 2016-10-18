@@ -64,6 +64,8 @@ Sound.setMethod(function execute(callback) {
 		return callback(new Error('No sound file has been given'));
 	}
 
+	console.log('Playing sound on server', this.payload.sound);
+
 	elric.playSound(this.payload.sound, function playing(err) {
 
 		if (err) {

@@ -530,8 +530,7 @@ module.exports = function elricScenarioBlockElement(Hawkejs, Blast) {
 		block = blocks[options.type];
 
 		if (!block) {
-			// Block type has been removed
-			// @TODO: handle this?
+			console.error("Can't add block, type '" + options.type + '" not found!');
 			return;
 		}
 

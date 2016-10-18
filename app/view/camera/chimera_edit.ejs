@@ -1,0 +1,12 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+<% start('chimera-status') %>
+<% end('chimera-status') %>
+
+<% start('chimera-cage') %>
+
+<% camera = record[0].Camera %>
+<% print_element('elements/camera_panel', {client: client}) %>
+<br>
+<% end('chimera-cage') %>

@@ -5,7 +5,7 @@
  * @since    0.1.0
  * @version  0.1.0
  */
-var Floor = Function.inherits('ChimeraController', function FloorplanChimeraController(conduit, options) {
+var Floor = Function.inherits('Alchemy.ChimeraController', function FloorplanChimeraController(conduit, options) {
 	FloorplanChimeraController.super.call(this, conduit, options);
 });
 
@@ -45,7 +45,7 @@ Floor.setMethod(function index(conduit) {
 	}, function getElementTypes(next) {
 
 		var element_types = {},
-		    shared = alchemy.shared('elric.element_type'),
+		    shared = alchemy.getClassGroup('elric_element_type'),
 		    entry,
 		    key;
 
@@ -160,6 +160,8 @@ Floor.setMethod(function addRoomElement(conduit) {
  */
 Floor.setMethod(function saveElement(conduit, data) {
 
+	console.log('Save element+?', data);
+
 	if (!data || !data._id) {
 		return conduit.error('No element data given');
 	}
@@ -173,6 +175,10 @@ Floor.setMethod(function saveElement(conduit, data) {
 
 		if (err) {
 			return conduit.error(err);
+		}
+
+		if (!result.length) {
+			return conduit.error('Room not found');
 		}
 
 		console.log('Result:', result);
@@ -197,6 +203,46 @@ Floor.setMethod(function saveElement(conduit, data) {
 				return conduit.error(err);
 			}
 		});
+	});
+});
+
+/**
+ * Get external ids for specific types
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Floor.setMethod(function getTypeExternalIds(conduit, data, callback) {
+
+	var that = this,
+	    class_name = data.element_type.classify() + 'ElementType',
+	    constructor,
+	    instance;
+
+	constructor = Classes.Elric[class_name];
+
+	if (!constructor) {
+		return callback(new Error('Not found: "' + class_name + '"'));
+	}
+
+	instance = new constructor();
+
+	if (!instance.getExternalIds) {
+		return callback(null);
+	}
+
+	instance.getExternalIds(function gotExternalIds(err, result) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		console.log('Responding with', err, result);
+
+		callback(null, result);
 	});
 });
 

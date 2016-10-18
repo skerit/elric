@@ -37,7 +37,7 @@ var Block = Function.inherits('Elric.Wrapper', function ScenarioBlock(scenario, 
  *
  * @type {Boolean}
  */
-Block.setProperty('extend_only', true);
+Block.setProperty('is_abstract_class', true);
 
 /**
  * This wrapper class starts a new group
@@ -246,7 +246,7 @@ Block.constitute(function setSchema() {
 	var schema;
 
 	// Create a new schema
-	schema = new alchemy.classes.Schema(this);
+	schema = new Classes.Alchemy.Schema(this);
 	this.schema = schema;
 });
 

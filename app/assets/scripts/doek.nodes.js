@@ -90,8 +90,11 @@ Doek.Rectangle.prototype.fillEditForm = function fillEditForm(selected) {
  */
 Doek.Node.prototype._fillEditForm = function _fillEditForm(selected) {
 
-	var floorplan,
+	var that = this,
+	    floorplan,
 	    html,
+	    el,
+	    i,
 	    n;
 
 	if (!this.elric_node) {
@@ -103,11 +106,9 @@ Doek.Node.prototype._fillEditForm = function _fillEditForm(selected) {
 	n = this.roomElement;
 
 	// Only set these values on initial select
-	if (selected) {
+	if (selected && html._id) {
 		html._id.value = n._id || '';
 		html.name.value = n.name || '';
-
-		console.log('Filling edit form of', this);
 
 		$('option:selected', html.room).removeAttr('selected');
 		$('option[value="' + n.room_id + '"]', html.room).attr('selected', 'selected');
@@ -117,6 +118,43 @@ Doek.Node.prototype._fillEditForm = function _fillEditForm(selected) {
 		// @todo: disable?
 		html.external_id.value = '';
 	}
+
+	// We assume that, since there is no external id, nothing is set.
+	if (!html.external_id) {
+		return;
+	}
+
+	// Remove options of previous selected element
+	for (i = 0; i < html.external_id.children.length; i++) {
+		el = html.external_id.children[i];
+
+		if (el.value) {
+			el.remove();
+		}
+	}
+
+	// Get the external ids for this type
+	alchemy.submit('element-externalids', {element_type: this.elricType}, function gotTypes(err, data) {
+
+		var entry,
+		    key;
+
+		if (err) {
+			return console.error(err);
+		}
+
+		if (data) {
+			for (key in data) {
+				entry = data[key];
+
+				html.external_id.insertAdjacentHTML('beforeend', '<option value="' + key + '">' + entry + '</option>');
+			}
+		}
+
+		if (that.roomElement.type_external_id) {
+			html.external_id.value = that.roomElement.type_external_id;
+		}
+	});
 
 	html.x.value = this.instructions.sx;
 	html.y.value = this.instructions.sy;
@@ -154,6 +192,7 @@ Doek.Wall = Doek.extend(Doek.Line, function Wall(instructions, parentObject, roo
 
 	var thisWall = this,
 	    element_types,
+	    element_type,
 	    selectStyle,
 	    hoverStyle,
 	    style;
@@ -174,16 +213,22 @@ Doek.Wall = Doek.extend(Doek.Line, function Wall(instructions, parentObject, roo
 
 	instructions.type = 'line';
 
+	element_type = element_types[this.elricType];
+
+	if (!element_type) {
+		throw new Error('Unable to find element type "' + this.elricType + '"');
+	}
+
 	style = new Doek.Style('ori');
-	style.properties.strokeStyle = element_types[this.elricType].colour_original;
+	style.properties.strokeStyle = element_type.colour_original;
 	style.weight = 100;
 
 	hoverStyle = new Doek.Style('hover');
-	hoverStyle.properties.strokeStyle = element_types[this.elricType].colour_hover;
+	hoverStyle.properties.strokeStyle = element_type.colour_hover;
 	hoverStyle.weight = 1000;
 
 	selectStyle = new Doek.Style('select');
-	selectStyle.properties.strokeStyle = element_types[this.elricType].colour_select;
+	selectStyle.properties.strokeStyle = element_type.colour_select;
 	selectStyle.weight = 10000;
 
 	this.addStyle(style);
@@ -284,12 +329,19 @@ Doek.Camera.prototype._fillEditForm = function() {
 Doek.Object.prototype.addNewType = function addNewType(room_element, type_name) {
 
 	var floorplan = this.canvas.floorplan,
-	    dimensions = room_element.elementType.dimensions,
+	    dimensions,
 	    class_name,
 	    type_class,
 	    new_node,
 	    index,
 	    data;
+
+	if (room_element.elementType) {
+		dimensions = room_element.elementType.dimensions;
+	} else {
+		console.warn('elementType property of', type_name, 'is not set! Defaulting to 2 dimensions');
+		dimensions = 2;
+	}
 
 	class_name = String(type_name).classify();
 

@@ -1,4 +1,4 @@
-var all_capabilities = alchemy.shared('Elric.capabilities');
+var all_capabilities = alchemy.getClassGroup('elric_capability');
 
 /**
  * The Client Capability Model

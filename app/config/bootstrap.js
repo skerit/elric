@@ -11,13 +11,15 @@
  * @license     GPL v3
  */
 alchemy.usePlugin('acl');
+alchemy.usePlugin('i18n');
+//alchemy.usePlugin('debugbar');
+alchemy.usePlugin('menu');
 alchemy.usePlugin('chimera', {title: 'Elric'});
 alchemy.usePlugin('web-components');
 alchemy.usePlugin('styleboost');
 alchemy.usePlugin('media');
-alchemy.usePlugin('menu');
-alchemy.usePlugin('storywise');
 alchemy.usePlugin('elric-philips-hue');
+alchemy.usePlugin('elric-positioning');
 
 // Define your own plugins in here
 // alchemy.usePlugin('elric-display');

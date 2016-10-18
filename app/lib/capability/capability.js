@@ -1,5 +1,3 @@
-var capabilities = alchemy.shared('Elric.capabilities');
-
 /**
  * The Elric Capability class
  * These define the options you can set per capability, per client.
@@ -8,48 +6,19 @@ var capabilities = alchemy.shared('Elric.capabilities');
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
- * @version  0.1.0
+ * @version  1.0.0
  */
-var Capability = Function.inherits('Informer', function Capability() {});
+var Capability = Function.inherits('Elric.Wrapper', function Capability() {});
 
 /**
- * Register the capability and set the schema
- *
- * @author   Jelle De Loecker   <jelle@develry.be>
- * @since    0.1.0
- * @version  0.1.0
+ * is_abstract_class does not get inherited, used for wrapper classes
  */
-Capability.constitute(function register() {
-
-	var type_name,
-	    schema,
-	    name;
-
-	name = this.name.beforeLast('Capability') || this.name;
-	type_name = name.underscore();
-
-	this.setProperty('title', name.humanize());
-	this.setProperty('type_name', type_name);
-
-	// Create a new schema
-	schema = new alchemy.classes.Schema(this);
-	this.schema = schema;
-
-	// Do not let the child inherit the extendonly setting
-	if (!this.prototype.hasOwnProperty('extend_only')) {
-		this.setProperty('extend_only', false);
-	}
-
-	// Register non-wrapper classes
-	if (!this.prototype.extend_only) {
-		capabilities[type_name] = this;
-	}
-});
+Capability.setProperty('is_abstract_class', true);
 
 /**
- * Extend_only does not get inherited, used for wrapper classes
+ * This wrapper class starts a new group
  */
-Capability.setProperty('extend_only', true);
+Capability.setProperty('starts_new_group', true);
 
 /**
  * The version of the client file
@@ -73,6 +42,14 @@ Capability.setProperty('description', '');
 Capability.setProperty('config_element', '');
 
 /**
+ * Is this a capability that is always enabled?
+ * If it is, the on/off switch should be hidden.
+ *
+ * @type   {Boolean}
+ */
+Capability.setProperty('always_enabled', false);
+
+/**
  * Capability view configurator
  *
  * @type   {Function}
@@ -83,6 +60,32 @@ Capability.setProperty('config_element', '');
  */
 Capability.setProperty('setupConfigView', null);
 
+
+/**
+ * Return the class-wide schema
+ *
+ * @type   {Schema}
+ */
+Capability.setProperty(function schema() {
+	return this.constructor.schema;
+});
+
+/**
+ * Set the event schema
+ *
+ * @author   Jelle De Loecker   <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Capability.constitute(function setSchema() {
+
+	var schema;
+
+	// Create a new schema
+	schema = new Classes.Alchemy.Schema(this);
+	this.schema = schema;
+});
+
 /**
  * Return the basic record for JSON
  *
@@ -92,11 +95,12 @@ Capability.setProperty('setupConfigView', null);
  */
 Capability.setMethod(function toJSON() {
 	return {
-		title: this.title,
-		type_name: this.type_name,
-		version: this.version,
-		description: this.description,
-		scema: this.constructor.schema,
-		config_element: this.config_element
+		title           : this.title,
+		type_name       : this.type_name,
+		version         : this.version,
+		description     : this.description,
+		scema           : this.constructor.schema,
+		config_element  : this.config_element,
+		always_enabled  : this.always_enabled
 	}
 });

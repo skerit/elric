@@ -1,4 +1,4 @@
-var all_actions = alchemy.shared('elric.action');
+var all_actions = alchemy.getClassGroup('elric_action');
 
 /**
  * The Action Model

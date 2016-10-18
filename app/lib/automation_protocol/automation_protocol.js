@@ -69,7 +69,7 @@ AProtocol.constitute(function setProperties() {
 /**
  * This is a wrapper class
  */
-AProtocol.setProperty('extend_only', true);
+AProtocol.setProperty('is_abstract_class', true);
 
 /**
  * This wrapper class starts a new group

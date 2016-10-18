@@ -1,9 +1,9 @@
 
 Doek.Canvas = function (containerId) {
-	
+
 	var that = this;
 	var thisCanvas = this;
-	
+
 	// Get the DOM element
 	this.container = document.getElementById(containerId);
 	this.id = containerId;
@@ -326,7 +326,7 @@ Doek.Canvas.prototype.setAction = function (actionname, payload) {
 	
 	var prevAction = this._action;
 	this._action = this.actions.getByName(actionname);
-	
+
 	if (prevAction != this._action) {
 		
 		// Inform the canvas and children the action has changed

@@ -38,6 +38,12 @@ module.exports = {
 	// Allow use of JSON-dry in non-hawkejs responses
 	json_dry_response: true,
 
+	// Kill the process when a file changes
+	kill_on_file_change: false,
+
+	// Override kill extensions
+	// kill_extensions: ['js'],
+
 	// Extra import paths
 	less_import_paths: false,
 
@@ -61,23 +67,23 @@ module.exports = {
 	// How long query results are cached (falsy to disable)
 	model_query_cache_duration: '60 minutes',
 
+	// How many assoc data queries are allowed to run at the same time
+	model_assoc_parallel_limit: 8,
+
 	// Minify CSS
 	minify_css: true,
 
 	// Minify javascript files
 	minify_js: true,
 
+	// Project name (gotten from package.json by default)
+	name: null,
+
 	// The port to run the server on
 	port: 3000,
 
-	// Kill the process when a file changes
-	kill_on_file_change: false,
-
 	// Do an extensive and expensive search for modules
 	search_for_modules: false,
-
-	// Override kill extensions
-	// kill_extensions: ['js'],
 
 	// Type of sessions to use: 'server', 'cookie', 'persistent'
 	sessions: 'cookie',
@@ -87,6 +93,9 @@ module.exports = {
 
 	// The length of the session
 	session_length: '20 minutes',
+
+	// Project title (gotten from package.json by default)
+	title: null,
 
 	// Detect when this node server is too busy
 	// 70ms is the default, and would result in a 200ms latency lag

@@ -1,0 +1,50 @@
+<%
+live_event('client_auto_update_info', function gotUpdateInfo(data) {
+
+	console.log('Self update data:', data);
+
+	// Do nothing on the initial run
+	if (gotUpdateInfo.initial) {
+		return;
+	}
+
+	if (data.error) {
+		print('<p style="text-align: center;">Error has been detected in the <bold>' + data.stage + '</bold> stage:</p>');
+
+		if (data.errmsg) {
+			print('<pre>' + data.errmsg + '</pre>');
+		}
+
+		return;
+	}
+
+	if (data.done) {
+		print('<p style="text-align: center;">Update has finished</p>');
+		return;
+	}
+
+	if (data.starting) {
+		return print('<p style="text-align: center;">Client is starting to update itself...</p>');
+	}
+
+	if (data.reset) {
+		return print('<p style="text-align: center;">Git repository has been reset</p>');
+	}
+
+	if (data.pull) {
+		return print('<p style="text-align: center;">Latest changes have been pulled in</p>');
+	}
+
+	if (data.update) {
+		return print('<p style="text-align: center;">NPM packages have updated</p>');
+	}
+
+});
+%>
+
+<button
+	class="btn btn-danger"
+	data-server-event="capconfig | <%= config._id %> | startupdate"
+>
+	Start update
+</button>

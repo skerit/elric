@@ -86,6 +86,8 @@ module.exports = function AlchemyVideoElement(Hawkejs, Blast) {
 	 */
 	AlVideo.setMethod(function init() {
 
+		var that = this;
+
 		// Create the video element, add the 'video' class
 		this.el_video = this.grab('video', 'video');
 
@@ -97,6 +99,30 @@ module.exports = function AlchemyVideoElement(Hawkejs, Blast) {
 
 		// Create a div for the cover
 		this.el_cover = this.grab('div', 'cover');
+
+		// Get the parent x-panel if there is one
+		this.x_panel = this.closest('x-panel');
+
+		if (this.x_panel && this.x_panel.querySelector) {
+			this.toggle = this.x_panel.querySelector('button[data-play-video]');
+
+			if (this.toggle) {
+				this.toggle.addEventListener('click', function onClick(e) {
+
+					console.log('Toggling video');
+
+					e.preventDefault();
+
+					if (that.el_video) {
+						if (that.el_video.paused) {
+							that.play();
+						} else {
+							that.pause();
+						}
+					}
+				});
+			}
+		}
 
 		this.createLink();
 	});
@@ -214,7 +240,16 @@ module.exports = function AlchemyVideoElement(Hawkejs, Blast) {
 	 * @version       0.1.0
 	 */
 	AlVideo.setMethod(function play() {
-		this.el_video.play();
+
+		var promise;
+
+		promise = this.el_video.play();
+
+		if (typeof Promise == 'function' && promise instanceof Promise) {
+			promise.catch(function catchPlayError(error) {
+				console.log('Could not play video: ' + error);
+			});
+		}
 	});
 
 	/**
@@ -367,7 +402,7 @@ module.exports = function AlchemyVideoElement(Hawkejs, Blast) {
 		this.option_id = data.option_id;
 
 		// Start playing the video
-		this.el_video.play();
+		this.play();
 
 		// Make sure to start at the correct timestamp
 		source.on('start_time', function gotStartTime(timestamp) {

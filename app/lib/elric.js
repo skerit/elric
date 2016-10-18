@@ -1,8 +1,9 @@
-var all_capabilities = alchemy.shared('Elric.capabilities'),
-    all_events = alchemy.shared('elric.event'),
-    all_actions = alchemy.shared('elric.action'),
-    persisted = alchemy.shared('elric.persisted_shares'),
+var all_capabilities = alchemy.getClassGroup('elric_capability'),
+    all_events = alchemy.getClassGroup('elric_event'),
+    all_actions = alchemy.getClassGroup('elric_action'),
+    persisted = alchemy.getClassGroup('elric_persisted_shares'),
     cron = alchemy.use('node-cron'),
+    dgram = require('dgram'),
     fs = require('fs');
 
 /**
@@ -12,12 +13,17 @@ var all_capabilities = alchemy.shared('Elric.capabilities'),
  * @since    0.0.1
  * @version  0.1.0
  */
-var Elric = Function.inherits('Informer', function Elric() {
+var Elric = Function.inherits('Informer', function SingletonElric() {
 
 	// Only allow 1 elric instance
 	if (global.elric) {
 		return global.elric;
 	}
+
+	// Dummy offset and latency
+	// Will always be zero for the server
+	this.offset = 0;
+	this.latency = 0;
 
 	// The scheduled cron jobs
 	this.cron_jobs = [];
@@ -53,6 +59,19 @@ Elric.setMethod(function init() {
 			that.loadCron();
 		})
 	});
+});
+
+/**
+ * Get the current timestamp
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @return   {Number}
+ */
+Elric.setMethod(function now() {
+	return Date.now();
 });
 
 /**
@@ -618,6 +637,10 @@ Elric.setMethod(function getClientCapabilities(id, callback) {
 	client = this.getClient(id);
 });
 
+Elric.setMethod(function tsound(){
+	this.playSound('soundbites/ef_computer_voice/welcome_to_holomatch.mp3', Function.thrower);
+});
+
 /**
  * Play a sound
  *
@@ -630,7 +653,8 @@ Elric.setMethod(function getClientCapabilities(id, callback) {
  */
 Elric.setMethod(function playSound(sound, callback) {
 
-	var CC = Model.get('ClientCapability');
+	var CC = Model.get('ClientCapability'),
+	    csock = dgram.createSocket('udp4');
 
 	console.log('Playing sound', sound);
 
@@ -646,7 +670,8 @@ Elric.setMethod(function playSound(sound, callback) {
 		records.forEach(function eachRecord(record) {
 
 			var client,
-			    id = record.Client._id;
+			    id = record.Client._id,
+			    ip;
 
 			client = elric.getClient(id);
 
@@ -655,22 +680,37 @@ Elric.setMethod(function playSound(sound, callback) {
 				return;
 			}
 
-			tasks.push(function sendStream(next) {
+			ip = client.conduit.ip;
 
-				var link;
+			if (!ip) {
+				return;
+			}
+
+			if (ip.startsWith('::ffff:')) {
+				ip = ip.after('::ffff:');
+			}
+
+			fs.createReadStream(sound).on('data', function onChunk(chunk) {
+				console.log('Sending chunk', chunk.length, 'to', ip + ':' + client.audio_ports.unicast);
+				csock.send(chunk, 0, chunk.length, client.audio_ports.unicast, ip);
+			});
+
+			return;
+
+			tasks.push(function sendStream(next) {
 
 				console.log('Creating audio link to client ' + id);
 
-				link = client.linkup('audio_stream', {test: true}, function ready(link) {
+				client.linkup('audio_stream', {test: true}, function ready(link) {
 					console.log('Link', link, 'is ready!');
+
+					link.on('loaded', next);
+
+					links.push(link);
 
 					// Submit the stream once a connection has been made
 					link.submit('stream', fs.createReadStream(sound));
 				});
-
-				link.on('loaded', next);
-
-				links.push(link);
 
 				return;
 
@@ -684,14 +724,18 @@ Elric.setMethod(function playSound(sound, callback) {
 
 		Function.parallel(tasks, function allHaveLoaded(err) {
 
-			var i;
+			var play_time,
+			    i;
 
 			if (err) {
 				return console.error('Could not play: ' + err);
 			}
 
+			// Play the file in 55 ms
+			play_time = Date.now() + 55;
+
 			for (i = 0; i < links.length; i++) {
-				links[i].submit('play');
+				links[i].submit('play', play_time);
 			}
 
 			console.log('All clients should be playing the file', err);
@@ -700,9 +744,8 @@ Elric.setMethod(function playSound(sound, callback) {
 	});
 });
 
-
 /**
- * Register a client
+ * Register incoming client connections
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -719,7 +762,7 @@ Elric.setMethod(function registerClient(eclient) {
 	    i;
 
 	if (!this.hasBeenSeen('client_list')) {
-		return this.after('client_list', function delay() {
+		return this.afterOnce('client_list', function delay() {
 			that.registerClient(eclient);
 		});
 	}
@@ -730,15 +773,17 @@ Elric.setMethod(function registerClient(eclient) {
 	// Listen for remote command requests
 	eclient.on('capability-command', function onCapabilityCommand(packet) {
 
-		var instance;
+		var instance,
+		    args;
 
-		console.log('Got capability command:', packet);
+		if (Classes.Elric[packet.capability + 'Capability']) {
+			instance = new Classes.Elric[packet.capability + 'Capability'];
 
-		if (alchemy.classes[packet.capability + 'Capability']) {
-			instance = new alchemy.classes[packet.capability + 'Capability'];
+			// Create a new args array, with the client document prepended to it
+			args = [client_doc].concat(packet.args);
 
 			if (instance[packet.type]) {
-				instance[packet.type].apply(instance, packet.args);
+				instance[packet.type].apply(instance, args);
 			} else {
 				console.error('Capability method "' + packet.type + '" not found, packet ignored', packet);
 			}
@@ -816,7 +861,9 @@ Elric.setMethod(function registerClient(eclient) {
 	}, function done(err) {
 
 		if (err) {
-			return log.error('Error registering client ' + eclient.announcement.hostname + ': ' + err);
+			log.error('Error registering client ' + eclient.announcement.hostname + ': ' + err);
+			console.log(err);
+			return;
 		}
 
 	});

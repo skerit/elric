@@ -1,0 +1,44 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+<% start('chimera-status') %>
+<% end('chimera-status') %>
+
+<% script('soundbites') %>
+
+<% start('chimera-cage') %>
+<x-panel class="devices table-panel">
+	<x-panel-body>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>Soundbite pack</th>
+					<th>Description</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+			<% for (i = 0; i < records.length; i++) {
+				record = records[i];
+				pack = record.Soundpack; %>
+				<tr>
+					<td><%= pack.title || pack.name || pack._id %></td>
+					<td><%= pack.description %></td>
+					<td>
+						<% Router.printRoute('chimera@IdActionLink', {
+							controller: 'Soundbite',
+							action: 'bite_index',
+							id: pack._id
+						}, {
+							className: 'btn btn-success',
+							title: 'Show bites',
+							content: 'Show bites'
+						}) %>
+					</td>
+				</tr>
+			<% } %>
+			</tbody>
+		</table>
+	</x-panel-body>
+</x-panel>
+<% end('chimera-cage') %>

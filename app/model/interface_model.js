@@ -1,4 +1,4 @@
-var interfaces = alchemy.shared('elric.interface');
+var interfaces = alchemy.getClassGroup('elric_interface');
 
 /**
  * The Interface Model
@@ -25,7 +25,7 @@ Interface.constitute(function addFields() {
 	this.belongsTo('Client');
 
 	this.addField('title', 'String');
-	this.addField('type', 'Enum', {values: alchemy.shared('elric.interface')});
+	this.addField('type', 'Enum', {values: alchemy.getClassGroup('elric_interface')});
 });
 
 /**

@@ -12,13 +12,25 @@ update_url(Router.routeUrl(
 );
 %>
 <x-panel>
-	<x-panel-header><%= ccap.capability.title %></x-panel-header>
+	<x-panel-header>
+		<% if (ccap.capability) { %>
+			<%= ccap.capability.title %>
+		<% } else { %>
+			<%= ccap.name %>
+		<% } %>
+	</x-panel-header>
 	<x-panel-actions>
-		<% live('ccap.enabled', function gotVal(enabled) { %>
-			<x-switch data-update-request="post" name="enable" title="Toggle capability" <% if (ccap.enabled) print('checked') %>></x-switch>
-		<% }) %>
+		<% if (!ccap.capability || !ccap.capability.always_enabled) { %>
+			<% live('ccap.enabled', function gotVal(enabled) { %>
+				<al-switch data-update-request="post" name="enable" title="Toggle capability" <% if (ccap.enabled) print('checked') %>></al-switch>
+			<% }) %>
+		<% } %>
 	</x-panel-actions>
 	<x-panel-body>
-		<% implement([ccap.capability.config_element, 'elements/client_capability_default_content'], null, {config: ccap}) %>
+		<% if (ccap.capability) { %>
+			<% implement([ccap.capability.config_element, 'elements/client_capability_default_content'], null, {config: ccap}) %>
+		<% } else { %>
+			<p>This capability appears to have been disabled.</p>
+		<% } %>
 	</x-panel-body>
 </x-panel>

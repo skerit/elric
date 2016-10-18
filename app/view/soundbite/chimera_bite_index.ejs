@@ -1,0 +1,67 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+<% start('chimera-status') %>
+<% end('chimera-status') %>
+
+<% script('soundbites') %>
+
+<% start('chimera-cage') %>
+<x-panel class="devices table-panel">
+	<x-panel-body>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>Filename</th>
+					<th>Transcript</th>
+					<th><%= Pagination.sort({field: 'confidence', content: 'Confidence'}) %></th>
+					<th>Approved</th>
+					<th>Actions</th>
+				</tr>
+				<tr>
+					<th><%= Pagination.filter({field: 'filename'}) %></th>
+					<th><%= Pagination.filter({field: 'transcript'}) %></th>
+					<th><%= Pagination.filter({field: 'confidence'}) %></th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+			<% for (i = 0; i < records.length; i++) {
+				record = records[i];
+				bite = record.Soundbite; %>
+				<tr data-id="<%= bite._id %>">
+					<td><%= bite.filename %></td>
+					<td>
+						<textarea name="transcript" class="ajax-update transcript"><%= (bite.transcript || '') %></textarea>
+						<input class="tag-input" type="text">
+					</td>
+					<td>
+						<input name="confidence" class="ajax-update" type="number" step="0.001" value="<%= bite.confidence %>">
+					</td>
+					<td>
+						<input name="approved" class="ajax-update" type="checkbox" <%= bite.approved ? 'checked' : '' %>>
+					</td>
+					<td>
+						<% Router.printRoute('chimera@IdActionLink', {
+							controller: 'Soundbite',
+							action: 'bite_edit',
+							id: bite._id
+						}, {
+							className: 'btn btn-success',
+							title: 'Edit',
+							content: 'Edit'
+						}) %>
+						<button class="btn btn-success play-bite">Play</button>
+					</td>
+				</tr>
+			<% } %>
+			</tbody>
+		</table>
+	</x-panel-body>
+	<x-panel-footer class="chimeraEditor-footer u-stretch">
+		<%= Pagination.getInfo() %>
+		<% Pagination.show() %>
+	</x-panel-footer>
+</x-panel>
+<% end('chimera-cage') %>

@@ -18,29 +18,33 @@ var Floorplan = Function.inherits('Informer', function Floorplan(canvas_id) {
 
 	editor_element = this.d.container.closest('.floorplan-editor');
 
-	// Get the toolbar
-	this.toolbar = editor_element.querySelector('.floorplan-toolbar');
+	if (editor_element) {
+		// Get the toolbar
+		this.toolbar = editor_element.querySelector('.floorplan-toolbar');
 
-	// Get the sidebar
-	this.sidebar = editor_element.parentElement.querySelector('.floorplan-sidebar');
+		// Get the sidebar
+		this.sidebar = editor_element.parentElement.querySelector('.floorplan-sidebar');
 
-	// html elements
-	this.html_elements = {
-		rooms: this.sidebar.querySelector('[data-name="rooms"]'),
-		room_elements: this.sidebar.querySelector('[data-name="elements"]'),
-		_id: this.sidebar.querySelector('[data-name="_id"]'),
-		name: this.sidebar.querySelector('[data-name="name"]'),
-		room: this.sidebar.querySelector('[data-name="room_id"]'),
-		element_type: this.sidebar.querySelector('[data-name="element_type"]'),
-		external_id: this.sidebar.querySelector('[data-name="type_external_id"]'),
-		x: this.sidebar.querySelector('[data-name="x"]'),
-		y: this.sidebar.querySelector('[data-name="y"]'),
-		dx: this.sidebar.querySelector('[data-name="dx"]'),
-		dy: this.sidebar.querySelector('[data-name="dy"]'),
-		width: this.sidebar.querySelector('[data-name="width"]'),
-		height: this.sidebar.querySelector('[data-name="height"]'),
-		save: this.sidebar.querySelector('#saveElement')
-	};
+		// html elements
+		this.html_elements = {
+			rooms: this.sidebar.querySelector('[data-name="rooms"]'),
+			room_elements: this.sidebar.querySelector('[data-name="elements"]'),
+			_id: this.sidebar.querySelector('[data-name="_id"]'),
+			name: this.sidebar.querySelector('[data-name="name"]'),
+			room: this.sidebar.querySelector('[data-name="room_id"]'),
+			element_type: this.sidebar.querySelector('[data-name="element_type"]'),
+			external_id: this.sidebar.querySelector('[data-name="type_external_id"]'),
+			x: this.sidebar.querySelector('[data-name="x"]'),
+			y: this.sidebar.querySelector('[data-name="y"]'),
+			dx: this.sidebar.querySelector('[data-name="dx"]'),
+			dy: this.sidebar.querySelector('[data-name="dy"]'),
+			width: this.sidebar.querySelector('[data-name="width"]'),
+			height: this.sidebar.querySelector('[data-name="height"]'),
+			save: this.sidebar.querySelector('#saveElement')
+		};
+	} else {
+		this.html_elements = {};
+	}
 
 	// Create a reference to this floorplan
 	this.d.floorplan = this;
@@ -70,46 +74,55 @@ var Floorplan = Function.inherits('Informer', function Floorplan(canvas_id) {
 	);
 
 	// Listen to changes in the floorplan-mode
-	this.toolbar.querySelector('.floorplan-mode').addEventListener('change', function(e) {
+	if (this.toolbar) {
+		this.toolbar.querySelector('.floorplan-mode').addEventListener('change', function(e) {
 
-		if (!this.value) {
-			that.mode = '';
-		} else if (this.value == 'select') {
-			that.mode = 'select';
-			that.d.setAction('select');
-		} else if (this.value == 'changesize')  {
-			that.mode = 'changesize';
-			that.d.setAction('changeSize');
-		}
-	});
+			if (!this.value) {
+				that.mode = '';
+			} else if (this.value == 'select') {
+				that.mode = 'select';
+				that.d.setAction('select');
+			} else if (this.value == 'changesize')  {
+				that.mode = 'changesize';
+				that.d.setAction('changeSize');
+			}
+		});
 
-	// Listen to clicks on the new element buttons
-	this.toolbar.querySelector('.floorplan-elements').addEventListener('change', function(e) {
-		console.log('Value:', this.value)
+		// Listen to clicks on the new element buttons
+		this.toolbar.querySelector('.floorplan-elements').addEventListener('click', function onClick(e) {
 
-		var room = that.getSelectedRoom(),
-		    type = this.value,
-		    get;
+			var room,
+			    type,
+			    get;
 
-		if (room) {
+			// Ignore clicks on the dropdown button
+			if (e.target.classList.contains('x-dropdown-toggle')) {
+				return;
+			}
 
-			get = {
-				room: room._id,
-				element: type
-			};
+			room = that.getSelectedRoom();
+			type = this.value;
 
-			hawkejs.scene.fetch(that.new_element_url, {get: get}, function gotResponse(err, data) {
+			if (room) {
 
-				if (err) {
-					throw err;
-				}
+				get = {
+					room: room._id,
+					element: type
+				};
 
-				that.addElements(data, room);
-			});
-		} else {
-			throw new Error('You have to select a room');
-		}
-	});
+				hawkejs.scene.fetch(that.new_element_url, {get: get}, function gotResponse(err, data) {
+
+					if (err) {
+						throw err;
+					}
+
+					that.addElements(data, room);
+				});
+			} else {
+				throw new Error('You have to select a room');
+			}
+		});
+	}
 
 	registerNewActions(this);
 });
@@ -220,6 +233,8 @@ Floorplan.setMethod(function addRooms(rooms) {
 			this.floorNode.setEndpoint(ep);
 		});
 
+		console.log('elements:', elements)
+
 		// Add the elements
 		that.addElements(elements, room);
 		
@@ -238,10 +253,16 @@ Floorplan.setMethod(function addRooms(rooms) {
  */
 Floorplan.setMethod(function addElements(elements, room) {
 
-	var that = this;
+	var that = this,
+	    room_id,
+	    result = [];
 
 	if (typeof room == 'string') {
 		room = this.rooms[room];
+	}
+
+	if (room) {
+		room_id = room._id;
 	}
 
 	elements = Array.cast(elements);
@@ -251,17 +272,18 @@ Floorplan.setMethod(function addElements(elements, room) {
 
 		var type_name = element.element_type;
 
-
-		element.room_id = room._id;
+		element.room_id = room_id;
 
 		// Store the element type instance on the element
 		element.elementType = that.element_types[type_name];
 
-		console.log('ttt:', element.elementType)
+		console.log('Element type:', element.elementType)
 
 		// @todo: add custom inits
-		that.createNewElement(room._id, element, type_name);
+		result.push(that.createNewElement(room_id, element, type_name));
 	});
+
+	return result;
 });
 
 /**
@@ -281,10 +303,17 @@ Floorplan.setMethod(function createNewElement(room_id, element, type_name) {
 	    el,
 	    er;
 
-	er = this.rooms[room_id];
+	if (room_id) {
+		er = this.rooms[room_id];
+	} else {
+		er = Object.first(this.rooms);
+	}
+
 	er.elements[element._id] = element;
 
 	newElement = er.doek_object.addNewType(element, type_name);
+
+	return newElement;
 });
 
 /**

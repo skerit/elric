@@ -11,6 +11,22 @@
 	justify-content: space-between;
 }
 
+.chimera-client-index {
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
+	-webkit-justify-content: space-between;
+	justify-content: space-between;
+	align-items: flex-start;
+}
+
+[data-template="client/chimera_index"] [data-template="elements/client_panel"] {
+	-webkit-flex: 0 0 32%;
+	flex: 0 0 32%;
+	margin-bottom: 2rem;
+}
+
 .floorplan {
 
 	&-editor,
@@ -123,4 +139,10 @@
 			height: 100%;
 		}
 	}
+}
+
+textarea.transcript {
+	width: 500px;
+	resize: vertical;
+	border: none;
 }

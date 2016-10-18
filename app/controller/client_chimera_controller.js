@@ -5,7 +5,7 @@
  * @since         0.2.0
  * @version       0.2.0
  */
-var Client = Function.inherits('ChimeraController', function ClientChimeraController(conduit, options) {
+var Client = Function.inherits('Alchemy.ChimeraController', function ClientChimeraController(conduit, options) {
 
 	ClientChimeraController.super.call(this, conduit, options);
 
@@ -24,13 +24,8 @@ Client.setMethod(function index(conduit) {
 
 	this.set('pagetitle', 'Clients');
 
+	// @TODO: add newly connected clients to elric.clients object
 	this.set('clients', elric.clients);
-
-	console.log(elric.clients);
-
-	console.log('Cloning...')
-	JSON.clone(elric.clients[1]);
-	console.log('Done Cloning...')
 
 	this.render('client/chimera_index');
 });
@@ -91,10 +86,26 @@ Client.setMethod(function detail(conduit) {
 
 	client = elric.getClient(id);
 
+	console.log('Detail client:', client, conduit.body);
+
 	// An administrator has authorized this client
 	if (conduit.body.authorize) {
 		client.authorize(function authorized(err) {
+
+			if (err) {
+				return conduit.error(err);
+			}
+
 			conduit.end({client: client.Client});
+		});
+	} else if (conduit.body.remove) {
+		client.remove(function removed(err) {
+
+			if (err) {
+				return conduit.error(err);
+			}
+
+			conduit.end({client: null, removed: true});
 		});
 	} else {
 		conduit.end({client: client.Client});
@@ -102,7 +113,7 @@ Client.setMethod(function detail(conduit) {
 });
 
 /**
- * Send client capability data
+ * Enable/disable specific client capability
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -116,6 +127,8 @@ Client.setMethod(function capability(conduit) {
 	    id = conduit.param('id');
 
 	ccap = elric.getClientCapability(id);
+
+	console.log('Update please:', conduit.body);
 
 	// See if we need to toggle the "enabled" value
 	if (conduit.body.enable != null && conduit.body.enable !== ccap.enabled) {

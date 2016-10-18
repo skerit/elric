@@ -17,6 +17,8 @@ hawkejs.scene.on({type: 'set', template: 'scenario/chimera_edit', name: 'chimera
 		// Append the new element
 		el.appendChild(scenario_element);
 
+		console.log('All blocks:', vars, vars.all_blocks);
+
 		// Set block info
 		scenario_element.setBlockInfo(vars.all_blocks);
 

@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var Closet = Function.inherits('ElementType', function ClosetElementType() {});
+var Closet = Function.inherits('Elric.ElementType', function ClosetElementType() {});
 
 Closet.setProperty('dimensions', 2);
 

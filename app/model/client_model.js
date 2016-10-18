@@ -1,6 +1,6 @@
 var bcrypt = alchemy.use('bcrypt'),
     connected_clients = alchemy.shared('elric.clients'),
-    all_capabilities = alchemy.shared('Elric.capabilities'),
+    all_capabilities = alchemy.getClassGroup('elric_capability'),
     fs = alchemy.use('fs');
 
 /**
@@ -15,6 +15,8 @@ var bcrypt = alchemy.use('bcrypt'),
 var Client = Model.extend(function ClientModel(options) {
 	ClientModel.super.call(this, options);
 });
+
+Client.setProperty('displayField', 'hostname');
 
 /**
  * Constitute the class wide schema
@@ -124,7 +126,8 @@ Client.setDocumentMethod(function loadCapabilityData(callback) {
 		// Iterate over all the available capabilities
 		Function.forEach.parallel(all_capabilities, function eachCapability(capability, key, nextcap) {
 
-			var found,
+			var update,
+			    found,
 			    ccap,
 			    data,
 			    i;
@@ -141,16 +144,24 @@ Client.setDocumentMethod(function loadCapabilityData(callback) {
 
 			// If it has already been found, do nothing
 			if (found) {
-				return nextcap();
-			}
 
-			// It hasn't been found, so we need to add it to the database
-			data = {
-				client_id: client_id,
-				settings: {},
-				enabled: false,
-				name: key
-			};
+				// Enable a capability that should always be enabled, but currently isn't
+				if (capability.prototype.always_enabled && !found.enabled) {
+					found.enabled = true;
+					update = true;
+					data = found;
+				} else {
+					return nextcap();
+				}
+			} else {
+				// It hasn't been found, so we need to add it to the database
+				data = {
+					client_id: client_id,
+					settings: {},
+					enabled: capability.prototype.always_enabled == true,
+					name: key
+				};
+			}
 
 			// Save it to the database
 			CC.save(data, function savedCap(err, record) {
@@ -159,8 +170,10 @@ Client.setDocumentMethod(function loadCapabilityData(callback) {
 					return nextcap(err);
 				}
 
-				// Also add it to the existing document
-				client.ClientCapability.push({ClientCapability: record.ClientCapability});
+				// Also add it to the existing document if it's not an update
+				if (!update) {
+					client.ClientCapability.push({ClientCapability: record.ClientCapability});
+				}
 			});
 		}, next);
 	});
@@ -189,6 +202,23 @@ Client.setDocumentMethod(function getCapability(key) {
 });
 
 /**
+ * Remove a client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Client.setDocumentMethod(function remove(callback) {
+
+	var that = this;
+
+	this.authorized = false;
+	this.enabled = false;
+
+	this.model.remove(this._id, callback);
+});
+
+/**
  * Authorize the client and assign it a key
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -214,7 +244,7 @@ Client.setDocumentMethod(function authorize(callback) {
 	};
 
 	// Send the new credentials first
-	this.submit('credentials', {secret: this.secret, key: this.key}, function done(err, response) {
+	this._submit('credentials', {secret: this.secret, key: this.key}, function done(err, response) {
 
 		if (err) {
 			return callback(err);
@@ -266,7 +296,7 @@ Client.setDocumentMethod(function requestAuthentication(callback) {
 			return callback(err);
 		}
 
-		that.submit('request-authentication', hash, function gotResponse(err, client_hash) {
+		that._submit('request-authentication', hash, function gotResponse(err, client_hash) {
 
 			if (err) {
 				log.error('Client refused to authenticate this server');
@@ -289,7 +319,7 @@ Client.setDocumentMethod(function requestAuthentication(callback) {
 
 				log.info('Client "' + that.hostname + '" has been authenticated');
 
-				that.submit('authenticated');
+				that._submit('authenticated');
 
 				// Send client capabilities
 				that.sendCapabilities();
@@ -316,6 +346,7 @@ Client.setDocumentMethod(function sendCapabilities(callback) {
 	}
 
 	log.info('Sending capabilities to "' + this.hostname + '"');
+	console.log(this.ClientCapability);
 
 	Function.forEach.parallel(Array.cast(this.ClientCapability), function eachCap(record, index, next) {
 
@@ -326,6 +357,18 @@ Client.setDocumentMethod(function sendCapabilities(callback) {
 			return next();
 		}
 
+		// Don't send it if the capability is disabled
+		if (!ccap.enabled) {
+			return next();
+		}
+
+		console.log('Getting client file for', ccap.name);
+
+		function doNext() {
+			console.log('Calling next for', ccap.name);
+			next();
+		}
+
 		// Look for the client file
 		elric.getClientFile(ccap.name, function gotFile(err, stat) {
 
@@ -333,12 +376,17 @@ Client.setDocumentMethod(function sendCapabilities(callback) {
 
 			if (!err && (stat && stat.path)) {
 				stream = fs.createReadStream(stat.path);
-				that.submit('capability-settings', ccap, stream, next);
+				that._submit('capability-settings', ccap, stream, doNext);
 			} else {
-				that.submit('capability-settings', ccap, next);
+				that._submit('capability-settings', ccap, doNext);
 			}
 		});
 	}, function done(err) {
+
+		console.log('Client', that, 'has loaded');
+
+		// Emit the loaded event, even if some capability files failed
+		that.emit('loaded');
 
 		if (err) {
 			log.error('Client "' + that.hostname + '" failed to receive capability files: ' + err);
@@ -369,8 +417,12 @@ Client.setDocumentMethod(function attachConduit(conduit) {
 
 	alchemy.updateData(this._id, this.Client);
 
+	this.emit('has_conduit');
+
 	// Listen to the disconnect event
 	conduit.on('disconnect', function disconnected() {
+
+		console.log('Client', that, 'has disconnected');
 
 		// Revoke authentication
 		that.authenticated = false;
@@ -381,12 +433,33 @@ Client.setDocumentMethod(function attachConduit(conduit) {
 		// Remove the conduit
 		that.conduit = false;
 
+		// Remove the 'ready' event
+		// @TODO: integrate into Informer
+		delete that.simpleSeen.ready;
+		delete that.simpleSeen.has_conduit;
+
 		alchemy.updateData(that._id, that.Client);
 	});
 });
 
 /**
- * Send data to the client
+ * Submit data to the client as soon as it's connected
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+Client.setDocumentMethod(function _submit(type, data, stream, callback) {
+
+	var that = this;
+
+	this.afterOnce('has_conduit', function isReady() {
+		that.conduit.submit(type, data, stream, callback);
+	});
+});
+
+/**
+ * Send data to the client as soon as it's ready
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.1.0
@@ -394,20 +467,13 @@ Client.setDocumentMethod(function attachConduit(conduit) {
  */
 Client.setDocumentMethod(function submit(type, data, stream, callback) {
 
-	if (!this.conduit) {
+	var that = this;
 
-		if (typeof stream == 'function') {
-			callback = stream;
-		}
+	console.log('Submitting to client', this, 'once loaded')
 
-		if (typeof stream != 'function') {
-			callback = Function.thrower;
-		}
-
-		return callback(new Error('Could not submit "' + type + '" data, is client connected?'));
-	}
-
-	return this.conduit.submit(type, data, stream, callback);
+	this.afterOnce('loaded', function isReady() {
+		that.conduit.submit(type, data, stream, callback);
+	});
 });
 
 /**
@@ -418,7 +484,15 @@ Client.setDocumentMethod(function submit(type, data, stream, callback) {
  * @version  0.1.0
  */
 Client.setDocumentMethod(function linkup(type, data, cb) {
-	return this.conduit.linkup(type, data, cb);
+
+	var that = this;
+
+	console.log('Waiting for loaded')
+
+	this.afterOnce('loaded', function isReady() {
+		console.log('client loaded!')
+		that.conduit.linkup(type, data, cb);
+	});
 });
 
 /**
@@ -433,5 +507,5 @@ Client.setDocumentMethod(function submitCommand(command_type, capability_type, d
 	data.command_type = command_type;
 	data.client_type = capability_type;
 
-	return this.conduit.submit('client-command', data, stream, callback);
+	return this.submit('client-command', data, stream, callback);
 });

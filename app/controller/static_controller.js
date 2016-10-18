@@ -2,13 +2,13 @@
  * The Static Controller class
  *
  * @constructor
- * @extends       alchemy.classes.AppController
+ * @extends       Alchemy.AppController
  *
  * @author   Jelle De Loecker <jelle@develry.be>
  * @since    0.0.1
  * @version  0.1.0
  */
-var Static = Function.inherits('AppController', function StaticController(conduit, options) {
+var Static = Function.inherits('Alchemy.AppController', function StaticController(conduit, options) {
 	StaticController.super.call(this, conduit, options);
 });
 
@@ -42,6 +42,10 @@ Static.setMethod(function test(conduit) {
 	var that = this,
 	    Scenario = this.getModel('Scenario'),
 	    scenario_id;
+
+	this.render('static/circle_test');
+
+	return;
 
 	// The scenario id
 	scenario_id = '56f9446bc14a8c345ea73e4b';

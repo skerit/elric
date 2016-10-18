@@ -11,7 +11,7 @@ var RoomElement = Model.extend(function RoomElementModel(options) {
 
 	RoomElementModel.super.call(this, options);
 
-	this.element_types = alchemy.shared('Elric.elementTypes');
+	this.element_types = alchemy.getClassGroup('elric_element_type');
 
 	this.icon = 'lightbulb-o';
 });

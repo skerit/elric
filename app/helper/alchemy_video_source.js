@@ -4,7 +4,7 @@ module.exports = function AlchemyVideoSource(Hawkejs, Blast) {
 	 * The PlaySource
 	 *
 	 * @constructor
-	 * @extends       alchemy.classes.Informer
+	 * @extends       Alchemy.Informer
 	 *
 	 * @author        Jelle De Loecker   <jelle@kipdola.be>
 	 * @since         0.1.0

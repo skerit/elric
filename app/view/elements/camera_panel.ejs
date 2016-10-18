@@ -4,6 +4,7 @@
 	<!--<x-panel-overlay>TEST</x-panel-overlay>-->
 	<x-panel-header><%= camera.name %></x-panel-header>
 	<x-panel-actions>
+		<button class="btn btn-success" data-play-video>Play</button>
 		<% Router.printRoute('chimera@IdActionLink', {
 			controller: 'Camera',
 			action: 'edit',

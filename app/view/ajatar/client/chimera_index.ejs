@@ -1,0 +1,23 @@
+<% implement('layouts/chimera') %>
+<% style('elric-chimera') %>
+
+<% start('chimera-status') %>
+<% end('chimera-status') %>
+
+<%
+Router.setBreadcrumb([
+	{title: __('chimera', 'Dashboard'), route: 'chimera@Dashboard'},
+	{title: 'Clients', route: 'chimera@ActionLink', parameters: {action: 'index', controller: 'client'}}
+]);
+
+Chimera.setTitle('Clients');
+%>
+
+<% start('chimera-cage') %>
+<div class="chimera-client-index flex-row">
+<% for (i = 0; i < clients.length; i++) { %>
+	<% client = clients[i].Client %>
+	<% print_element('elements/client_panel', {client: client}) %>
+<% } %>
+</div>
+<% end('chimera-cage') %>

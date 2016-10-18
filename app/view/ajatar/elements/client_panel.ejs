@@ -1,0 +1,47 @@
+<%
+if (!client) {
+	return;
+}
+%>
+
+<% update_url(Router.routeUrl('chimera@ActionLink', {controller: 'Client', action: 'detail'}, {get: {id: ''+client._id}})) %>
+<% add_class('col-md-4 flex-col') %>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title"><%= client.hostname %></h3>
+		<div class="panel-actions">
+			<% live('client.enabled', function gotVal(enabled) { %>
+				<al-switch title="Toggle client" <% if (client.enabled) print('checked') %>></al-switch>
+			<% }) %>
+		</div>
+	</div>
+	<div class="panel-body">
+		<% implement('elements/client_info', {wrap: false}) %>
+
+		<% live('client.authorized', function gotVal(authorized) {
+			add_class('live-button-group');
+
+			if (!client) {
+				/* Client has been removed */
+			} else if (!authorized) { %>
+				<button data-update-request="post" name="authorize" class="btn btn-success client-auth-button">
+					<i><%= Media.svg('lightning') %></i>Authorize
+				</button>
+				<button data-update-request="post" name="remove" class="btn btn-success client-remove-button">
+					<i><%= Media.svg('lightning') %></i>Remove
+				</button>
+			<% } else { %>
+				<% Router.printRoute('chimera@IdActionLink', {
+					controller: 'Client',
+					action: 'configure',
+					id: client._id
+				}, {
+					className: 'btn btn-success client-config-button',
+					title: 'Configure',
+					content: '<i>' + Media.svg('gears') + '</i>Configure'
+				}) %>
+			<% }
+		}) %>
+	</div>
+</div>

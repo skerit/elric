@@ -7,7 +7,7 @@
  * @since    0.0.1
  * @version  0.1.0
  */
-var Room = Model.extend(function RoomModel(options) {
+var Room = Function.inherits('Alchemy.AppModel', function RoomModel(options) {
 
 	RoomModel.super.call(this, options);
 
@@ -23,7 +23,7 @@ var Room = Model.extend(function RoomModel(options) {
  */
 Room.constitute(function addFields() {
 
-	var element_schema = new alchemy.classes.Schema();
+	var element_schema = new Classes.Alchemy.Schema();
 
 	this.addField('name', 'String');
 	this.addField('x', 'Number');

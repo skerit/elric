@@ -22,7 +22,7 @@ var Device = Function.inherits('Elric.Action', function DeviceAction(document) {
  */
 Device.constitute(function setSchema() {
 
-	var device_schema = new alchemy.classes.Schema();
+	var device_schema = new Classes.Alchemy.Schema();
 
 	// The device to apply this action to
 	device_schema.belongsTo('Device');

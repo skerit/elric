@@ -12,7 +12,7 @@ var ElementType = Function.inherits('Elric.Wrapper', function ElementType() {});
 /**
  * This is a wrapper class
  */
-ElementType.setProperty('extend_only', true);
+ElementType.setProperty('is_abstract_class', true);
 
 /**
  * This wrapper class starts a new group

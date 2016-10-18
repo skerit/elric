@@ -36,7 +36,7 @@ var Action = Function.inherits('Elric.Wrapper', function Action(document) {
 /**
  * This is a wrapper class
  */
-Action.setProperty('extend_only', true);
+Action.setProperty('is_abstract_class', true);
 
 /**
  * This wrapper class starts a new group
@@ -89,7 +89,7 @@ Action.constitute(function setSchema() {
 	var schema;
 
 	// Create a new schema
-	schema = new alchemy.classes.Schema(this);
+	schema = new Classes.Alchemy.Schema(this);
 	this.schema = schema;
 
 	// Every event has a start and end property

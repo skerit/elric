@@ -1,4 +1,4 @@
-var all_events = alchemy.shared('elric.event');
+var all_events = alchemy.getClassGroup('elric_event');
 
 /**
  * The Event Scenario Block:

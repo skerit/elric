@@ -96,6 +96,8 @@ module.exports = function elricScenarioElement(Hawkejs, Blast) {
 		// Create a save button
 		save = Hawkejs.createElement('button');
 		save.innerText = 'Save';
+		save.classList.add('btn');
+		save.classList.add('btn-success');
 
 		// Listen for the save click
 		save.addEventListener('click', function onClick(e) {

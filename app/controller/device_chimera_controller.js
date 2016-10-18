@@ -5,7 +5,7 @@
  * @since    0.1.0
  * @version  0.1.0
  */
-var Device = Function.inherits('ChimeraController', function DeviceChimeraController(conduit, options) {
+var Device = Function.inherits('Alchemy.ChimeraController', function DeviceChimeraController(conduit, options) {
 	DeviceChimeraController.super.call(this, conduit, options);
 });
 
