@@ -20,6 +20,8 @@ alchemy.usePlugin('styleboost');
 alchemy.usePlugin('media');
 alchemy.usePlugin('elric-philips-hue');
 alchemy.usePlugin('elric-positioning');
+alchemy.usePlugin('elric-display');
+alchemy.usePlugin('elric-play');
 
 // Define your own plugins in here
 // alchemy.usePlugin('elric-display');

@@ -18,7 +18,7 @@ Router.linkup('Camera::linkup', 'cameralink', 'CameraChimera#createLink');
 alchemy.hawkejs.on('viewrenderDone', function finishedRendering(viewrender) {
 
 	// Disable pageview event for now
-	// return;
+	return;
 
 	var conduit = viewrender.conduit,
 	    event;

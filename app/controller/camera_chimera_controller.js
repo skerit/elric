@@ -82,6 +82,8 @@ Camera.setMethod(function webStream(conduit, camera_id) {
 			return conduit.error(err);
 		}
 
+		console.log(' -- Getting camera stream', record);
+
 		record.getStream(function gotStream(err, stream) {
 
 			var conv_options;
@@ -129,21 +131,23 @@ Camera.setMethod(function webStream(conduit, camera_id) {
  *
  * @param   {Conduit}   conduit
  */
-Camera.setMethod(function createLink(conduit, linkup, data) {
+Camera.setMethod(function createLink(conduit, linkup, config) {
 
 	var that = this;
 
-	console.log('Got linkup:', conduit, linkup, data);
+	console.log('Got linkup:', conduit, linkup, config);
 
-	if (!data.camera_id) {
+	if (!config.camera_id) {
 		return conduit.error(new Error('No camera id given'));
 	}
 
-	this.getModel('Camera').findById(data.camera_id, function gotCamera(err, record) {
+	this.getModel('Camera').findById(config.camera_id, function gotCamera(err, record) {
 
 		if (err) {
 			return conduit.error(err);
 		}
+
+		console.log(' -- Getting camera stream', record);
 
 		// Get a raw video stream
 		record.getStream(function gotStream(err, stream) {
@@ -189,14 +193,16 @@ Camera.setMethod(function createLink(conduit, linkup, data) {
 
 			conv_options = {
 
-				// Make encoding realtime
+				// Make encoding realtime (for mp4/h264)
 				realtime: true,
 
-				// Use mp4 profile
-				profile: 'mp4',
+				// Use jsmpeg or mp4 profile
+				profile: config.jsmpeg ? 'jsmpeg' : 'mp4',
 
 				force_audio_encode: true
 			};
+
+			conv_options = Object.assign(conv_options, record.getConversionOptions());
 
 			// If the source is an mjpeg stream,
 			// make sure ffmpeg knows it's a variable framerate thing

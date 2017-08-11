@@ -1,7 +1,7 @@
 // Intercept uncaught exceptions so the server won't crash
 process.on('uncaughtException', function onError(error) {
 	// Indicate we caught an exception
-	log.error('Uncaught Exception!', {err: error});
+	alchemy.printLog('error', ['Uncaught Exception!', String(error), error], {err: error, level: -2});
 });
 
 //require('heapdump');

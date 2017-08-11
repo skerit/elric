@@ -130,3 +130,16 @@ Camera.setDocumentMethod(function getStream(callback) {
 		return callback(null, hinder.stream.createStream());
 	});
 });
+
+/**
+ * Get media conversion options
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @return   {Object}
+ */
+Camera.setDocumentMethod(function getConversionOptions() {
+	return this.camera.getConversionOptions();
+});

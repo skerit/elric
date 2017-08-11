@@ -76,6 +76,12 @@ module.exports = {
 	// Minify javascript files
 	minify_js: true,
 
+	// Multicast ipv4 address
+	multicast_ipv4: '224.0.192.47',
+
+	// Start listening to multicast on boot?
+	multicast_on_boot: true,
+
 	// Project name (gotten from package.json by default)
 	name: null,
 
@@ -84,9 +90,6 @@ module.exports = {
 
 	// Do an extensive and expensive search for modules
 	search_for_modules: false,
-
-	// Type of sessions to use: 'server', 'cookie', 'persistent'
-	sessions: 'cookie',
 
 	// The session key (for server & persistent sessions)
 	session_key: 'session_key',

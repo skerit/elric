@@ -47,9 +47,34 @@ Client.constitute(function addFields() {
 	this.Document.setFieldGetter('connected');
 	this.Document.setFieldGetter('start_time');
 	this.Document.setFieldGetter('authenticated');
+	this.Document.setFieldGetter('authentication_error');
 
 	// Add the capability data
 	this.hasMany('ClientCapability');
+
+	// Return the device
+	this.Document.setFieldGetter('status', function getStatus() {
+
+		var status;
+
+		if (this.connected) {
+			if (this.authentication_error) {
+				status = 'auth-error'
+			} else if (!this.authenticated) {
+				status = 'connecting';
+			} else {
+				status = 'online';
+			}
+		} else if (!this.authorized) {
+			status = 'new';
+		} else if (!this.enabled) {
+			status = 'disabled';
+		} else {
+			status = 'offline';
+		}
+
+		return status;
+	});
 });
 
 /**
@@ -296,6 +321,11 @@ Client.setDocumentMethod(function requestAuthentication(callback) {
 			return callback(err);
 		}
 
+		that.authentication_error = false;
+
+		// Update indicator: this client should now be 'authenticating'
+		elric.client_indicator.update('requesting_authentication');
+
 		that._submit('request-authentication', hash, function gotResponse(err, client_hash) {
 
 			if (err) {
@@ -310,12 +340,15 @@ Client.setDocumentMethod(function requestAuthentication(callback) {
 				}
 
 				if (!result) {
-					log.error('Failed to authenticate client');
+					that.authentication_error = true;
 					return callback(new Error('Failed to authenticate client'));
 				}
 
 				// Authentication complete!
 				that.authenticated = true;
+
+				// Update the indicator: this client should now be online
+				elric.client_indicator.update('authenticated');
 
 				log.info('Client "' + that.hostname + '" has been authenticated');
 
@@ -409,7 +442,9 @@ Client.setDocumentMethod(function attachConduit(conduit) {
 
 	var that = this;
 
-	console.log('Attaching conduit to', this, conduit)
+	if (!conduit) {
+		throw new Error('Trying to attach conduit, but no conduit given');
+	}
 
 	this.conduit = conduit;
 	this.connected = true;
@@ -418,6 +453,7 @@ Client.setDocumentMethod(function attachConduit(conduit) {
 	alchemy.updateData(this._id, this.Client);
 
 	this.emit('has_conduit');
+	elric.emit('client_connection', this);
 
 	// Listen to the disconnect event
 	conduit.on('disconnect', function disconnected() {
@@ -434,10 +470,10 @@ Client.setDocumentMethod(function attachConduit(conduit) {
 		that.conduit = false;
 
 		// Remove the 'ready' event
-		// @TODO: integrate into Informer
-		delete that.simpleSeen.ready;
-		delete that.simpleSeen.has_conduit;
+		that.unsee('ready');
+		that.unsee('has_conduit');
 
+		elric.client_indicator.update();
 		alchemy.updateData(that._id, that.Client);
 	});
 });

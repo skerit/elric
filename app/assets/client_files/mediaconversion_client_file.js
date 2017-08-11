@@ -74,4 +74,4 @@ Media.setMethod(function stop() {
 	console.log('Client disconnected, conversion is stopping');
 });
 
-module.exports = Media.create;
+module.exports = Media;

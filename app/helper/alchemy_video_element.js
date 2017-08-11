@@ -88,6 +88,9 @@ module.exports = function AlchemyVideoElement(Hawkejs, Blast) {
 
 		var that = this;
 
+		// Create the jsmpeg canvas, in case it's needed
+		this.el_canvas = this.grab('canvas', 'jsmpeg');
+
 		// Create the video element, add the 'video' class
 		this.el_video = this.grab('video', 'video');
 

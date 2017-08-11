@@ -127,7 +127,7 @@ Audio.setMethod(function start(callback) {
 	this.mp3_decoder.pipe(this.speaker);
 
 	// Create new rudeplay server
-	this.rudeplay_server = new Rudeplay({
+	this.rudeplay_server = new Rudeplay.Server.Server({
 		name: this.client.hostname
 	});
 
@@ -146,4 +146,4 @@ Audio.setMethod(function stop() {
 	this.rudeplay_server.destroy();
 });
 
-module.exports = Audio.create;
+module.exports = Audio;

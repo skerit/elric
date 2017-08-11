@@ -497,19 +497,19 @@ Device.setDocumentMethod(function sendProtocolCommand(options, callback) {
 	}
 
 	// Get the interface to control this device
-	this.getInterface(function gotInterface(err, interface) {
+	this.getInterface(function gotInterface(err, device_interface) {
 
 		if (err) {
 			return callback(err);
 		}
 
-		if (!interface.length) {
+		if (!device_interface.length) {
 			return callback(new Error('Could not find interface for device "' + (that.name || that._id) + '"'));
 		}
 
 		console.log('Sending command', that.address, options)
 
-		interface.sendCommand(that.address, options, function gotInterfaceResponse(err, response) {
+		device_interface.sendCommand(that.address, options, function gotInterfaceResponse(err, response) {
 
 			console.log('Interface response:', err, response);
 

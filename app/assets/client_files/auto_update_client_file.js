@@ -179,4 +179,4 @@ Auto.setMethod(function checkUpdate(data, linkup, callback) {
 	});
 });
 
-module.exports = Auto.create;
+module.exports = Auto;

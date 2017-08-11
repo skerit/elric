@@ -57,6 +57,8 @@ Elric.setMethod(function init() {
 		Blast.loaded(function() {
 			that.initClientList(done);
 			that.loadCron();
+
+			that.client_indicator = __Janeway.addIndicator({type: 'client', name: 'clients'});
 		})
 	});
 });
@@ -532,10 +534,22 @@ Elric.setMethod(function initClientList(callback) {
 			docs = result;
 
 			result.forEach(function eachClientDocument(client) {
+				var entry,
+				    i;
+
+				// Don't add the same client twice
+				// (Some clients could have connected before this function)
+				for (i = 0; i < that.clients.length; i++) {
+					if (String(that.clients[i]._id) == String(client._id)) {
+						return;
+					}
+				}
+
 				that.clients.push(client);
 			});
 
 			that.emit('client_list');
+			that.client_indicator.update('initial_client_list');
 			next();
 		});
 	}, function getClientCapabilities(next) {
@@ -751,9 +765,9 @@ Elric.setMethod(function playSound(sound, callback) {
  * @since    0.1.0
  * @version  0.1.0
  *
- * @param    {ElricClientSocketConduit}   eclient
+ * @param    {ElricClientSocketConduit}   client_socket
  */
-Elric.setMethod(function registerClient(eclient) {
+Elric.setMethod(function registerClient(client_socket) {
 
 	var that = this,
 	    client_doc,
@@ -763,15 +777,16 @@ Elric.setMethod(function registerClient(eclient) {
 
 	if (!this.hasBeenSeen('client_list')) {
 		return this.afterOnce('client_list', function delay() {
-			that.registerClient(eclient);
+			that.registerClient(client_socket);
 		});
 	}
 
-	info = eclient.announcement;
+	info = client_socket.announcement;
 	log.info('Incoming client connection: ' + info.hostname);
+	that.client_indicator.update('incoming_connection');
 
 	// Listen for remote command requests
-	eclient.on('capability-command', function onCapabilityCommand(packet) {
+	client_socket.on('capability-command', function onCapabilityCommand(packet) {
 
 		var instance,
 		    args;
@@ -790,6 +805,11 @@ Elric.setMethod(function registerClient(eclient) {
 		} else {
 			console.error('Could not find capability ' + packet.capability + ', packet ignored', packet);
 		}
+	});
+
+	// Listen for disconnects
+	client_socket.on('disconnect', function disconnected() {
+		that.client_indicator.update('disconnect');
 	});
 
 	Function.series(function findDocument(next) {
@@ -822,7 +842,7 @@ Elric.setMethod(function registerClient(eclient) {
 
 		data = {
 			hostname: info.hostname,
-			ip: eclient.socket.conn.remoteAddress,
+			ip: client_socket.socket.conn.remoteAddress,
 			enabled: false,
 			secret: '',
 			key: ''
@@ -846,7 +866,7 @@ Elric.setMethod(function registerClient(eclient) {
 		client_doc.start_time = info.start_time || Date.now();
 
 		// Attach the conduit
-		client_doc.attachConduit(eclient);
+		client_doc.attachConduit(client_socket);
 
 		next();
 	}, function doAuthentication(next) {
@@ -860,8 +880,10 @@ Elric.setMethod(function registerClient(eclient) {
 
 	}, function done(err) {
 
+		that.client_indicator.update('registered_client');
+
 		if (err) {
-			log.error('Error registering client ' + eclient.announcement.hostname + ': ' + err);
+			log.error('Error registering client ' + client_socket.announcement.hostname + ': ' + err);
 			console.log(err);
 			return;
 		}

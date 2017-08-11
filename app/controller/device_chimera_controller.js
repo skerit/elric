@@ -87,10 +87,17 @@ Device.setMethod(function feature(conduit, device_id, feature, data) {
  *
  * @param    {Conduit}   conduit
  */
-Device.setMethod(function readFeature(conduit, data, callback) {
+Device.setMethod(function readFeature(conduit, callback) {
 
-	var device_id = data.device_id,
-	    feature = data.feature;
+	var device_id,
+	    feature;
+
+	device_id = conduit.param('device_id');
+	feature = conduit.param('feature');
+
+	if (!device_id) {
+		return callback(new Error('No device id given!'));
+	}
 
 	this.getModel('Device').findById(device_id, function gotDevice(err, record) {
 

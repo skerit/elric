@@ -74,6 +74,19 @@ CameraType.setMethod(function toJSON() {
 });
 
 /**
+ * Get media conversion options
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @return   {Object}
+ */
+CameraType.setMethod(function getConversionOptions() {
+	return {};
+});
+
+/**
  * Get the (cached) stream to this device
  *
  * @author   Jelle De Loecker <jelle@develry.be>

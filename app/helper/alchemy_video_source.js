@@ -22,7 +22,11 @@ module.exports = function AlchemyVideoSource(Hawkejs, Blast) {
 
 		if (!data.codec) {
 			data.codec = 'video/webm; codecs="vorbis,vp8"';
+		} else if (data.codec.indexOf('video/mpg') > -1 || data.codec.indexOf('video/mpeg') > -1) {
+			this.is_jsmpeg = true;
 		}
+
+		this.data = data;
 
 		this.player = player;
 		this.streams = [];
@@ -52,6 +56,67 @@ module.exports = function AlchemyVideoSource(Hawkejs, Blast) {
 		// Range callbacks
 		this.range_callbacks = [];
 
+		// Create mediasources for h264 or webm streams
+		if (this.is_jsmpeg) {
+			this.createJsmpeg();
+		} else {
+			this.createMediasources();
+		}
+
+		if (data.range) {
+			this.registerRange(data.range);
+		}
+
+		this.on('got_range_start', function gotRangeStart(range) {
+			that.gotRangeStart(range);
+		});
+
+		this.addStream(stream);
+	});
+
+	/**
+	 * Create jsmpeg instance
+	 *
+	 * @author        Jelle De Loecker   <jelle@kipdola.be>
+	 * @since         0.1.0
+	 * @version       0.1.0
+	 */
+	PlaySource.setMethod(function createJsmpeg() {
+
+		var that = this;
+
+		// Get the jsmpeg canvas
+		this.canvas = this.player.el_canvas;
+
+		hawkejs.require('jsmpeg', function gotJsmpeg() {
+
+			// Create the jsmpeg instance, without a websocket
+			that.jsmpeg = new jsmpeg(null, {canvas: that.canvas});
+
+			that.jsmpeg.initStream();
+
+			that.jsmpeg.width = 1920;
+			that.jsmpeg.height = 1080;
+			that.jsmpeg.initBuffers();
+
+			console.log('jsmpeg instance:', that.jsmpeg);
+
+			// There is no videosource, but certain parts of code wait for this
+			that.emit('videoSourceOpen');
+		});
+	});
+
+	/**
+	 * Create MediaSource instances
+	 *
+	 * @author        Jelle De Loecker   <jelle@kipdola.be>
+	 * @since         0.1.0
+	 * @version       0.1.0
+	 */
+	PlaySource.setMethod(function createMediasources() {
+
+		var that = this;
+
 		// The MediaSource instances
 		this.videoSource = new MediaSource();
 		this.audioSource = new MediaSource();
@@ -60,7 +125,7 @@ module.exports = function AlchemyVideoSource(Hawkejs, Blast) {
 		this.videoSource.addEventListener('sourceopen', function videoSourceOpen() {
 
 			// Create the buffer
-			that.videoBuffer = that.videoSource.addSourceBuffer(data.codec);
+			that.videoBuffer = that.videoSource.addSourceBuffer(that.data.codec);
 			that.videoBufferBusy = false;
 
 			that.videoBuffer.addEventListener('updatestart', function onupdate() {
@@ -86,18 +151,8 @@ module.exports = function AlchemyVideoSource(Hawkejs, Blast) {
 		this.videoSource.url = window.URL.createObjectURL(this.videoSource);
 		this.audioSource.url = window.URL.createObjectURL(this.audioSource);
 
-		player.el_video.src = this.videoSource.url;
-		player.el_audio.src = this.audioSource.url;
-
-		if (data.range) {
-			this.registerRange(data.range);
-		}
-
-		this.on('got_range_start', function gotRangeStart(range) {
-			that.gotRangeStart(range);
-		});
-
-		this.addStream(stream);
+		this.player.el_video.src = this.videoSource.url;
+		this.player.el_audio.src = this.audioSource.url;
 	});
 
 	/**
@@ -491,22 +546,27 @@ module.exports = function AlchemyVideoSource(Hawkejs, Blast) {
 			this.buffered += obj.data.length;
 		}
 
-		if (!this.videoBufferBusy && this.cache.length) {
+		if ((this.jsmpeg || !this.videoBufferBusy) && this.cache.length) {
 
 			this.videoBufferBusy = true;
 
 			// Get the next block to add
 			obj = this.cache.shift();
 
-			if (obj.first && obj.offset != null) {
-				console.log('Setting buffer offset to', obj.offset);
+			if (this.jsmpeg == null) {
 
-				// Set the offset
-				that.videoBuffer.timestampOffset = obj.offset;
+				if (obj.first && obj.offset != null) {
+					console.log('Setting buffer offset to', obj.offset);
+
+					// Set the offset
+					that.videoBuffer.timestampOffset = obj.offset;
+				}
+
+				// Append it
+				this.videoBuffer.appendBuffer(obj.data);
+			} else {
+				this.jsmpeg.receiveSocketMessage(obj);
 			}
-
-			// Append it
-			this.videoBuffer.appendBuffer(obj.data);
 
 			if (obj.first) {
 				that.emit('stream-start-' + obj.Stream_id);
@@ -516,7 +576,7 @@ module.exports = function AlchemyVideoSource(Hawkejs, Blast) {
 			//console.log('Buffer size is now', this.buffered);
 		}
 
-		if (this.start_time == null && this.buffer_updates > 0 && this.videoBuffer.buffered.length) {
+		if (!this.jsmpeg && this.start_time == null && this.buffer_updates > 0 && this.videoBuffer.buffered.length) {
 			this.start_time = this.videoBuffer.buffered.start(0);
 
 			// Emit the start_time of this stream

@@ -153,7 +153,8 @@ Soundbite.setMethod(function audiofile(conduit) {
 
 	Soundbite.find('first', options, function gotRecord(err, record) {
 
-		var path;
+		var path,
+		    conv;
 
 		if (err) {
 			return conduit.error(err);
