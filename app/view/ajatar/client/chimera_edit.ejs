@@ -21,8 +21,27 @@ Chimera.setTitle(page_title);
 
 <% start('chimera-cage') %>
 <div class="chimera-client-capabilities flex-row">
-<% client_capabilities.forEach(function eachcc(cc) {
-	implement('elements/client_capability_panel', null, {ccap: cc});
-}) %>
+	<% client_capabilities.forEach(function eachcc(cc) {
+		implement('elements/client_capability_panel', null, {ccap: cc});
+	}) %>
+	<div class="panel panel-danger">
+		<div class="panel-heading">
+			<h3 class="panel-title">
+				Delete
+			</h3>
+			<div class="panel-actions">
+
+			</div>
+		</div>
+		<div class="panel-body">
+			<p>Remove this client</p>
+			<a
+				href="<%= Router.routeUrl('chimera@ActionLink', {controller: 'Client', action: 'remove'}, {get: {id: ''+client._id}}) %>"
+				class="js-he-link btn btn-danger client-remove-button"
+			>
+				Remove
+			</a>
+		</div>
+	</div>
 </div>
 <% end('chimera-cage') %>

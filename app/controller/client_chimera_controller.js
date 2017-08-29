@@ -71,6 +71,36 @@ Client.setMethod(function configure(conduit) {
 });
 
 /**
+ * Remove client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {Conduit}   conduit
+ */
+Client.setMethod(function remove(conduit) {
+
+	var client,
+	    id = conduit.param('id');
+
+	client = elric.getClient(id);
+
+	if (client) {
+		client.remove(function removed(err) {
+			if (err) {
+				return conduit.error(err);
+			}
+
+			// @TODO: router redirect
+			conduit.redirect('/chimera/Client/index');
+		});
+	} else {
+		return conduit.notFound();
+	}
+});
+
+/**
  * Send client specific detail
  *
  * @author   Jelle De Loecker <jelle@develry.be>
@@ -93,6 +123,7 @@ Client.setMethod(function detail(conduit) {
 		client.authorize(function authorized(err) {
 
 			if (err) {
+				console.log('ERR: ' + err, err);
 				return conduit.error(err);
 			}
 

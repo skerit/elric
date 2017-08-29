@@ -224,6 +224,8 @@ Floor.setMethod(function getTypeExternalIds(conduit, data, callback) {
 
 	constructor = Classes.Elric[class_name];
 
+	console.log('Getting external ids?', class_name, constructor)
+
 	if (!constructor) {
 		return callback(new Error('Not found: "' + class_name + '"'));
 	}

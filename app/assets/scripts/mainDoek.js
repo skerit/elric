@@ -17,7 +17,7 @@ var Floorplan = Function.inherits('Informer', function Floorplan(canvas_id) {
 	this._gridObject = this.d.addGrid();
 
 	editor_element = this.d.container.closest('.floorplan-editor');
-
+console.log('ED:', editor_element)
 	if (editor_element) {
 		// Get the toolbar
 		this.toolbar = editor_element.querySelector('.floorplan-toolbar');

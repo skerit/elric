@@ -58,9 +58,24 @@ Elric.setMethod(function init() {
 			that.initClientList(done);
 			that.loadCron();
 
-			that.client_indicator = __Janeway.addIndicator({type: 'client', name: 'clients'});
+			that.client_indicator = that.addIndicator({type: 'client', name: 'clients'});
 		})
 	});
+});
+
+/**
+ * Create a janeway indicator
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    1.0.0
+ * @version  1.0.0
+ */
+Elric.setMethod(function addIndicator(options) {
+	try {
+		return __Janeway.addIndicator(options);
+	} catch (err) {
+		return null;
+	}
 });
 
 /**

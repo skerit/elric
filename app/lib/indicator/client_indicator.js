@@ -32,9 +32,14 @@ Client.setMethod(function update(reason) {
 	    separator,
 	    status,
 	    client,
+	    name,
 	    list,
 	    conf,
 	    i;
+
+	if (!elric.clients) {
+		return;
+	}
 
 	list = elric.clients.slice(0);
 	list.sortByPath('hostname', 'ip');
@@ -43,9 +48,10 @@ Client.setMethod(function update(reason) {
 		client = list[i];
 
 		status = client.status;
+		name = client.hostname || client.ip || String(client._id);
 
-		if (client.hostname.length > max_length) {
-			max_length = client.hostname.length;
+		if (name.length > max_length) {
+			max_length = name.length;
 		}
 
 		if (status.length > max_right) {
@@ -59,14 +65,15 @@ Client.setMethod(function update(reason) {
 		client = list[i];
 
 		status = client.status;
+		name = client.hostname || client.ip || String(client._id);
 
-		separator = ' '.multiply((max_length - client.hostname.length) + (max_right - status.length));
+		separator = ' '.multiply((max_length - name.length) + (max_right - status.length));
 
 		if (hover_text) {
 			hover_text += '\n';
 		}
 
-		hover_text += client.hostname + separator + status;
+		hover_text += name + separator + status;
 	}
 
 	this.setHover(hover_text);

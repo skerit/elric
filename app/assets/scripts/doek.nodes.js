@@ -133,6 +133,8 @@ Doek.Node.prototype._fillEditForm = function _fillEditForm(selected) {
 		}
 	}
 
+	console.log('Getting external ids?')
+
 	// Get the external ids for this type
 	alchemy.submit('element-externalids', {element_type: this.elricType}, function gotTypes(err, data) {
 
@@ -150,6 +152,8 @@ Doek.Node.prototype._fillEditForm = function _fillEditForm(selected) {
 				html.external_id.insertAdjacentHTML('beforeend', '<option value="' + key + '">' + entry + '</option>');
 			}
 		}
+
+		console.log('Have external element?', that.roomElement.type_external_id)
 
 		if (that.roomElement.type_external_id) {
 			html.external_id.value = that.roomElement.type_external_id;
