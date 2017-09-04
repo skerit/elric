@@ -797,7 +797,7 @@ Elric.setMethod(function registerClient(client_socket) {
 	}
 
 	info = client_socket.announcement;
-	log.info('Incoming client connection: ' + info.hostname);
+	log.info('Incoming client connection:', info.hostname);
 	that.client_indicator.update('incoming_connection');
 
 	// Listen for remote command requests

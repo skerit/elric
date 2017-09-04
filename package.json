@@ -26,6 +26,5 @@
 	"license": "GPLv3",
 	"engines": {
 		"node": "~4.2.0"
-	},
-	"private": true
+	}
 }
