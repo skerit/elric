@@ -126,30 +126,50 @@ Capability.constitute(function setSchema() {
  * @version  0.1.0
  *
  * @param    {ClientCapabilityDocument}   record
+ * @param    {Function}                   callback
  */
-Capability.setMethod(function attachConfig(record) {
+Capability.setMethod(function attachConfig(record, callback) {
 
 	if (!record) {
 		return;
+	}
+
+	if (!callback) {
+		callback = Function.thrower;
 	}
 
 	let that = this;
 
 	this.config = record;
 
-	Blast.setImmediate(function emitConfig() {
+	let pledge = Function.parallel(function emitConfig(next) {
 		// Emit the config event
 		that.emit('config', function doneConfig() {
 			// See if there's an onConfig callback
 			if (typeof that.onConfig == 'function') {
-				that.onConfig(record);
+				that.onConfig(record, next);
+			} else {
+				next();
 			}
 		});
+	}, function attachClient(next) {
+
+		if (!record.client_id) {
+			return next();
+		}
+
+		that.attachClient(record.client_id, next);
+	}, function finished(err) {
+
+		if (err) {
+			return callback(err);
+		}
+
+		that.emit('ready');
+		callback();
 	});
 
-	if (record.client_id) {
-		this.attachClient(record.client_id);
-	}
+	return pledge;
 });
 
 /**
@@ -160,10 +180,20 @@ Capability.setMethod(function attachConfig(record) {
  * @version  0.1.0
  *
  * @param    {ClientDocument}   record
+ * @param    {Function}         callback
  */
-Capability.setMethod(function attachClient(record) {
+Capability.setMethod(function attachClient(record, callback) {
 
-	var client,
+	if (!record) {
+		return;
+	}
+
+	if (!callback) {
+		callback = Function.thrower;
+	}
+
+	let that = this,
+	    client,
 	    id;
 
 	id = alchemy.castObjectId(record);
@@ -179,7 +209,9 @@ Capability.setMethod(function attachClient(record) {
 		that.emit('client', function doneClient() {
 			// See if there's an onConfig callback
 			if (typeof that.onClient == 'function') {
-				that.onClient(client);
+				that.onClient(client, callback);
+			} else {
+				callback();
 			}
 		});
 	});
