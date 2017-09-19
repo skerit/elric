@@ -58,4 +58,20 @@ X11.setMethod(function stop() {
 	}
 });
 
+/**
+ * Start an X11 proccess
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ */
+X11.setMethod(function exec(command, args) {
+
+	var proc;
+
+	proc = spawn(command, args);
+
+	return proc;
+});
+
 module.exports = X11;

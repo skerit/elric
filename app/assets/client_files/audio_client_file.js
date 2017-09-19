@@ -23,7 +23,6 @@ var Audio = Function.inherits('ClientFile', function AudioClientFile(client, set
 	// Type is always udp4, for now
 	this.socket_type = 'udp4';
 
-
 	// Old, mp3 stream way
 	this.onLinkup('audio_stream', function gotLinkup(linkup, data) {
 

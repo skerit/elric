@@ -16,6 +16,17 @@ alchemy.start(function onAlchemyReady() {
 
 	//Classes.Alchemy.Command.execute('Test', function(){});
 
+	Model.get('Client').findById('55eda64331bcb50e54bdddda', function gotClient(err, record) {
+		console.log('Client:', record, record.ClientCapability);
+
+		let cap = record.getCapability('mediaconversion');
+		let cap2 = record.getCapability('mediaconversion');
+
+		console.log(cap.capability == cap2.capability);
+
+		console.log('Mediacap', cap, '==', cap2, cap == cap2)
+	});
+
 });
 
 alchemy.utest = function utest() {

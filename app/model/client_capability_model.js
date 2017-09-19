@@ -28,9 +28,19 @@ ClientCapability.constitute(function addFields() {
 	this.belongsTo('Client');
 
 	this.Document.setFieldGetter('capability', function getCapability() {
-		if (all_capabilities[this.name]) {
-			return new all_capabilities[this.name]();
+
+		if (!this._instance) {
+			if (all_capabilities[this.name]) {
+
+				// Create the capability instance
+				this._instance = new all_capabilities[this.name]();
+
+				// Attach this record as the configuration
+				this._instance.attachConfig(this);
+			}
 		}
+
+		return this._instance;
 	});
 });
 

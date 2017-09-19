@@ -150,7 +150,6 @@ Elric.setMethod(function persistShares(sync) {
 
 		write_method(path, JSON.dry(persisted[key]));
 	}
-
 });
 
 process.on('exit', function onExit() {
@@ -796,38 +795,44 @@ Elric.setMethod(function registerClient(client_socket) {
 		});
 	}
 
+	// Get the client's announcement data
 	info = client_socket.announcement;
-	log.info('Incoming client connection:', info.hostname);
+
+	// Update the Janeway client_indicator
 	that.client_indicator.update('incoming_connection');
 
-	// Listen for remote command requests
+	// Listen for remote capability command requests
 	client_socket.on('capability-command', function onCapabilityCommand(packet) {
 
-		var instance,
-		    args;
+		var name;
 
-		if (Classes.Elric[packet.capability + 'Capability']) {
-			instance = new Classes.Elric[packet.capability + 'Capability'];
+		name = packet.capability + 'Capability';
 
-			// Create a new args array, with the client document prepended to it
-			args = [client_doc].concat(packet.args);
+		if (!Classes.Elric[name]) {
+			return console.error('Could not find capability ' + packet.capability + ', packet ignored', packet);
+		}
 
-			if (instance[packet.type]) {
-				instance[packet.type].apply(instance, args);
-			} else {
-				console.error('Capability method "' + packet.type + '" not found, packet ignored', packet);
-			}
+		let instance = new Classes.Elric[name];
+
+		// Make sure the method actually exists, and execute it
+		if (instance[packet.type]) {
+
+			// Create a new args array,
+			// with the client document prepended to it
+			let args = [client_doc].concat(packet.args);
+
+			instance[packet.type].apply(instance, args);
 		} else {
-			console.error('Could not find capability ' + packet.capability + ', packet ignored', packet);
+			console.error('Capability method "' + packet.type + '" not found, packet ignored', packet);
 		}
 	});
 
-	// Listen for disconnects
+	// Listen for the client to disconnect
 	client_socket.on('disconnect', function disconnected() {
 		that.client_indicator.update('disconnect');
 	});
 
-	Function.series(function findDocument(next) {
+	let pledge = Function.series(function findDocument(next) {
 
 		// Look for this hostname first
 		that.clients.some(function eachClientDocument(client) {
@@ -856,11 +861,11 @@ Elric.setMethod(function registerClient(client_socket) {
 		}
 
 		data = {
-			hostname: info.hostname,
-			ip: client_socket.socket.conn.remoteAddress,
-			enabled: false,
-			secret: '',
-			key: ''
+			hostname : info.hostname,
+			ip       : client_socket.socket.conn.remoteAddress,
+			enabled  : false,
+			secret   : '',
+			key      : ''
 		};
 
 		Model.get('Client').save(data, function savedClient(err, doc) {
@@ -902,8 +907,10 @@ Elric.setMethod(function registerClient(client_socket) {
 			console.log(err);
 			return;
 		}
-
 	});
+
+	// Simple log output
+	log.info('Incoming client connection:', info.hostname, pledge);
 });
 
 /**

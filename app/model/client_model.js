@@ -215,15 +215,25 @@ Client.setDocumentMethod(function loadCapabilityData(callback) {
  */
 Client.setDocumentMethod(function getCapability(key) {
 
-	var result;
+	var that = this,
+	    result;
 
-	this.ClientCapability.forEach(function eachCapability(record, index) {
-		if (record.capability == key) {
-			result = record;
-		}
-	});
+	if (!this._capabilities) {
+		this._capabilities = {};
 
-	return result;
+		// Iterate over all the associated records
+		this.ClientCapability.forEach(function eachCapability(record, index) {
+
+			// Store each capability instance
+			that._capabilities[record.name] = record.capability;
+
+			if (record.name == key) {
+				result = record;
+			}
+		});
+	}
+
+	return this._capabilities[key];
 });
 
 /**
@@ -379,7 +389,6 @@ Client.setDocumentMethod(function sendCapabilities(callback) {
 	}
 
 	log.info('Sending capabilities to "' + this.hostname + '"');
-	console.log(this.ClientCapability);
 
 	Function.forEach.parallel(Array.cast(this.ClientCapability), function eachCap(record, index, next) {
 
@@ -395,10 +404,7 @@ Client.setDocumentMethod(function sendCapabilities(callback) {
 			return next();
 		}
 
-		console.log('Getting client file for', ccap.name);
-
 		function doNext() {
-			console.log('Calling next for', ccap.name);
 			next();
 		}
 
@@ -416,7 +422,7 @@ Client.setDocumentMethod(function sendCapabilities(callback) {
 		});
 	}, function done(err) {
 
-		console.log('Client', that, 'has loaded');
+		log.info('Client', that, 'has loaded');
 
 		// Emit the loaded event, even if some capability files failed
 		that.emit('loaded');
@@ -458,7 +464,7 @@ Client.setDocumentMethod(function attachConduit(conduit) {
 	// Listen to the disconnect event
 	conduit.on('disconnect', function disconnected() {
 
-		console.log('Client', that, 'has disconnected');
+		log.info('Client', that, 'has disconnected');
 
 		// Revoke authentication
 		that.authenticated = false;

@@ -50,6 +50,20 @@ Capability.setProperty('config_element', '');
 Capability.setProperty('always_enabled', false);
 
 /**
+ * The client configuration
+ *
+ * @type   {Object}
+ */
+Capability.setProperty('config', null);
+
+/**
+ * The client document
+ *
+ * @type   {Object}
+ */
+Capability.setProperty('client', null);
+
+/**
  * Capability view configurator
  *
  * @type   {Function}
@@ -60,6 +74,23 @@ Capability.setProperty('always_enabled', false);
  */
 Capability.setProperty('setupConfigView', null);
 
+/**
+ * onConfig callback
+ *
+ * @type   {Function}
+ *
+ * @param  {ClientCapabilityDocument} record
+ */
+Capability.setProperty('onConfig', null);
+
+/**
+ * onClient callback
+ *
+ * @type   {Function}
+ *
+ * @param  {ClientDocument} record
+ */
+Capability.setProperty('onClient', null);
 
 /**
  * Return the class-wide schema
@@ -84,6 +115,74 @@ Capability.constitute(function setSchema() {
 	// Create a new schema
 	schema = new Classes.Alchemy.Schema(this);
 	this.schema = schema;
+});
+
+/**
+ * Attach the client capability config.
+ * This also sets the client record.
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {ClientCapabilityDocument}   record
+ */
+Capability.setMethod(function attachConfig(record) {
+
+	if (!record) {
+		return;
+	}
+
+	let that = this;
+
+	this.config = record;
+
+	Blast.setImmediate(function emitConfig() {
+		// Emit the config event
+		that.emit('config', function doneConfig() {
+			// See if there's an onConfig callback
+			if (typeof that.onConfig == 'function') {
+				that.onConfig(record);
+			}
+		});
+	});
+
+	if (record.client_id) {
+		this.attachClient(record.client_id);
+	}
+});
+
+/**
+ * Set the capability client
+ *
+ * @author   Jelle De Loecker <jelle@develry.be>
+ * @since    0.1.0
+ * @version  0.1.0
+ *
+ * @param    {ClientDocument}   record
+ */
+Capability.setMethod(function attachClient(record) {
+
+	var client,
+	    id;
+
+	id = alchemy.castObjectId(record);
+
+	if (id) {
+		client = elric.getClient(id);
+	}
+
+	this.client = client;
+
+	Blast.setImmediate(function emitClient() {
+		// Emit the client event
+		that.emit('client', function doneClient() {
+			// See if there's an onConfig callback
+			if (typeof that.onClient == 'function') {
+				that.onClient(client);
+			}
+		});
+	});
 });
 
 /**

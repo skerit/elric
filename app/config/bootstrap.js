@@ -18,6 +18,7 @@ alchemy.usePlugin('chimera', {title: 'Elric'});
 alchemy.usePlugin('web-components');
 alchemy.usePlugin('styleboost');
 alchemy.usePlugin('media');
+alchemy.usePlugin('gezicht');
 alchemy.usePlugin('elric-philips-hue');
 alchemy.usePlugin('elric-positioning');
 alchemy.usePlugin('elric-display');
