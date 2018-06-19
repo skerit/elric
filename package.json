@@ -1,30 +1,36 @@
 {
-	"name": "elric",
-	"description": "The Elric server",
-	"title": "Elric Server",
-	"version": "0.1.0-alpha",
-	"dependencies": {
-		"alchemymvc": "~0.4.2",
-		"alchemy-acl": "~0.2.0",
-		"alchemy-chimera": "~0.2.0",
-		"alchemy-i18n": "~0.2.0",
-		"alchemy-styleboost": "~0.2.0",
-		"alchemy-menu": "~0.2.0",
-		"alchemy-media": "~0.2.0",
-		"mediaconversion": "~0.1.0",
-		"motion-detect": "~0.2.4",
-		"node-cron": "1.1.1",
-		"ping": "0.1.10"
-	},
-	"devDependencies": {
-		"alchemy-debugbar": "~1.0.0",
-		"benchmark": "1.0.x",
-		"microtime": "0.3.x",
-		"v8-profiler": "3.6.x",
-		"node-inspector": "0.3.x"
-	},
-	"license": "GPLv3",
-	"engines": {
-		"node": "~4.2.0"
-	}
+  "name": "elric",
+  "description": "The Elric server",
+  "title": "Elric Server",
+  "version": "0.1.0-alpha",
+  "dependencies": {
+    "alchemymvc": "~0.4.2",
+    "alchemy-acl": "~0.2.0",
+    "alchemy-chimera": "~0.2.0",
+    "alchemy-i18n": "~0.2.0",
+    "alchemy-styleboost": "~0.2.0",
+    "alchemy-menu": "~0.2.0",
+    "alchemy-media": "~0.2.0",
+    "mediaconversion": "~0.1.0",
+    "motion-detect": "~0.2.4",
+    "node-cron": "1.1.1",
+    "ping": "0.1.10",
+    "snyk": "^1.83.0"
+  },
+  "devDependencies": {
+    "alchemy-debugbar": "~1.0.0",
+    "benchmark": "1.0.x",
+    "microtime": "0.3.x",
+    "v8-profiler": "3.6.x",
+    "node-inspector": "0.3.x"
+  },
+  "license": "GPLv3",
+  "engines": {
+    "node": "~4.2.0"
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "snyk": true
 }
