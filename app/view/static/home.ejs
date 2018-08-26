@@ -1,0 +1,19 @@
+<%
+	// This reads in the Alchemy core 'alchemy/info' template,
+	// you'll probably want to change this to 'layouts/body'
+	expands('alchemy/info');
+%>
+
+<% start('welcome') %>
+<div class="row">
+	<article class="col">
+		<h1>Editing this page</h1>
+		<ul>
+			<li>You can edit this page by modifying <strong>app/view/home.ejs</strong></li>
+			<li>Stylesheets &amp; scripts can be found in the <strong>app/assets</strong> folder</li>
+			<li>This page can also be accessed at <a href="/alchemy-info">/alchemy-info</a></li>
+			<li><%= message %></li>
+		</ul>
+	</article>
+</div>
+<% end('welcome') %>

@@ -1,0 +1,12 @@
+{
+	"name"        : "elric",
+	"description" : "The Elric home automation server",
+	"version"     : "1.0.0-alpha",
+	"license"     : "GPLv3",
+	"dependencies": {
+		"alchemymvc": "~1.0.4"
+	},
+	"engines": {
+		"node": ">=8.9.0"
+	}
+}
