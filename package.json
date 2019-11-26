@@ -4,7 +4,7 @@
 	"title": "Elric Server",
 	"version": "0.1.0-alpha",
 	"dependencies": {
-		"alchemymvc": "~0.4.2",
+		"alchemymvc": "~1.0.0",
 		"alchemy-acl": "~0.2.0",
 		"alchemy-chimera": "~0.2.0",
 		"alchemy-i18n": "~0.2.0",
